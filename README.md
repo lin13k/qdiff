@@ -1,24 +1,26 @@
-#qDiff
-##Overview
+# qDiff
+## Overview
 A tool for finding the difference between multiple data sources which are supposed to be the same.
 
 ---
-##Goals
+## Goals
 1. Reducing the efforts required for checking data validation from different source.
 1. Reporting the differences to user.
 1. Resolving the differences for user basing on input rules.
 
 ---
-##System architecture
-###Architecture
+## System architecture
+### Architecture
 
+<img src="https://drive.google.com/uc?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i&authuser=0&export=view">
 <a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i">link</a>
 
-###Data flow
+### Data flow
+<img src="https://drive.google.com/uc?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF&authuser=0&export=view">
 <a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF">link</a>
 
 
-###Components
+### Components
 1. Data reader
     * Using ORM framework to read the data
     * Supporting multiple databases and file sources
@@ -91,22 +93,22 @@ A tool for finding the difference between multiple data sources which are suppos
 
 ---
 
-##Milestone
-###Development
+## Milestone
+### Development
 | phase | timeline | items
 ---|---|---
 1 | Week 2 | Data reader, file reader, comparator
 2 | Week 4 | Report viewer
 3 | Week 6 | Rule parser, conflict resolver
 
-###SIT
+### SIT
 | phase | timeline | items
 ---|---|---
 1 | Week 3 | Data reader, file reader, comparator
 2 | Week 5 | Report viewer
 3 | Week 7 | Rule parser, conflict resolver
 
-###CAT/UAT
+### CAT/UAT
 | phase | timeline | items
 ---|---|---
 1 | Week 4 | Data reader, file reader, comparator
@@ -114,7 +116,7 @@ A tool for finding the difference between multiple data sources which are suppos
 3 | Week 8 | Rule parser, conflict resolver
 
 ---
-##Scenarios
+## Scenarios
 1. Comparing tables within same database
 1. Comparing tables from different databases
 1. Comparing tables with different range of data within same/different database
@@ -122,8 +124,8 @@ A tool for finding the difference between multiple data sources which are suppos
 1. Comparing unordered CSV file and database 
 ---
 
-##ERD
-###entities	
+## ERD
+### entities	
 1. Task
 
     * Information of datasource
