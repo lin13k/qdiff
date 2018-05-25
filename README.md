@@ -1,16 +1,19 @@
 # qDiff
 ## Overview
-A tool for finding the difference between multiple data sources which are supposed to be the same.
+A tool for finding the difference between multiple data sources which should have the same value.
 
 ---
 ## Goals
-1. Reducing the efforts required for checking data validation from different source.
-1. Reporting the differences to user.
-1. Resolving the differences for user basing on input rules.
+1. Reduce the efforts required to check data validation from different source.
+1. Report the differences to user.
+1. Resolve the differences for user basing on input rules.
 
 ---
 ## System architecture
 ### Architecture
+
+    For database, the user should config access in django setting.
+    For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
 
 <img src="./diagrams/sa.png">
 <a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i">link</a>
@@ -28,19 +31,35 @@ A tool for finding the difference between multiple data sources which are suppos
     * Importing the file into the database, support  DSV(CSV, TSV) and excel
 1. Comparator
     
-    1. Algorithm.
+    1. Brief description
+
+        data1, data2: the input data
+
+        item1, item2: the elements from data1 and data2
+        
+        list1, list2: the list for saving unmatch records
+
+    1. steps
+        1. Sort the data1 and data2
+        1. Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
+            1. If the item1 is identical to item2, iterate next item
+            1. If the item1 in list2, save the all elements in list2 except item1 as conflicted results
+            1. If the item2 in list1, save the all elements in list1 except item2 as conflicted results
+            1. If the item1 is different from the item2, put item1 in list1 and item2 in list2
+
+    1. Complexity.
 
         given m,n = len(data1),len(data2)
     
-    1. Time complexity
-    
-        Average Case: O(m+n)
+        Time complexity:
 
-        Amortized Worst Case: O(m*n)
+            Average Case: O(m+n)
 
-    1. Space complexity
+            Amortized Worst Case: O(m*n)
 
-        O(m+n)
+        Space complexity:
+
+            O(m+n)
 
     1. pseudo code in python
 
@@ -62,12 +81,13 @@ A tool for finding the difference between multiple data sources which are suppos
                         item1 = None
                         item2 = None
                         continue
-                    if h1 in temp_dict2:
-                        temp_dict2.pop(h1)
-                        saveToConflictedResult(temp_dict2.values())
-                    elif h2 in temp_dict1:
-                        temp_dict1.pop(h2) 
-                        saveToConflictedResult(temp_dict1.values())
+                    elif h1 in temp_dict2 or h2 in temp_dict1:
+                        if h1 in temp_dict2:
+                            temp_dict2.pop(h1)
+                            saveToConflictedResult(temp_dict2.values())
+                        if h2 in temp_dict1:
+                            temp_dict1.pop(h2) 
+                            saveToConflictedResult(temp_dict1.values())
                     else:
                         temp_dict1[h1]=item1
                         temp_dict2[h2]=item2
@@ -83,6 +103,12 @@ A tool for finding the difference between multiple data sources which are suppos
 
 1. Rule parser
     * Parsing the input rules and save as rule set for reuse
+    * Rules:
+
+        Where to write the resolved result
+        Left join, right join, inner join, and outer join
+        Condition based rule, (E.X. when field1 == 0 and field2 > 3)
+
 
 1. Report viewer
     * Providing the comparison result    
@@ -90,6 +116,15 @@ A tool for finding the difference between multiple data sources which are suppos
 
 1. Conflict resolver
     * Filtering the conflicted results basing on the input rules
+
+
+---
+## Scenarios
+1. Comparing tables within same database
+1. Comparing tables from different databases
+1. Comparing tables with different range of data within same/different database
+1. Comparing table and CSV file
+1. Comparing unordered CSV file and database 
 
 ---
 
@@ -116,13 +151,6 @@ A tool for finding the difference between multiple data sources which are suppos
 3 | Week 8 | Rule parser, conflict resolver
 
 ---
-## Scenarios
-1. Comparing tables within same database
-1. Comparing tables from different databases
-1. Comparing tables with different range of data within same/different database
-1. Comparing table and CSV file
-1. Comparing unordered CSV file and database 
----
 
 ## ERD
 ### entities	
@@ -132,9 +160,7 @@ A tool for finding the difference between multiple data sources which are suppos
     * Information of datasource
     * Uploaded file path
     * Database information (encryption required, use what as secret key, what as salt) 
-    * Datetime
-
-        Recording the start time and end time for performance evaluation
+    * Datetime, Recording the start time and end time for performance evaluation
     * Owner 
 
 1. Conflict record
@@ -143,5 +169,5 @@ A tool for finding the difference between multiple data sources which are suppos
 1. Rule set
     * Name 
     * Description
-1. Rule
-    * Formatted rule
+    * Rule, formatted rules in json format
+    
