@@ -12,11 +12,11 @@ A tool for finding the difference between multiple data sources which are suppos
 ## System architecture
 ### Architecture
 
-<img src="https://drive.google.com/uc?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i&authuser=0&export=view">
+<img src="./diagrams/sa.png">
 <a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i">link</a>
 
 ### Data flow
-<img src="https://drive.google.com/uc?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF&authuser=0&export=view">
+<img src="./diagrams/df.png">
 <a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF">link</a>
 
 
@@ -126,6 +126,7 @@ A tool for finding the difference between multiple data sources which are suppos
 
 ## ERD
 ### entities	
+<img src="./diagrams/erd.png">
 1. Task
 
     * Information of datasource
