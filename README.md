@@ -12,7 +12,7 @@ A tool for finding the difference between multiple data sources which should hav
 ## System architecture
 ### Architecture
 
-    For database, the user should config access in django setting.
+    For database, the user should config access in qDiff database.
     For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
 
 <img src="./diagrams/sa.png">
@@ -33,7 +33,7 @@ A tool for finding the difference between multiple data sources which should hav
     
     1. Brief description
 
-        data1, data2: the input data
+        data1, data2: the input data, can be queryset, list, dictionary
 
         item1, item2: the elements from data1 and data2
         
