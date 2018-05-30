@@ -25,10 +25,10 @@ class Task(models.Model):
     end_datetime = models.DateTimeField(null=True, blank=True)
     owner = models.ForeignKey(
         'auth.User', on_delete=models.SET_NULL,
-        null=True)
+        null=True, related_name='tasks')
     resolving_ruleset = models.ForeignKey(
         'RuleSet', on_delete=models.SET_NULL,
-        null=True)
+        null=True, related_name='tasks')
 
 
 class ConflictRecord(models.Model):
@@ -36,7 +36,9 @@ class ConflictRecord(models.Model):
     ConflictRecord is the model for linking Tasks with dynamic raw tables
     """
     raw_table_name = models.TextField(max_length=100)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE,
+        related_name='tasks')
     POSITION_IN_TASK_CHOICES = (
         ('LF', 'Left'),
         ('RT', 'Right'),
