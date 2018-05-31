@@ -1,7 +1,9 @@
 from django.test import TestCase
-from qdiff.writers import DBWriter
+from qdiff.writers import DBWriter, CSVWriter
 from random import randint
 from django.db import connection
+from csv import reader
+import os
 
 
 class DbWriterTestCase(TestCase):
@@ -32,7 +34,6 @@ class DbWriterTestCase(TestCase):
 
     def testInsertStatement(self):
         w = DBWriter(connection, 'temp')
-        print(w.getInsertStatement())
         self.assertEquals(
             w.getInsertStatement(),
             '''INSERT INTO temp (col1, col2) VALUES (%s, %s)''')
@@ -49,3 +50,33 @@ class DbWriterTestCase(TestCase):
             cursor.execute('''SELECT * FROM temp;''')
             rows = cursor.fetchall()
             self.assertEquals(len(rows), 20)
+
+
+class CSVWriterTestCase(TestCase):
+
+    def setUp(self):
+        pass
+
+    def testWriteWithoutHeaders(self):
+        with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
+            w = CSVWriter(csvfile, delimiter=',', quotechar='\\')
+            w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+        with open('test_csvwriter.txt', newline='') as csvfile:
+            w = reader(csvfile, delimiter=',', quotechar='\\')
+            r = '\n'.join([str(x) for x in list(w)])
+            os.remove('test_csvwriter.txt')
+            self.assertEquals(r, "['row1', 'data1']\n['row2', 'data2']")
+
+    def testWriteWithHeaders(self):
+        with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
+            w = CSVWriter(
+                csvfile, delimiter=',',
+                quotechar='\\', headers=['h1', 'h2'])
+            w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+        with open('test_csvwriter.txt', newline='') as csvfile:
+            w = reader(csvfile, delimiter=',', quotechar='\\')
+            r = '\n'.join([str(x) for x in list(w)])
+            os.remove('test_csvwriter.txt')
+            self.assertEquals(
+                r,
+                "['h1', 'h2']\n['row1', 'data1']\n['row2', 'data2']")

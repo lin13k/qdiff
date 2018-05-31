@@ -6,6 +6,7 @@ class DBWriter:
         self.connection = connection
         # TODO purify the tableName
         self.tableName = tableName
+        # TODO should get header from outside
 
     def getColumns(self):
         columns = []
@@ -30,4 +31,24 @@ class DBWriter:
             cursor.executemany(self.insert_statement, rows)
 
 
-CSVWriter = writer
+class CSVWriter:
+
+    def __init__(self, *args, **kwargs):
+        headers = kwargs.pop('headers', None)
+        self.writer = writer(*args, **kwargs)
+        if headers:
+            self.headers = headers
+
+    def writeAll(self, rows):
+        if hasattr(self, 'headers'):
+            self.writer.writerow(self.headers)
+        for row in rows:
+            self.writer.writerow(row)
+
+
+class ConsoleWriter:
+
+    def writeAll(self, rows):
+        self.rows = rows
+        for row in rows:
+            print(row)
