@@ -33,7 +33,7 @@ class DbSupportTestCase(TestCase):
     test if django can fetch the fields information of the table
     '''
 
-    def test_get_table_schema(self):
+    def testGetTableSchema(self):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * from temp LIMIT 1;")
             self.assertEqual(cursor.description[0][0], 'col1')
