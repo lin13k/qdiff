@@ -1,7 +1,7 @@
 from csv import writer
 
 
-class DBWriter:
+class DatabaseWriter:
     def __init__(self, connection, tableName):
         self.connection = connection
         # TODO purify the tableName
@@ -31,7 +31,7 @@ class DBWriter:
             cursor.executemany(self.insert_statement, rows)
 
 
-class CSVWriter:
+class CsvWriter:
 
     def __init__(self, *args, **kwargs):
         headers = kwargs.pop('headers', None)

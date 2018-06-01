@@ -1,12 +1,12 @@
 from django.test import TestCase
-from qdiff.writers import DBWriter, CSVWriter
+from qdiff.writers import DatabaseWriter, CsvWriter
 from random import randint
 from django.db import connection
 from csv import reader
 import os
 
 
-class DbWriterTestCase(TestCase):
+class DatabaseWriterTestCase(TestCase):
 
     def setUp(self):
         with connection.cursor() as cursor:
@@ -29,17 +29,17 @@ class DbWriterTestCase(TestCase):
                 for i in range(10)])
 
     def testGetColumns(self):
-        w = DBWriter(connection, 'temp')
+        w = DatabaseWriter(connection, 'temp')
         self.assertEquals(w.getColumns(), ['col1', 'col2'])
 
     def testInsertStatement(self):
-        w = DBWriter(connection, 'temp')
+        w = DatabaseWriter(connection, 'temp')
         self.assertEquals(
             w.getInsertStatement(),
             '''INSERT INTO temp (col1, col2) VALUES (%s, %s)''')
 
     def testInsert(self):
-        w = DBWriter(connection, 'temp')
+        w = DatabaseWriter(connection, 'temp')
         w.writeAll([
             (
                 str(randint(0, 1)),
@@ -52,14 +52,14 @@ class DbWriterTestCase(TestCase):
             self.assertEquals(len(rows), 20)
 
 
-class CSVWriterTestCase(TestCase):
+class CsvWriterTestCase(TestCase):
 
     def setUp(self):
         pass
 
     def testWriteWithoutHeaders(self):
         with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
-            w = CSVWriter(csvfile, delimiter=',', quotechar='\\')
+            w = CsvWriter(csvfile, delimiter=',', quotechar='\\')
             w.writeAll([['row1', 'data1'], ['row2', 'data2']])
         with open('test_csvwriter.txt', newline='') as csvfile:
             w = reader(csvfile, delimiter=',', quotechar='\\')
@@ -69,7 +69,7 @@ class CSVWriterTestCase(TestCase):
 
     def testWriteWithHeaders(self):
         with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
-            w = CSVWriter(
+            w = CsvWriter(
                 csvfile, delimiter=',',
                 quotechar='\\', headers=['h1', 'h2'])
             w.writeAll([['row1', 'data1'], ['row2', 'data2']])
