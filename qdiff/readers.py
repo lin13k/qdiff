@@ -1,5 +1,6 @@
 from qdiff.exceptions import NotImplementedException
 from django.db import connections
+from qdiff.abstracts import AbstractDatabaseAccessUnit
 
 
 class DataReader:
@@ -14,47 +15,37 @@ class DataReader:
         raise NotImplementedException("close method is not implemented")
 
 
-class DatabaseReader(DataReader):
+class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
 
     def __init__(self, config_dict, query_sql):
         # TODO valid the config_dict
-        self.config_dict = config_dict
-        if 'id' in config_dict:
-            self.label = config_dict['id']
-        else:
-            self.label = 'db_' + str(hash(tuple(sorted(config_dict.items()))))
+        super(DatabaseReader, self).__init__(config_dict)
         self.query_sql = query_sql
 
-    def getCursor(self):
-        c = connections[self.label].cursor()
-        c.execute(self.query_sql)
-        return c
-
-    def register(self):
-        connections._databases[self.label] = self.config_dict
-        del connections.databases
-
     def getRow(self):
-        if self.label not in connections:
-            self.register()
         try:
             if not hasattr(self, 'cursor'):
                 self.cursor = self.getCursor()
+                self.cursor.execute(self.query_sql)
         except Exception as e:
             self.cursor.close()
             raise e
         return self.cursor.fetchone()
 
     def getRowsList(self):
-        if self.label not in connections:
-            self.register()
         try:
             if not hasattr(self, 'cursor'):
                 self.cursor = self.getCursor()
+                self.cursor.execute(self.query_sql)
         except Exception as e:
             self.cursor.close()
             raise e
         return self.cursor.fetchall()
+
+    def requery(self):
+        self.close()
+        self.cursor = self.getCursor()
+        self.cursor.execute(self.query_sql)
 
     def close(self):
         try:

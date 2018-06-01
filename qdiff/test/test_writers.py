@@ -29,17 +29,29 @@ class DatabaseWriterTestCase(TestCase):
                 for i in range(10)])
 
     def testGetColumns(self):
-        w = DatabaseWriter(connection, 'temp')
+        newDBConfig = {}
+        newDBConfig['id'] = 'default'
+        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        newDBConfig['NAME'] = ':memory:'
+        w = DatabaseWriter(newDBConfig, 'temp')
         self.assertEquals(w.getColumns(), ['col1', 'col2'])
 
     def testInsertStatement(self):
-        w = DatabaseWriter(connection, 'temp')
+        newDBConfig = {}
+        newDBConfig['id'] = 'default'
+        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        newDBConfig['NAME'] = ':memory:'
+        w = DatabaseWriter(newDBConfig, 'temp')
         self.assertEquals(
             w.getInsertStatement(),
             '''INSERT INTO temp (col1, col2) VALUES (%s, %s)''')
 
     def testInsert(self):
-        w = DatabaseWriter(connection, 'temp')
+        newDBConfig = {}
+        newDBConfig['id'] = 'default'
+        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        newDBConfig['NAME'] = ':memory:'
+        w = DatabaseWriter(newDBConfig, 'temp')
         w.writeAll([
             (
                 str(randint(0, 1)),

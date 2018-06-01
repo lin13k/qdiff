@@ -79,8 +79,8 @@ class ComparatorTestCase(TestCase):
         query_sql2 = 'SELECT * FROM r2;'
         r2 = DatabaseReader(DbConfig, query_sql2)
 
-        w1 = DatabaseWriter(connection, 'w1')
-        w2 = DatabaseWriter(connection, 'w2')
+        w1 = DatabaseWriter(DbConfig, 'w1')
+        w2 = DatabaseWriter(DbConfig, 'w2')
 
         comparator = ValueComparator(r1, r2, w1, w2, [])
         comparator.compare()

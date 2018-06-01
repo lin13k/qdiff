@@ -1,16 +1,18 @@
 from csv import writer
+from qdiff.abstracts import AbstractDatabaseAccessUnit
 
 
-class DatabaseWriter:
-    def __init__(self, connection, tableName):
-        self.connection = connection
+class DatabaseWriter(AbstractDatabaseAccessUnit):
+    def __init__(self, config_dict, tableName):
+        super(DatabaseWriter, self).__init__(config_dict)
+
         # TODO purify the tableName
         self.tableName = tableName
         # TODO should get header from outside
 
     def getColumns(self):
         columns = []
-        with self.connection.cursor() as cursor:
+        with self.getCursor() as cursor:
             cursor.execute("SELECT * FROM %s LIMIT 1;" % (self.tableName))
             for columnDesc in cursor.description:
                 columns.append(columnDesc[0])
@@ -27,7 +29,7 @@ class DatabaseWriter:
     def writeAll(self, rows):
         if not hasattr(self, 'insert_statement'):
             self.insert_statement = self.getInsertStatement()
-        with self.connection.cursor() as cursor:
+        with self.getCursor() as cursor:
             cursor.executemany(self.insert_statement, rows)
 
 
