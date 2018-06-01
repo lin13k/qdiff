@@ -1,6 +1,3 @@
-erd
-test case
-manage.py command
-data reader
-comparator
-file reader
+setup table for writer
+setup column for writer
+apply ignored fields in comparator
