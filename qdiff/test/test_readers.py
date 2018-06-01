@@ -35,8 +35,8 @@ class DatabaseReaderTestCase(TestCase):
         query_sql = 'SELECT * FROM temp;'
         r = DatabaseReader(newDBConfig, query_sql)
         row = r.getRow()
-        print(row)
         r.close()
+        self.assertEquals(2, len(row))
 
     '''
     this require additional mysql setup
