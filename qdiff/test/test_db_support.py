@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.db import connection
+from django.db import connection, connections
 from random import randint
 from logging import Logger
 
@@ -28,6 +28,16 @@ class DbSupportTestCase(TestCase):
                     str(randint(0, 10))
                 )
                 for i in range(10)])
+        newDBConfig = {}
+        newDBConfig['id'] = 'new'
+        newDBConfig['ENGINE'] = 'django.db.backends.mysql'
+        newDBConfig['NAME'] = 'test2'
+        newDBConfig['PASSWORD'] = 'root'
+        newDBConfig['USER'] = 'root'
+        newDBConfig['HOST'] = 'localhost'
+        newDBConfig['PORT'] = '3306'
+        connections._databases[newDBConfig['id']] = newDBConfig
+        del connections.databases
 
     '''
     test if django can fetch the fields information of the table
@@ -38,4 +48,8 @@ class DbSupportTestCase(TestCase):
             cursor.execute("SELECT * from temp LIMIT 1;")
             self.assertEqual(cursor.description[0][0], 'col1')
             self.assertEqual(cursor.description[1][0], 'col2')
-            cursor.close()
+
+    def testAccessNewDB(self):
+        with connections['new'].cursor() as cursor:
+            cursor.execute("SELECT * from group2 LIMIT 1;")
+            print(cursor.fetchall())
