@@ -1,4 +1,8 @@
-class Comparator:
+class FieldComparator:
+    pass
+
+
+class ValueComparator:
     """Comparator is used to compare the given data and find the differences"""
 
     def __init__(self, data_reader1, data_reader2,

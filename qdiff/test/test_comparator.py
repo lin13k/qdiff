@@ -1,8 +1,6 @@
 from django.test import TestCase
 from django.db import connection
-from random import randint
-from logging import Logger
-from qdiff.comparator import Comparator
+from qdiff.comparator import ValueComparator
 from qdiff.readers import DatabaseReader
 from qdiff.writers import DatabaseWriter
 
@@ -84,7 +82,7 @@ class ComparatorTestCase(TestCase):
         w1 = DatabaseWriter(connection, 'w1')
         w2 = DatabaseWriter(connection, 'w2')
 
-        comparator = Comparator(r1, r2, w1, w2, [])
+        comparator = ValueComparator(r1, r2, w1, w2, [])
         comparator.compare()
 
         with connection.cursor() as cursor:
@@ -100,7 +98,7 @@ class ComparatorTestCase(TestCase):
         r2 = TestReader([1, 2, 3, 4, 5])
         w1 = TestWriter()
         w2 = TestWriter()
-        comparator = Comparator(r1, r2, w1, w2)
+        comparator = ValueComparator(r1, r2, w1, w2)
         comparator.compare()
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 0)
@@ -110,7 +108,7 @@ class ComparatorTestCase(TestCase):
         r2 = TestReader([1, 2, 3, 4, 5])
         w1 = TestWriter()
         w2 = TestWriter()
-        comparator = Comparator(r1, r2, w1, w2)
+        comparator = ValueComparator(r1, r2, w1, w2)
         comparator.compare()
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 1)
@@ -120,7 +118,7 @@ class ComparatorTestCase(TestCase):
         r2 = TestReader([1, 2, 3, 4, 5, 9])
         w1 = TestWriter()
         w2 = TestWriter()
-        comparator = Comparator(r1, r2, w1, w2)
+        comparator = ValueComparator(r1, r2, w1, w2)
         comparator.compare()
         self.assertEqual(len(w1.data), 2)
         self.assertEqual(len(w2.data), 2)
