@@ -77,3 +77,4 @@ class DbSupportTestCase(TestCase):
                 for i in range(10)])
             # read
             cursor.execute("SELECT * from temp LIMIT 1;")
+            self.assertEqual(len(cursor.fetchall()), 1)
