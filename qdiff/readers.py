@@ -1,4 +1,4 @@
-from qdiff.Exceptions import NotImplementedException
+from qdiff.exceptions import NotImplementedException
 from django.db import connections
 
 
