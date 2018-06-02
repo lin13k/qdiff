@@ -1,5 +1,4 @@
 from qdiff.exceptions import NotImplementedException
-from django.db import connections
 from qdiff.abstracts import AbstractDatabaseAccessUnit
 
 
