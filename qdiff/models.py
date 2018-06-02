@@ -29,6 +29,14 @@ class Task(models.Model):
     resolving_ruleset = models.ForeignKey(
         'RuleSet', on_delete=models.SET_NULL,
         null=True, related_name='tasks')
+    STATUS_OF_TASK_CHOICES = (
+        ('PN', 'Pending'),
+        ('CM', 'Completed'),
+        ('RN', 'Running'),
+        ('ER', 'Error'),
+    )
+    status = models.CharField(
+        max_length=2, choices=STATUS_OF_TASK_CHOICES, default='PN')
 
 
 class ConflictRecord(models.Model):
