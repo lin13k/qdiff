@@ -1,3 +1,2 @@
-setup table for writer
-setup column for writer
-apply ignored fields in comparator
+wrap comparator in commands
+command testsuits

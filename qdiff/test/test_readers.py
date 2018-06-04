@@ -38,6 +38,17 @@ class DatabaseReaderTestCase(TestCase):
         r.close()
         self.assertEquals(2, len(row))
 
+    def testGetColumns(self):
+        newDBConfig = {}
+        newDBConfig['id'] = 'default'
+        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        newDBConfig['NAME'] = ':memory:'
+        query_sql = 'SELECT * FROM temp;'
+        r = DatabaseReader(newDBConfig, query_sql)
+        columns = r.getColumns()
+        r.close()
+        self.assertEqual(columns, ['col1', 'col2'])
+
     '''
     this require additional mysql setup
     '''

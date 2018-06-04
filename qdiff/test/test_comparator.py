@@ -20,6 +20,9 @@ class TestReader:
     def getRowsList(self):
         return self.data
 
+    def getColumns(self):
+        return [str(i) for i in range(1, len(self.data[0]) + 1)]
+
 
 class ComparatorTestCase(TestCase):
     def setUp(self):
@@ -94,8 +97,8 @@ class ComparatorTestCase(TestCase):
             self.assertEqual(len(records2), 1)
 
     def testDataLogic1(self):
-        r1 = TestReader([1, 2, 3, 4, 5])
-        r2 = TestReader([1, 2, 3, 4, 5])
+        r1 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
+        r2 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
@@ -104,8 +107,8 @@ class ComparatorTestCase(TestCase):
         self.assertEqual(len(w2.data), 0)
 
     def testDataLogic2(self):
-        r1 = TestReader([1, 2, 4, 5])
-        r2 = TestReader([1, 2, 3, 4, 5])
+        r1 = TestReader([(1, 1), (2, 2), (4, 4), (5, 5)])
+        r2 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
@@ -114,11 +117,36 @@ class ComparatorTestCase(TestCase):
         self.assertEqual(len(w2.data), 1)
 
     def testDataLogic3(self):
-        r1 = TestReader([1, 2, 4, 5, 6, 8])
-        r2 = TestReader([1, 2, 3, 4, 5, 9])
+        r1 = TestReader([(1, 1), (2, 2), (4, 4), (5, 5), (6, 6), (8, 8)])
+        r2 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (9, 9)])
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
         comparator.compare()
         self.assertEqual(len(w1.data), 2)
         self.assertEqual(len(w2.data), 2)
+
+    def testDataLogicWithIgnoredFields1(self):
+        r1 = TestReader([[
+            'row1', 'data1', 'ignore*', ], [
+            'row2', 'data2', 'ignore*', ], [
+            'row3', 'data3', 'ignore*', ], [
+            'row4', 'data4', 'ignore*', ], [
+            'row5', 'data5', 'ignore*', ], [
+            'row6', 'data6', 'ignore*',
+        ]])
+        r2 = TestReader([[
+            'row1', 'ignore&', 'data1', ], [
+            'row2', 'ignore&', 'data2', ], [
+            'row3', 'ignore&', 'data3', ], [
+            'row4', 'ignore&', 'data4', ], [
+            'row5', 'ignore&', 'data5', ], [
+            'row6', 'ignore&', 'data6',
+        ]])
+
+        w1 = TestWriter()
+        w2 = TestWriter()
+        comparator = ValueComparator(r1, r2, w1, w2, ['3'], ['2'])
+        comparator.compare()
+        self.assertEqual(len(w1.data), 0)
+        self.assertEqual(len(w2.data), 0)

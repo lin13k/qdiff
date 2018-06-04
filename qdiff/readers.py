@@ -13,6 +13,9 @@ class DataReader:
     def close(self):
         raise NotImplementedException("close method is not implemented")
 
+    def getColumns(self):
+        raise NotImplementedException("getColumns method is not implemented")
+
 
 class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
 
@@ -20,6 +23,19 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
         # TODO valid the config_dict
         super(DatabaseReader, self).__init__(config_dict)
         self.query_sql = query_sql
+
+    def getColumns(self):
+        columns = []
+        try:
+            if not hasattr(self, 'cursor'):
+                self.cursor = self.getCursor()
+                self.cursor.execute(self.query_sql)
+        except Exception as e:
+            self.cursor.close()
+            raise e
+        for columnDesc in self.cursor.description:
+            columns.append(columnDesc[0])
+        return columns
 
     def getRow(self):
         try:
