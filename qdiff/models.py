@@ -15,10 +15,12 @@ class Task(models.Model):
     left_query_sql = models.TextField(
         max_length=2000,
         null=True, blank=True)
+    left_ignore_fields = models.TextField(max_length=1000)
     right_source = models.TextField(max_length=1000)
     right_query_sql = models.TextField(
         max_length=2000,
         null=True, blank=True)
+    right_ignore_fields = models.TextField(max_length=1000)
     start_datetime = models.DateTimeField(
         auto_now_add=True,
         null=True, blank=True)
@@ -41,12 +43,17 @@ class Task(models.Model):
     )
     status = models.CharField(
         max_length=2, choices=STATUS_OF_TASK_CHOICES, default='PN')
+    result = models.TextField(
+        max_length=1000, null=True, blank=True)
 
 
 class ConflictRecord(models.Model):
     """
     ConflictRecord is the model for linking Tasks with dynamic raw tables
     """
+    data_source = models.TextField(
+        max_length=1000,
+        null=True, blank=True)
     raw_table_name = models.TextField(max_length=100)
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE,

@@ -169,3 +169,8 @@ LOGGING = {
         },
     }
 }
+
+# qDiff
+GENERATED_TABLE_PREFIX = 'gen'
+DEFAULT_DATA_LENGTH = 500
+SOURCE_TYPE_DATABASE_PREFIX = 'database:'
