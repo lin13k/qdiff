@@ -29,11 +29,15 @@ class Task(models.Model):
     resolving_ruleset = models.ForeignKey(
         'RuleSet', on_delete=models.SET_NULL,
         null=True, related_name='tasks')
+    STATUS_OF_TASK_PENDING = 'PN'
+    STATUS_OF_TASK_COMPLETED = 'CM'
+    STATUS_OF_TASK_RUNNING = 'RN'
+    STATUS_OF_TASK_ERROR = 'ER'
     STATUS_OF_TASK_CHOICES = (
-        ('PN', 'Pending'),
-        ('CM', 'Completed'),
-        ('RN', 'Running'),
-        ('ER', 'Error'),
+        (STATUS_OF_TASK_PENDING, 'Pending'),
+        (STATUS_OF_TASK_COMPLETED, 'Completed'),
+        (STATUS_OF_TASK_RUNNING, 'Running'),
+        (STATUS_OF_TASK_ERROR, 'Error'),
     )
     status = models.CharField(
         max_length=2, choices=STATUS_OF_TASK_CHOICES, default='PN')
@@ -47,9 +51,11 @@ class ConflictRecord(models.Model):
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE,
         related_name='tasks')
+    POSITION_IN_TASK_LEFT = 'LF'
+    POSITION_IN_TASK_RIGHT = 'RT'
     POSITION_IN_TASK_CHOICES = (
-        ('LF', 'Left'),
-        ('RT', 'Right'),
+        (POSITION_IN_TASK_LEFT, 'Left'),
+        (POSITION_IN_TASK_RIGHT, 'Right'),
 
     )
     position = models.CharField(
@@ -67,16 +73,15 @@ class RuleSet(models.Model):
     this field defines where to write the resolved result
     '''
     data_target = models.TextField(max_length=1000)
+    JOIN_TYPE_IN_RULESET_LEFT = 'LF'
+    JOIN_TYPE_IN_RULESET_RIGHT = 'RT'
+    JOIN_TYPE_IN_RULESET_BOTH = 'BT'
 
     JOIN_TYPE_IN_RULESET_CHOICES = (
-        ('LF', 'Left'),
-        ('RT', 'Right'),
-        ('BT', 'Both'),
+        (JOIN_TYPE_IN_RULESET_LEFT, 'Left'),
+        (JOIN_TYPE_IN_RULESET_RIGHT, 'Right'),
+        (JOIN_TYPE_IN_RULESET_BOTH, 'Both'),
     )
     join_type = models.CharField(
         max_length=2, choices=JOIN_TYPE_IN_RULESET_CHOICES)
     conditions = models.TextField(max_length=2000)
-
-
-
-
