@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import connection
-from qdiff.comparator import ValueComparator
+from qdiff.comparators import ValueComparator
 from qdiff.readers import DatabaseReader
 from qdiff.writers import DatabaseWriter
 

@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import connections
-from qdiff.comparator import ValueComparator
+from qdiff.comparators import ValueComparator
 from qdiff.exceptions import NotImplementedException
 from qdiff.models import Task, ConflictRecord
 from qdiff.readers import DatabaseReader
