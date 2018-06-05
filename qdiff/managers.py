@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import connections
+from django.db import connection
 from qdiff.comparators import ValueComparator
 from qdiff.exceptions import NotImplementedException
 from qdiff.models import Task, ConflictRecord
@@ -42,16 +42,17 @@ class TaskManager:
         else:
             self._compareValues()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
+        # write the result
 
     def getTableNames(self):
-        tableName1 = '%s_%s_%s' % (
+        tableName1 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self.task),
+            str(self._model.id),
             ConflictRecord.POSITION_IN_TASK_LEFT
         )
-        tableName2 = '%s_%s_%s' % (
+        tableName2 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self.task),
+            str(self._model.id),
             ConflictRecord.POSITION_IN_TASK_RIGHT
         )
         return (tableName1, tableName2)
@@ -94,9 +95,9 @@ class TaskManager:
 
         colSql = ', '.join(tmpCol)
 
-        return '''
+        return ('''
             CREATE TABLE %s (%s);
-        ''' % (tableName, colSql)
+        ''' % (tableName, colSql)).strip()
 
     def _setUpWriters(self):
         if not hasattr(self, 'reader1') or not hasattr(self, 'reader2'):
@@ -106,8 +107,8 @@ class TaskManager:
         tableName1, tableName2 = self.getTableNames()
         dbConfig = settings.DATABASES['default'].copy()
         dbConfig['id'] = 'default'
-        with connections['defaut'].cursor() as cursor:
-            if not self._ws1:
+        if not self._ws1:
+            with connection.cursor() as cursor:
                 cursor.execute(self._getCreateSql(
                     columns1, tableName1))
                 self.writer1 = DatabaseWriter(dbConfig, tableName1)
@@ -117,10 +118,11 @@ class TaskManager:
                     data_source='database:' + json.dumps(dbConfig),
                     position=ConflictRecord.POSITION_IN_TASK_LEFT
                 )
-            else:
-                raise NotImplementedException(
-                    'external write source not support yet')
-            if not self._ws2:
+        else:
+            raise NotImplementedException(
+                'external write source not support yet')
+        if not self._ws2:
+            with connection.cursor() as cursor:
                 cursor.execute(self._getCreateSql(
                     columns2, tableName2))
                 self.writer2 = DatabaseWriter(dbConfig, tableName2)
@@ -131,20 +133,26 @@ class TaskManager:
                                  json.dumps(dbConfig)),
                     position=ConflictRecord.POSITION_IN_TASK_RIGHT
                 )
-            else:
-                raise NotImplementedException(
-                    'external write source not support yet')
+        else:
+            raise NotImplementedException(
+                'external write source not support yet')
         return (self.writer1, self.writer2)
 
     def _compareValues(self):
         comparator = ValueComparator(
-            self.data_reader1, self.data_reader2,
+            self.reader1, self.reader2,
             self.writer1, self.writer2,
-            self._model.left_ignore_fields, self._model.right_ignore_fields)
+            (self._model.left_ignore_fields
+                if self._model.left_ignore_fields else []),
+            (self._model.right_ignore_fields
+                if self._model.right_ignore_fields else []))
         comparator.compare()
 
     def _compareFields(self):
         return True
 
-    def _changeStatus(self):
-        pass
+    def _changeStatus(self, status):
+        validStatus = [choice[0] for choice in Task.STATUS_OF_TASK_CHOICES]
+        if status in validStatus:
+            self._model.status = status
+            self._model.save()
