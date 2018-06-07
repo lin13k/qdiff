@@ -1,8 +1,7 @@
 from django.test import TestCase
-from django.db import connection, connections
+from django.db import connection
 from random import randint
 from qdiff.readers import DatabaseReader, CsvReader
-import os
 
 
 class DatabaseReaderTestCase(TestCase):
