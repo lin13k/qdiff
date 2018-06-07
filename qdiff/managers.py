@@ -2,8 +2,9 @@ from django.conf import settings
 from django.db import connection
 from qdiff.comparators import ValueComparator
 from qdiff.exceptions import NotImplementedException
+from qdiff.exceptions import InvalidDataSourceException
 from qdiff.models import Task, ConflictRecord
-from qdiff.readers import DatabaseReader
+from qdiff.readers import DatabaseReader, CsvReader
 from qdiff.writers import DatabaseWriter
 import json
 import re
@@ -65,9 +66,14 @@ class TaskManager:
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
                     self._model.left_query_sql
                 )
+            elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
+                          self._model.left_source, re.I):
+                self.reader1 = CsvReader(
+                    self._model.left_source[len(
+                        settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
-                # TODO CSV reader
-                self.reader1 = None
+                raise InvalidDataSourceException(
+                    self._model.left_source + ' is not a valid source type')
 
         if not hasattr(self, 'reader2'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
@@ -79,9 +85,15 @@ class TaskManager:
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
                     self._model.right_query_sql
                 )
+            elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
+                          self._model.right_source, re.I):
+                self.reader1 = CsvReader(
+                    self._model.right_source[len(
+                        settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
-                # TODO CSV reader
-                self.reader2 = None
+                raise InvalidDataSourceException(
+                    self._model.right_source + ' is not a valid source type')
+
         return (self.reader1, self.reader2)
 
     def _getCreateSql(self, columns, tableName):
