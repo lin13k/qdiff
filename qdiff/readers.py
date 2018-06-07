@@ -80,8 +80,9 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
                 tmpList.append(row)
                 row = tmpCursor.fetchone()
                 i -= 1
-            return Schema.infer(
-                tmpList, headers=0,
+            schema = Schema()
+            return schema.infer(
+                tmpList, headers=self.getColumns(),
                 confidence=settings.SCHEMA_INFER_CONFIDENCE)
 
         except Exception as e:
@@ -113,14 +114,14 @@ class CsvReader(DataReader):
         self._table = Table(self._filePath)
 
     def getRow(self):
-        i = self._table(cast=False)
+        i = self._table.iter(cast=False)
         return next(i)
 
     def getRowsList(self):
-        i = self._table(cast=False)
+        i = self._table.iter(cast=False)
         return list(i)
 
     def getSchema(self):
-        self._table.infer(
+        return self._table.infer(
             settings.SCHEMA_INFER_LIMIT,
-            confidence=settings.SCHEMA_INFER_CONFIDENCE)
+            confidence=settings.SCHEMA_INFER_CONFIDENCE) 

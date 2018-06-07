@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.db import connection, connections
 from random import randint
-from qdiff.readers import DatabaseReader
+from qdiff.readers import DatabaseReader, CsvReader
+import os
 
 
 class DatabaseReaderTestCase(TestCase):
@@ -78,3 +79,59 @@ class DatabaseReaderTestCase(TestCase):
         rows = r.getRowsList()
         self.assertEquals(10, len(rows))
         r.close()
+
+    def testGetSchema(self):
+        newDBConfig = {}
+        newDBConfig['id'] = 'default'
+        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        newDBConfig['NAME'] = ':memory:'
+        query_sql = 'SELECT * FROM temp;'
+        r = DatabaseReader(newDBConfig, query_sql)
+        schema = r.getSchema()
+        self.assertEqual(
+            schema,
+            {'fields': [
+                {'name': 'col1', 'type': 'integer',
+                                 'format': 'default'},
+                {'name': 'col2', 'type': 'integer', 'format': 'default'}]})
+
+
+class CsvReaderTestCase(TestCase):
+
+    def setUp(self):
+        pass
+
+    def testGetColumns(self):
+        r = CsvReader('qdiff/test/testcsv.csv')
+        columns = r.getColumns()
+        self.assertEqual(
+            columns,
+            ['id', 'address', 'price', 'qan', 'start'])
+
+    def testRequery(self):
+        r = CsvReader('qdiff/test/testcsv.csv')
+        row1 = r.getRow()
+        r.requery()
+        row2 = r.getRow()
+        self.assertEqual(row1, row2)
+
+    def testGetRow(self):
+        r = CsvReader('qdiff/test/testcsv.csv')
+        row = r.getRow()
+        self.assertEqual(len(row), 5)
+
+    def testGetRowList(self):
+        r = CsvReader('qdiff/test/testcsv.csv')
+        self.assertEqual(len(r.getRowsList()), 5)
+
+    def testGetSchema(self):
+        r = CsvReader('qdiff/test/testcsv.csv')
+        self.assertEqual(
+            r.getSchema(),
+            {'fields': [
+                {'name': 'id', 'type': 'integer', 'format': 'default'},
+                {'name': 'address', 'type': 'string', 'format': 'default'},
+                {'name': 'price', 'type': 'string', 'format': 'default'},
+                {'name': 'qan', 'type': 'integer', 'format': 'default'},
+                {'name': 'start', 'type': 'date', 'format': 'default'}],
+             'missingValues': ['']})
