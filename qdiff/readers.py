@@ -1,5 +1,7 @@
 from qdiff.exceptions import NotImplementedException
 from qdiff.abstracts import AbstractDatabaseAccessUnit
+from tableschema import Table, Schema
+from django.conf import settings
 
 
 class DataReader:
@@ -15,6 +17,9 @@ class DataReader:
 
     def getColumns(self):
         raise NotImplementedException("getColumns method is not implemented")
+
+    def getSchema(self):
+        raise NotImplementedException("getSchema method is not implemented")
 
 
 class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
@@ -62,8 +67,60 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
         self.cursor = self.getCursor()
         self.cursor.execute(self.query_sql)
 
+    def getSchema(self):
+        def iterFunc(x):
+            yield x.fetchone()
+        try:
+            tmpCursor = self.getCursor()
+            tmpCursor.execute(self.query_sql)
+            i = settings.SCHEMA_INFER_LIMIT
+            tmpList = []
+            row = tmpCursor.fetchone()
+            while i > 0 and row is not None:
+                tmpList.append(row)
+                row = tmpCursor.fetchone()
+                i -= 1
+            return Schema.infer(
+                tmpList, headers=0,
+                confidence=settings.SCHEMA_INFER_CONFIDENCE)
+
+        except Exception as e:
+            tmpCursor.close()
+            raise e
+
     def close(self):
         try:
             self.cursor.close()
         except Exception as e:
             pass
+
+
+class CsvReader(DataReader):
+
+    def __init__(self, filePath):
+        self._filePath = filePath
+        self._table = Table(filePath)
+
+    def close(self):
+        pass
+
+    def getColumns(self):
+        if not self._table.headers:
+            self._table.infer()
+        return self._table.headers
+
+    def requery(self):
+        self._table = Table(self._filePath)
+
+    def getRow(self):
+        i = self._table(cast=False)
+        return next(i)
+
+    def getRowsList(self):
+        i = self._table(cast=False)
+        return list(i)
+
+    def getSchema(self):
+        self._table.infer(
+            settings.SCHEMA_INFER_LIMIT,
+            confidence=settings.SCHEMA_INFER_CONFIDENCE)
