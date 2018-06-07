@@ -25,11 +25,7 @@ class TaskManager:
 
     def __init__(self, taskModel, writeSource1=None, writeSource2=None):
         self._model = taskModel
-        try:
-            # make sure the model is persistant
-            self._model.save()
-        except Exception as e:
-            raise e
+        self._model.save()
         self._ws1 = writeSource1
         self._ws2 = writeSource2
 
@@ -39,10 +35,11 @@ class TaskManager:
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         if not self._compareFields():
             self._changeStatus(Task.STATUS_OF_TASK_ERROR)
+            # write the result summary
         else:
             self._compareValues()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
-        # write the result
+            # write the result summary
 
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
