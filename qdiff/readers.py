@@ -107,7 +107,8 @@ class CsvReader(DataReader):
 
     def getColumns(self):
         if not self._table.headers:
-            self._table.infer()
+            self._table.infer(
+                settings.SCHEMA_INFER_LIMIT)
         return self._table.headers
 
     def requery(self):
@@ -122,6 +123,7 @@ class CsvReader(DataReader):
         return list(i)
 
     def getSchema(self):
-        return self._table.infer(
+        t = Table(self._filePath)
+        return t.infer(
             settings.SCHEMA_INFER_LIMIT,
-            confidence=settings.SCHEMA_INFER_CONFIDENCE) 
+            confidence=settings.SCHEMA_INFER_CONFIDENCE)
