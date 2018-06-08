@@ -68,8 +68,6 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
         self.cursor.execute(self.query_sql)
 
     def getSchema(self):
-        def iterFunc(x):
-            yield x.fetchone()
         try:
             tmpCursor = self.getCursor()
             tmpCursor.execute(self.query_sql)
