@@ -1,31 +1,34 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.db import connection
 from random import randint
 from qdiff.readers import DatabaseReader, CsvReader
 
 
-class DatabaseReaderTestCase(TestCase):
+class DatabaseReaderTestCase(TransactionTestCase):
 
     def setUp(self):
 
         with connection.cursor() as cursor:
             # create table
-            cursor.execute('''CREATE TABLE temp (
-                        col1 VARCHAR(10),
-                        col2 VARCHAR(10)
-                    );
-                ''')
+            try:
+                cursor.execute('''CREATE TABLE temp (
+                            col1 VARCHAR(10),
+                            col2 VARCHAR(10)
+                        );
+                    ''')
 
-            # insert data
-            query = '''INSERT INTO temp (col1, col2)
-                    VALUES (%s, %s)
-                '''
-            cursor.executemany(query, [
-                (
-                    str(randint(0, 1)),
-                    str(randint(0, 10))
-                )
-                for i in range(10)])
+                # insert data
+                query = '''INSERT INTO temp (col1, col2)
+                        VALUES (%s, %s)
+                    '''
+                cursor.executemany(query, [
+                    (
+                        str(randint(0, 1)),
+                        str(randint(0, 10))
+                    )
+                    for i in range(10)])
+            except Exception as e:
+                pass
 
     def testGetRow(self):
         newDBConfig = {}

@@ -1,47 +1,56 @@
 from django.db import connection
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from qdiff.managers import TaskManager
 from qdiff.models import Task
 from django.conf import settings
 import json
 
 
-class TaskManagerTestCase(TestCase):
+class TaskManagerTestCase(TransactionTestCase):
     def setUp(self):
         with connection.cursor() as cursor:
-            # create table
-            cursor.execute('''CREATE TABLE ds1 (
-                        col1 VARCHAR(10),
-                        col2 VARCHAR(10)
-                    );
-                ''')
+            try:
+                # create table
+                cursor.execute('''CREATE TABLE ds1 (
+                            col1 VARCHAR(10),
+                            col2 VARCHAR(10)
+                        );
+                    ''')
 
-            # insert data
-            query = '''INSERT INTO ds1 (col1, col2)
-                    VALUES (%s, %s)
-                '''
-            cursor.executemany(query, [
-                (
-                    str(i),
-                    str(i)
-                )
-                for i in range(10)])
-            cursor.execute('''CREATE TABLE ds2 (
-                        col1 VARCHAR(10),
-                        col2 VARCHAR(10)
-                    );
-                ''')
+                # insert data
+                query = '''INSERT INTO ds1 (col1, col2)
+                        VALUES (%s, %s)
+                    '''
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(10)])
+                cursor.execute('''CREATE TABLE ds2 (
+                            col1 VARCHAR(10),
+                            col2 VARCHAR(10)
+                        );
+                    ''')
 
-            # insert data
-            query = '''INSERT INTO ds2 (col1, col2)
-                    VALUES (%s, %s)
-                '''
-            cursor.executemany(query, [
-                (
-                    str(i),
-                    str(i)
-                )
-                for i in range(10)])
+                # insert data
+                query = '''INSERT INTO ds2 (col1, col2)
+                        VALUES (%s, %s)
+                    '''
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(10)])
+            except Exception as e:
+                pass
+            try:
+                cursor.execute('DROP TABLE gen_task_1_lf;')
+                cursor.execute('DROP TABLE gen_task_1_rt;')
+            except Exception as e:
+                pass
+
         newDBConfig = {}
         newDBConfig['id'] = 'default'
         newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'

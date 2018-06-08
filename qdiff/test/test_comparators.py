@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.db import connection
 from qdiff.comparators import ValueComparator
 from qdiff.readers import DatabaseReader
@@ -25,53 +25,64 @@ class TestReader:
         return [str(i) for i in range(1, len(self.data[0]) + 1)]
 
 
-class ValueComparatorTestCase(TestCase):
+class ValueComparatorTestCase(TransactionTestCase):
     def setUp(self):
         # setup database for readers
         with connection.cursor() as cursor:
             # create table
-            cursor.execute('''CREATE TABLE r1 (
+            try:
+                cursor.execute('''CREATE TABLE r1 (
                         col1 VARCHAR(10),
                         col2 VARCHAR(10)
                     );
                 ''')
-            # insert data
-            query = '''INSERT INTO r1 (col1, col2)
+                query = '''INSERT INTO r1 (col1, col2)
                     VALUES (%s, %s)
                 '''
-            cursor.executemany(query, [
-                (
-                    str(i),
-                    str(i)
-                )
-                for i in range(10)])
-            cursor.execute('''CREATE TABLE r2 (
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(10)])
+            except Exception as e:
+                pass
+            # insert data
+            # create table
+            try:
+                cursor.execute('''CREATE TABLE r2 (
                         col1 VARCHAR(10),
                         col2 VARCHAR(10)
                     );
                 ''')
-            # insert data
-            query = '''INSERT INTO r2 (col1, col2)
+                query = '''INSERT INTO r2 (col1, col2)
                     VALUES (%s, %s)
-                '''
-            cursor.executemany(query, [
-                (
-                    str(i),
-                    str(i)
-                )
-                for i in range(11)])
+                    '''
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(11)])
+            except Exception as e:
+                pass
+            # insert data
         # setup database for writers
         with connection.cursor() as cursor:
-            cursor.execute('''CREATE TABLE w1 (
+            try:
+                cursor.execute('''CREATE TABLE w1 (
                         col1 VARCHAR(10),
                         col2 VARCHAR(10)
                     );
                 ''')
-            cursor.execute('''CREATE TABLE w2 (
+                cursor.execute('''CREATE TABLE w2 (
                         col1 VARCHAR(10),
                         col2 VARCHAR(10)
                     );
                 ''')
+
+            except Exception as e:
+                pass
 
     def testSameDataComparisonWithDatabase(self):
         DbConfig = {}

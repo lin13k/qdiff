@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from qdiff.writers import DatabaseWriter, CsvWriter
 from random import randint
 from django.db import connection
@@ -6,27 +6,30 @@ from csv import reader
 import os
 
 
-class DatabaseWriterTestCase(TestCase):
+class DatabaseWriterTestCase(TransactionTestCase):
 
     def setUp(self):
         with connection.cursor() as cursor:
             # create table
-            cursor.execute('''CREATE TABLE temp (
-                    col1 VARCHAR(10),
-                    col2 VARCHAR(10)
-                );
-            ''')
+            try:
+                cursor.execute('''CREATE TABLE temp (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
 
-            # insert data
-            query = '''INSERT INTO temp (col1, col2)
-                VALUES (%s, %s)
-            '''
-            cursor.executemany(query, [
-                (
-                    str(randint(0, 1)),
-                    str(randint(0, 10))
-                )
-                for i in range(10)])
+                # insert data
+                query = '''INSERT INTO temp (col1, col2)
+                    VALUES (%s, %s)
+                '''
+                cursor.executemany(query, [
+                    (
+                        str(randint(0, 1)),
+                        str(randint(0, 10))
+                    )
+                    for i in range(10)])
+            except Exception as e:
+                pass
 
     def testGetColumns(self):
         newDBConfig = {}
