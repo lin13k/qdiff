@@ -55,20 +55,27 @@ class TaskManagerTestCase(TransactionTestCase):
         newDBConfig['id'] = 'default'
         newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
         newDBConfig['NAME'] = ':memory:'
-        self.taskModel = Task.objects.create(
-            summary='test_task',
-            left_source='database:' + json.dumps(newDBConfig),
-            left_query_sql='SELECT * FROM ds1;',
-            right_source='database:' + json.dumps(newDBConfig),
-            right_query_sql='SELECT * FROM ds2;',
-        )
+        if not hasattr(self, 'taskModel'):
+            self.taskModel = Task.objects.create(
+                summary='test_task',
+                left_source='database:' + json.dumps(newDBConfig),
+                left_query_sql='SELECT * FROM ds1;',
+                right_source='database:' + json.dumps(newDBConfig),
+                right_query_sql='SELECT * FROM ds2;',
+            )
 
     def testGetTableNames(self):
         m = TaskManager(self.taskModel)
-        self.assertEqual(m.getTableNames(),
-                         tuple(
+        n = m.getTableNames()
+        c = tuple(
             [settings.GENERATED_TABLE_PREFIX + '_TASK_1_LF',
-             settings.GENERATED_TABLE_PREFIX + '_TASK_1_RT']))
+             settings.GENERATED_TABLE_PREFIX + '_TASK_1_RT'])
+        self.assertEqual(
+            n[0][:len(settings.GENERATED_TABLE_PREFIX + '_TASK_')],
+            c[0][:len(settings.GENERATED_TABLE_PREFIX + '_TASK_')])
+        self.assertEqual(
+            n[0][-3:],
+            c[0][-3:])
 
     def test_changeStatusWithValidStatus(self):
         m = TaskManager(self.taskModel)

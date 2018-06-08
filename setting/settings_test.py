@@ -2,11 +2,11 @@ from .settings import *
 
 
 DATABASES = {
-    'database2': {
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
     },
-    'default': {
+    'database2': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'test1',
         'USER': 'root',
