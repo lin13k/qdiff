@@ -24,7 +24,7 @@ class TestReader:
         return [str(i) for i in range(1, len(self.data[0]) + 1)]
 
 
-class ComparatorTestCase(TestCase):
+class ValueComparatorTestCase(TestCase):
     def setUp(self):
         # setup database for readers
         with connection.cursor() as cursor:
@@ -86,7 +86,7 @@ class ComparatorTestCase(TestCase):
         w2 = DatabaseWriter(DbConfig, 'w2')
 
         comparator = ValueComparator(r1, r2, w1, w2, [])
-        comparator.compare()
+        isSame = comparator.isSame()
 
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM w1;')
@@ -95,6 +95,7 @@ class ComparatorTestCase(TestCase):
             records2 = list(cursor.fetchall())
             self.assertEqual(len(records1), 0)
             self.assertEqual(len(records2), 1)
+            self.assertEqual(isSame, False)
 
     def testDataLogic1(self):
         r1 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
@@ -102,9 +103,10 @@ class ComparatorTestCase(TestCase):
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
-        comparator.compare()
+        isSame = comparator.isSame()
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 0)
+        self.assertEqual(isSame, True)
 
     def testDataLogic2(self):
         r1 = TestReader([(1, 1), (2, 2), (4, 4), (5, 5)])
@@ -112,9 +114,10 @@ class ComparatorTestCase(TestCase):
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
-        comparator.compare()
+        isSame = comparator.isSame()
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 1)
+        self.assertEqual(isSame, False)
 
     def testDataLogic3(self):
         r1 = TestReader([(1, 1), (2, 2), (4, 4), (5, 5), (6, 6), (8, 8)])
@@ -122,9 +125,10 @@ class ComparatorTestCase(TestCase):
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2)
-        comparator.compare()
+        isSame = comparator.isSame()
         self.assertEqual(len(w1.data), 2)
         self.assertEqual(len(w2.data), 2)
+        self.assertEqual(isSame, False)
 
     def testDataLogicWithIgnoredFields1(self):
         r1 = TestReader([[
@@ -147,6 +151,7 @@ class ComparatorTestCase(TestCase):
         w1 = TestWriter()
         w2 = TestWriter()
         comparator = ValueComparator(r1, r2, w1, w2, ['3'], ['2'])
-        comparator.compare()
+        isSame = comparator.isSame()
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 0)
+        self.assertEqual(isSame, True)

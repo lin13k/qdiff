@@ -1,7 +1,7 @@
-from django.db import connection, connections
+from django.db import connection
 from django.test import TestCase
 from qdiff.managers import TaskManager
-from qdiff.models import Task, ConflictRecord
+from qdiff.models import Task
 from django.conf import settings
 import json
 

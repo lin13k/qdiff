@@ -155,7 +155,7 @@ class TaskManager:
                 if self._model.left_ignore_fields else []),
             (self._model.right_ignore_fields
                 if self._model.right_ignore_fields else []))
-        comparator.compare()
+        return comparator.isSame()
 
     def _compareFields(self):
         return True
