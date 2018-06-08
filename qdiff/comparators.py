@@ -117,7 +117,7 @@ class ValueComparator:
                 index2 += 1
 
         if len(tempDict2) > 0:
-            diffCount += len(tempDict1)
+            diffCount += len(tempDict2)
             self._writer2.writeAll(tempDict2.values())
         if len(tempDict1) > 0:
             diffCount += len(tempDict1)
@@ -135,7 +135,7 @@ class ValueComparator:
             if self._model:
                 self._model.result = 'Record difference found!'
                 self._model.result_detail = (
-                    'Found total %s differences' % diffCount)
+                    'Found total %s differences.' % diffCount)
                 self._model.save()
             return False
         return True

@@ -3,6 +3,7 @@ from django.db import connection
 from qdiff.comparators import ValueComparator
 from qdiff.readers import DatabaseReader
 from qdiff.writers import DatabaseWriter
+from qdiff.models import Task
 
 
 class TestWriter:
@@ -129,6 +130,27 @@ class ValueComparatorTestCase(TestCase):
         self.assertEqual(len(w1.data), 2)
         self.assertEqual(len(w2.data), 2)
         self.assertEqual(isSame, False)
+
+    def testWriteResultIntoModel(self):
+        r1 = TestReader([(1, 1), (2, 2), (4, 4), (5, 5), (6, 6), (8, 8)])
+        r2 = TestReader([(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (9, 9)])
+        w1 = TestWriter()
+        w2 = TestWriter()
+
+        model = Task.objects.create(
+            summary='test_task',
+            left_source='database:dummy',
+            left_query_sql='SELECT * FROM ds1;',
+            right_source='database:dummy',
+            right_query_sql='SELECT * FROM ds2;',
+        )
+        comparator = ValueComparator(r1, r2, w1, w2, taskModel=model)
+        isSame = comparator.isSame()
+        self.assertEqual(len(w1.data), 2)
+        self.assertEqual(len(w2.data), 2)
+        self.assertEqual(isSame, False)
+        self.assertEqual(model.result, 'Record difference found!')
+        self.assertEqual(model.result_detail, 'Found total 4 differences.')
 
     def testDataLogicWithIgnoredFields1(self):
         r1 = TestReader([[
