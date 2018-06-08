@@ -48,7 +48,9 @@ class Task(models.Model):
     status = models.CharField(
         max_length=2, choices=STATUS_OF_TASK_CHOICES, default='PN')
     result = models.TextField(
-        max_length=1000, null=True, blank=True)
+        max_length=500, null=True, blank=True)
+    result_detail = models.TextField(
+        max_length=2000, null=True, blank=True)
 
 
 class ConflictRecord(models.Model):
