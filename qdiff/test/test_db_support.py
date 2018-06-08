@@ -1,4 +1,4 @@
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 from django.db import connection, connections
 from random import randint
 from logging import Logger

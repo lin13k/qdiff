@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 from qdiff.managers import TaskManager
 from qdiff.models import Task
 from django.conf import settings
