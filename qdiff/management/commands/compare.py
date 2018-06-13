@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        print(options)
+        # print(options)
         # validate the input options
         # header check and json format check
         # fields check, id, engine, etc
@@ -125,5 +125,5 @@ class Command(BaseCommand):
         manager = TaskManager(model)
         manager.compare()
         print(model.result)
-        print(model.result_detail)
+        print(model.result_detail.replace('<@#$>', '\n'))
 
