@@ -1,9 +1,10 @@
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, TestCase
 from django.db import connection
-from qdiff.comparators import ValueComparator
+from qdiff.comparators import ValueComparator, FieldComparator
 from qdiff.readers import DatabaseReader
 from qdiff.writers import DatabaseWriter
 from qdiff.models import Task
+from tableschema import Schema
 
 
 class TestWriter:
@@ -23,6 +24,10 @@ class TestReader:
 
     def getColumns(self):
         return [str(i) for i in range(1, len(self.data[0]) + 1)]
+
+    def getSchema(self):
+        s = Schema()
+        return s.infer(self.data)
 
 
 class ValueComparatorTestCase(TransactionTestCase):
@@ -188,3 +193,67 @@ class ValueComparatorTestCase(TransactionTestCase):
         self.assertEqual(len(w1.data), 0)
         self.assertEqual(len(w2.data), 0)
         self.assertEqual(isSame, True)
+
+
+class FieldComparatorTestCase(TestCase):
+    def setUp(self):
+        pass
+
+    def testDataType1(self):
+        r1 = TestReader([[
+            'col1', 'datacol', 'igfield', ], [
+            'row1', 'data1', 'ignore*', ], [
+            'row2', 'data2', 'ignore*', ], [
+            'row3', 'data3', 'ignore*', ], [
+            'row4', 'data4', 'ignore*', ], [
+            'row5', 'data5', 'ignore*', ], [
+            'row6', 'data6', 'ignore*',
+        ]])
+        r2 = TestReader([[
+            'col1', 'igfield2', 'datacol', ], [
+            'row1', 'ignore&', 'data1', ], [
+            'row2', 'ignore&', 'data2', ], [
+            'row3', 'ignore&', 'data3', ], [
+            'row4', 'ignore&', 'data4', ], [
+            'row5', 'ignore&', 'data5', ], [
+            'row6', 'ignore&', 'data6',
+        ]])
+        comparator = FieldComparator(r1, r2, ['igfield'], ['igfield2'])
+        self.assertTrue(comparator.isSame())
+
+    def testDataType2(self):
+        r1 = TestReader([[
+            'col1', 'datacol', 'igfield', ], [
+            'row1', 'data1', 'ignore*', ], [
+            'row2', 'data2', 'ignore*', ], [
+            'row3', 'data3', 'ignore*', ], [
+            'row4', 'data4', 'ignore*', ], [
+            'row5', 'data5', 'ignore*', ], [
+            'row6', 'data6', 'ignore*',
+        ]])
+        r2 = TestReader([[
+            'col1', 'igfield2', 'datacol', ], [
+            'row1', 'ignore&', 'data1', ], [
+            'row2', 'ignore&', 'data2', ], [
+            'row3', 'ignore&', 'data3', ], [
+            'row4', 'ignore&', 'data4', ], [
+            'row5', 'ignore&', 'data5', ], [
+            'row6', 'ignore&', 'data6',
+        ]])
+        model = Task.objects.create(
+            summary='test_task',
+            left_source='database:dummy',
+            left_query_sql='SELECT * FROM ds1;',
+            right_source='database:dummy',
+            right_query_sql='SELECT * FROM ds2;',
+        )
+        comparator = FieldComparator(r1, r2, taskModel=model)
+        self.assertTrue(not comparator.isSame())
+        self.assertEqual(model.result, 'Fields are inconsistent!')
+        # self.assertEqual(model.result, 'Fields are inconsistent!')
+        print(model.result_detail)
+        self.assertEqual(
+            model.result_detail,
+            "+ {'name': 'igfield2', 'type': 'string', 'format': 'default'}"
+            "<@#$>- {'name': 'igfield', 'type': 'string', 'format': 'default'}"
+        )

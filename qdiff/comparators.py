@@ -13,23 +13,25 @@ class FieldComparator:
 
     def isSame(self):
         # get fields schema
-        schema1 = self._dataReader1.getSchema
-        schema2 = self._dataReader2.getSchema
+        schema1 = self._dataReader1.getSchema()
+        schema2 = self._dataReader2.getSchema()
         # compare field by field
         # check if fieldname are the same, respect to the ignored lists
         fields1 = schema1['fields']
         fields2 = schema2['fields']
         ignoreList1 = self._ignoredFields1
         ignoreList2 = self._ignoredFields2
-        for index in range(len(fields1), -1, -1):
+        for index in range(len(fields1) - 1, -1, -1):
             if fields1[index]['name'] in ignoreList1:
                 fields1.pop(index)
-        for index in range(len(fields2), -1, -1):
+        for index in range(len(fields2) - 1, -1, -1):
             if fields2[index]['name'] in ignoreList2:
                 fields2.pop(index)
 
-        fields1 = sorted(fields1, key=lambda x: tuple(x.items()))
-        fields2 = sorted(fields2, key=lambda x: tuple(x.items()))
+        
+        fields1 = [str(i) for i in sorted(fields1, key=lambda x: x.items())]
+        fields2 = [str(i) for i in sorted(fields2, key=lambda x: x.items())]
+        # fields2 = sorted(list(fields1.items()))
         d = Differ()
         diff = d.compare(fields1, fields2)
         result = [line for line in diff if re.match('^[-+] ', line)]
