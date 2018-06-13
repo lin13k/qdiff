@@ -9,6 +9,38 @@ A tool for finding the difference between multiple data sources which should hav
 1. Resolve the differences for user basing on input rules.
 
 ---
+## Install
+1. install mysql
+    sudo yum install mysql-server
+1. install python 3.6
+    sudo yum install python36
+1. clone repository
+    ssh-agent bash -c 'ssh-add /path/to/your/private/rsakey; git clone git@github.com:analyticsMD/datadiff.git'
+1. install gcc for compiling mysql-connector
+    sudo yum install gcc
+1. install python-devel for compiling mysql-connector
+    sudo yum install -y python36-devel
+1. install dependency
+    python3 -m pip install -r datadiff/requirements.txt --user
+
+
+## Setup database - mysql
+1. start mysql server
+    sudo service mysqld start
+1. login into mysql with root user
+    mysql -u root -p
+1. create database qdiff and qdiff_test
+    mysql> create database qdiff;
+    mysql> create database qdiff_test;
+1. install the database schema
+    python3 manage.py makemigrations
+    python3 manage.py migrate
+    
+
+
+
+
+---
 ## System architecture
 ### Architecture
 
