@@ -28,7 +28,6 @@ class FieldComparator:
             if fields2[index]['name'] in ignoreList2:
                 fields2.pop(index)
 
-        
         fields1 = [str(i) for i in sorted(fields1, key=lambda x: x.items())]
         fields2 = [str(i) for i in sorted(fields2, key=lambda x: x.items())]
         # fields2 = sorted(list(fields1.items()))
@@ -120,16 +119,20 @@ class ValueComparator:
 
         if len(tempDict2) > 0:
             diffCount += len(tempDict2)
+            isSame = False
             self._writer2.writeAll(tempDict2.values())
         if len(tempDict1) > 0:
             diffCount += len(tempDict1)
+            isSame = False
             self._writer1.writeAll(tempDict1.values())
 
         if index1 != len(dataList1):
+            isSame = False
             diffCount += len(dataList1[index1:])
             self._writer1.writeAll(dataList1[index1:])
 
         if index2 != len(dataList2):
+            isSame = False
             diffCount += len(dataList2[index2:])
             self._writer2.writeAll(dataList2[index2:])
 
@@ -140,4 +143,10 @@ class ValueComparator:
                     'Found total %s differences.' % diffCount)
                 self._model.save()
             return False
+        if self._model:
+            count = len(dataList1) + len(dataList2)
+            self._model.result = 'No difference found, congrats'
+            self._model.result_detail = (
+                'Searched total %s records' % (count))
+            self._model.save()
         return True
