@@ -251,7 +251,6 @@ class FieldComparatorTestCase(TestCase):
         self.assertTrue(not comparator.isSame())
         self.assertEqual(model.result, 'Fields are inconsistent!')
         # self.assertEqual(model.result, 'Fields are inconsistent!')
-        print(model.result_detail)
         self.assertEqual(
             model.result_detail,
             "+ {'name': 'igfield2', 'type': 'string', 'format': 'default'}"
