@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import connection
-from qdiff.comparators import ValueComparator
+from qdiff.comparators import ValueComparator, FieldComparator
 from qdiff.exceptions import NotImplementedException
 from qdiff.exceptions import InvalidDataSourceException
 from qdiff.models import Task, ConflictRecord
@@ -8,6 +8,9 @@ from qdiff.readers import DatabaseReader, CsvReader
 from qdiff.writers import DatabaseWriter
 import json
 import re
+import logging
+
+logger = logging.getLogger(name='django')
 
 
 class TaskManager:
@@ -31,14 +34,15 @@ class TaskManager:
         self._ws2 = writeSource2
 
     def compare(self):
+        logger.info('start compare')
         self._setUpReaders()
         self._setUpWriters()
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
-        if not self._compareFields():
+        if not self._isFieldsSame():
             self._changeStatus(Task.STATUS_OF_TASK_ERROR)
             # write the result summary
         else:
-            self._compareValues()
+            self._isValuesSame()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
             # write the result summary
 
@@ -147,18 +151,25 @@ class TaskManager:
                 'external write source not support yet')
         return (self.writer1, self.writer2)
 
-    def _compareValues(self):
+    def _isValuesSame(self):
         comparator = ValueComparator(
             self.reader1, self.reader2,
             self.writer1, self.writer2,
-            (self._model.left_ignore_fields
+            (self._model.left_ignore_fields.split(',')
                 if self._model.left_ignore_fields else []),
-            (self._model.right_ignore_fields
-                if self._model.right_ignore_fields else []))
+            (self._model.right_ignore_fields.split(',')
+                if self._model.right_ignore_fields else []),
+            self._model)
         return comparator.isSame()
 
-    def _compareFields(self):
-        return True
+    def _isFieldsSame(self):
+        comparator = FieldComparator(
+            self.reader1, self.reader2,
+            (self._model.left_ignore_fields.split(',')
+                if self._model.left_ignore_fields else []),
+            (self._model.right_ignore_fields.split(',')
+                if self._model.right_ignore_fields else []))
+        return comparator.isSame()
 
     def _changeStatus(self, status):
         validStatus = [choice[0] for choice in Task.STATUS_OF_TASK_CHOICES]
