@@ -195,9 +195,63 @@ class ValueComparatorTestCase(TransactionTestCase):
         self.assertEqual(isSame, True)
 
 
-class FieldComparatorTestCase(TestCase):
+class FieldComparatorTestCase(TransactionTestCase):
     def setUp(self):
-        pass
+        with connection.cursor() as cursor:
+            # create table
+            try:
+                cursor.execute('''CREATE TABLE r1 (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
+                query = '''INSERT INTO r1 (col1, col2)
+                    VALUES (%s, %s)
+                '''
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(10)])
+            except Exception as e:
+                pass
+            # insert data
+            # create table
+            try:
+                cursor.execute('''CREATE TABLE r2 (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
+                query = '''INSERT INTO r2 (col1, col2)
+                    VALUES (%s, %s)
+                    '''
+                cursor.executemany(query, [
+                    (
+                        str(i),
+                        str(i)
+                    )
+                    for i in range(11)])
+            except Exception as e:
+                pass
+            # insert data
+        # setup database for writers
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute('''CREATE TABLE w1 (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
+                cursor.execute('''CREATE TABLE w2 (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
+
+            except Exception as e:
+                pass
 
     def testDataType1(self):
         r1 = TestReader([[
@@ -256,3 +310,56 @@ class FieldComparatorTestCase(TestCase):
             "+ {'name': 'igfield2', 'type': 'string', 'format': 'default'}"
             "<@#$>- {'name': 'igfield', 'type': 'string', 'format': 'default'}"
         )
+
+    def testDataType3(self):
+        DbConfig = {}
+        DbConfig['id'] = 'default'
+        DbConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        DbConfig['NAME'] = ':memory:'
+        query_sql1 = 'SELECT * FROM r1;'
+        r1 = DatabaseReader(DbConfig, query_sql1)
+        r2 = TestReader([[
+            'col1', 'igfield2', 'datacol', ], [
+            'row1', 'ignore&', 'data1', ], [
+            'row2', 'ignore&', 'data2', ], [
+            'row3', 'ignore&', 'data3', ], [
+            'row4', 'ignore&', 'data4', ], [
+            'row5', 'ignore&', 'data5', ], [
+            'row6', 'ignore&', 'data6',
+        ]])
+        model = Task.objects.create(
+            summary='test_task',
+            left_source='database:dummy',
+            left_query_sql='SELECT * FROM r1;',
+            right_source='database:dummy',
+            right_query_sql='SELECT * FROM ds2;',
+        )
+        comparator = FieldComparator(r1, r2, taskModel=model)
+        self.assertTrue(not comparator.isSame())
+        self.assertEqual(model.result, 'Fields are inconsistent!')
+
+    def testDataType4(self):
+        DbConfig = {}
+        DbConfig['id'] = 'default'
+        DbConfig['ENGINE'] = 'django.db.backends.sqlite3'
+        DbConfig['NAME'] = ':memory:'
+        query_sql1 = 'SELECT * FROM r1;'
+        r1 = DatabaseReader(DbConfig, query_sql1)
+        r2 = TestReader([[
+            'col1', 'igfield2', 'col2', ], [
+            '1', 'ignore&', '1', ], [
+            '2', 'ignore&', '2', ], [
+            '3', 'ignore&', '3', ], [
+            '4', 'ignore&', '4', ], [
+            '5', 'ignore&', '5', ], [
+            '6', 'ignore&', '6',
+        ]])
+        model = Task.objects.create(
+            summary='test_task',
+            left_source='database:dummy',
+            left_query_sql='SELECT * FROM r1;',
+            right_source='database:dummy',
+            right_query_sql='SELECT * FROM ds2;',
+        )
+        comparator = FieldComparator(r1, r2, [], ['igfield2'], taskModel=model)
+        self.assertTrue(comparator.isSame())
