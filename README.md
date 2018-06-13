@@ -32,10 +32,11 @@ A tool for finding the difference between multiple data sources which should hav
 1. create database qdiff and qdiff_test
     mysql> create database qdiff;
     mysql> create database qdiff_test;
+1. change database password in the /qdiff/setting/settings.py and settings_test.py
 1. install the database schema
     python3 manage.py makemigrations
     python3 manage.py migrate
-    
+
 
 
 
