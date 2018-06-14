@@ -84,10 +84,6 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
             t.schema.descriptor[
                 'missingValues'] = settings.SCHEMA_DATABASE_MISSING_VALUES
             return t.infer(confidence=settings.SCHEMA_INFER_CONFIDENCE)
-            # schema = Schema({'missingValues': ['', 'None', 'null']})
-            # return schema.infer(
-            #     tmpList, headers=self.getColumns(),
-            #     confidence=settings.SCHEMA_INFER_CONFIDENCE)
 
         except Exception as e:
             tmpCursor.close()

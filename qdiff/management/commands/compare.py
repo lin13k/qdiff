@@ -3,7 +3,6 @@ from qdiff.models import Task
 from qdiff.managers import TaskManager
 from django.conf import settings
 import json
-import getpass
 import re
 # from qdiff.models import Task
 
@@ -129,9 +128,8 @@ class Command(BaseCommand):
         manager.compare()
 
         # display basic information
-        print('Comparing between\n -: %s\n +: %s' % (
+        self.stdout.write('Comparing between\n -: %s\n +: %s' % (
             manager.reader1, manager.reader2))
-        print(model.result)
+        self.stdout.write(model.result)
         if model.result_detail:
-            print(model.result_detail.replace('<@#$>', '\n'))
-
+            self.stdout.write(model.result_detail.replace('<@#$>', '\n'))

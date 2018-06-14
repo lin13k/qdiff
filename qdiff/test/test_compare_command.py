@@ -2,29 +2,8 @@ from django.test import TransactionTestCase
 from django.db import connection
 from django.core.management import call_command
 from django.conf import settings
+from qdiff.models import Task
 import json
-import sys
-from io import StringIO
-
-old_open = open
-in_memory_files = {}
-
-
-def open(name, mode="r", *args, **kwargs):
-    if name[:1] == ":" and name[-1:] == ":":
-        # in-memory file
-        if "w" in mode:
-            in_memory_files[name] = ""
-        f = StringIO(in_memory_files[name])
-        oldclose = f.close
-
-        def newclose():
-            in_memory_files[name] = f.getvalue()
-            oldclose()
-        f.close = newclose
-        return f
-    else:
-        return old_open(name, mode, *args, **kwargs)
 
 
 class CompareCommandTestCase(TransactionTestCase):
@@ -117,24 +96,32 @@ class CompareCommandTestCase(TransactionTestCase):
                 pass
 
     def testCompare1(self):
-        call_command(
-            'compare',
-            '--summary=test task',
-            "--rds1=database:" +
-            json.dumps(settings.DATABASES['default']),
-            "--sql1=select * from r3",
-            "--rds2=database:" +
-            json.dumps(settings.DATABASES['default']),
-            "--sql2=select * from r3",
-        )
+        with open('qdiff/test/test_compare_command_output.txt', 'w') as f:
+            call_command(
+                'compare',
+                '--summary=test task',
+                "--rds1=database:" +
+                json.dumps(settings.DATABASES['default']),
+                "--sql1=select * from r3",
+                "--rds2=database:" +
+                json.dumps(settings.DATABASES['default']),
+                "--sql2=select * from r3",
+                stdout=f,
+            )
+        task = Task.objects.all()[-1]
+        self.assertEqual(task.result, 'No difference found, congrats')
+        self.assertEqual(
+            task.result_detail,
+            'Searched total 10 records')
 
     def testCompare2(self):
-        call_command(
-            'compare',
-            '--summary=test task',
-            "--rds2=database:" +
-            json.dumps(settings.DATABASES['default']),
-            "--sql2=select * from r3",
-            "--rds1=csv:qdiff/test/testcsv.csv",
-        )
-        
+        with open('qdiff/test/test_compare_command_output.txt', 'w') as f:
+            call_command(
+                'compare',
+                '--summary=test task',
+                "--rds2=database:" +
+                json.dumps(settings.DATABASES['default']),
+                "--sql2=select * from r3",
+                "--rds1=csv:qdiff/test/testcsv.csv",
+                stdout=f,
+            )
