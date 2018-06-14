@@ -127,6 +127,10 @@ class Command(BaseCommand):
         # call manager and compare
         manager = TaskManager(model)
         manager.compare()
+
+        # display basic information
+        print('Comparing between\n -: %s\n +: %s' % (
+            manager.reader1, manager.reader2))
         print(model.result)
         if model.result_detail:
             print(model.result_detail.replace('<@#$>', '\n'))

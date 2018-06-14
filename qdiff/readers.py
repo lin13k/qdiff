@@ -1,6 +1,6 @@
 from qdiff.exceptions import NotImplementedException
 from qdiff.abstracts import AbstractDatabaseAccessUnit
-from tableschema import Table, Schema
+from tableschema import Table
 from django.conf import settings
 
 
@@ -78,10 +78,16 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
                 tmpList.append(row)
                 row = tmpCursor.fetchone()
                 i -= 1
-            schema = Schema()
-            return schema.infer(
-                tmpList, headers=self.getColumns(),
-                confidence=settings.SCHEMA_INFER_CONFIDENCE)
+            tmpList = [self.getColumns()] + tmpList
+            t = Table(tmpList)
+            t.infer()
+            t.schema.descriptor[
+                'missingValues'] = settings.SCHEMA_DATABASE_MISSING_VALUES
+            return t.infer(confidence=settings.SCHEMA_INFER_CONFIDENCE)
+            # schema = Schema({'missingValues': ['', 'None', 'null']})
+            # return schema.infer(
+            #     tmpList, headers=self.getColumns(),
+            #     confidence=settings.SCHEMA_INFER_CONFIDENCE)
 
         except Exception as e:
             tmpCursor.close()
@@ -92,6 +98,11 @@ class DatabaseReader(AbstractDatabaseAccessUnit, DataReader):
             self.cursor.close()
         except Exception as e:
             pass
+
+    def __repr__(self):
+        return (settings.SOURCE_TYPE_DATABASE_PREFIX +
+                self.config_dict['NAME'] + '@' +
+                self.config_dict['HOST'])
 
 
 class CsvReader(DataReader):
@@ -113,15 +124,28 @@ class CsvReader(DataReader):
         self._table = Table(self._filePath)
 
     def getRow(self):
-        i = self._table.iter(cast=False)
+        i = self._table.iter(cast=True)
         return next(i)
 
     def getRowsList(self):
-        i = self._table.iter(cast=False)
-        return list(i)
+        self._table.infer()
+        self._table.schema.descriptor[
+            'missingValues'] = settings.SCHEMA_CSV_MISSING_VALUES
+        self._table.schema.commit()
+        i = self._table.iter(cast=True)
+
+        return list(map(tuple, i))
 
     def getSchema(self):
         t = Table(self._filePath)
+        t.infer()
+        t.schema.descriptor[
+            'missingValues'] = settings.SCHEMA_CSV_MISSING_VALUES
+        t.schema.commit()
         return t.infer(
             settings.SCHEMA_INFER_LIMIT,
             confidence=settings.SCHEMA_INFER_CONFIDENCE)
+
+    def __repr__(self):
+        return (settings.SOURCE_TYPE_CSV_PREFIX +
+                self._filePath)
