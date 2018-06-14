@@ -108,7 +108,7 @@ class CompareCommandTestCase(TransactionTestCase):
                 "--sql2=select * from r3",
                 stdout=f,
             )
-        task = Task.objects.all()[-1]
+        task = Task.objects.last()
         self.assertEqual(task.result, 'No difference found, congrats')
         self.assertEqual(
             task.result_detail,
@@ -125,3 +125,8 @@ class CompareCommandTestCase(TransactionTestCase):
                 "--rds1=csv:qdiff/test/testcsv.csv",
                 stdout=f,
             )
+        task = Task.objects.last()
+        self.assertEqual(task.result, 'No difference found, congrats')
+        self.assertEqual(
+            task.result_detail,
+            'Searched total 10 records')
