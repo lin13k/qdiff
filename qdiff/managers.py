@@ -91,7 +91,7 @@ class TaskManager:
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
                           self._model.right_source, re.I):
-                self.reader1 = CsvReader(
+                self.reader2 = CsvReader(
                     self._model.right_source[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
