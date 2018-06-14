@@ -38,6 +38,10 @@ A tool for finding the difference between multiple data sources which should hav
     python3 manage.py migrate
 
 
+## Sanity test
+1. run command
+    python3 manage.py test --settings=setting.settings_test
+1. Cheers if all the test cases are successful
 
 
 
