@@ -9,8 +9,7 @@ from qdiff.writers import DatabaseWriter
 import json
 import re
 import logging
-
-logger = logging.getLogger(name='django')
+logging.basicConfig(filename='managers.log', level=logging.DEBUG)
 
 
 class TaskManager:
@@ -34,7 +33,7 @@ class TaskManager:
         self._ws2 = writeSource2
 
     def compare(self):
-        logger.info('start compare')
+        logging.debug('start compare')
         self._setUpReaders()
         self._setUpWriters()
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
@@ -60,6 +59,7 @@ class TaskManager:
         return (tableName1, tableName2)
 
     def _setUpReaders(self):
+        logging.debug('start setup readers')
         if not hasattr(self, 'reader1'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
                         self._model.left_source, re.I):
@@ -91,7 +91,7 @@ class TaskManager:
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
                           self._model.right_source, re.I):
-                self.reader1 = CsvReader(
+                self.reader2 = CsvReader(
                     self._model.right_source[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
@@ -113,6 +113,7 @@ class TaskManager:
         ''' % (tableName, colSql)).strip()
 
     def _setUpWriters(self):
+        logging.debug('start setup writers')
         if not hasattr(self, 'reader1') or not hasattr(self, 'reader2'):
             self._setUpReaders()
         columns1 = self.reader1.getColumns()
@@ -160,7 +161,9 @@ class TaskManager:
             (self._model.right_ignore_fields.split(',')
                 if self._model.right_ignore_fields else []),
             self._model)
-        return comparator.isSame()
+        r = comparator.isSame()
+        logging.debug('_isValuesSame:' + str(r))
+        return r
 
     def _isFieldsSame(self):
         comparator = FieldComparator(
@@ -168,8 +171,11 @@ class TaskManager:
             (self._model.left_ignore_fields.split(',')
                 if self._model.left_ignore_fields else []),
             (self._model.right_ignore_fields.split(',')
-                if self._model.right_ignore_fields else []))
-        return comparator.isSame()
+                if self._model.right_ignore_fields else []),
+            self._model)
+        r = comparator.isSame()
+        logging.debug('_isFieldsSame:' + str(r))
+        return r
 
     def _changeStatus(self, status):
         validStatus = [choice[0] for choice in Task.STATUS_OF_TASK_CHOICES]

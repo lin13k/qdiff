@@ -82,11 +82,14 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test1',
+        'NAME': 'qdiff',
         'USER': 'root',
         "PASSWORD": 'root',
         'HOST': 'localhost',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -180,4 +183,5 @@ SOURCE_TYPE_PREFIXES = [
 SOURCE_REQUIRED_FIELDS = ['ENGINE', 'NAME']
 SCHEMA_INFER_LIMIT = 30
 SCHEMA_INFER_CONFIDENCE = 0.95
-
+SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None]
+SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None]

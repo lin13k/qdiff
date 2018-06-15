@@ -46,8 +46,8 @@ class TaskManagerTestCase(TransactionTestCase):
             except Exception as e:
                 pass
             try:
-                cursor.execute('DROP TABLE gen_task_1_lf;')
-                cursor.execute('DROP TABLE gen_task_1_rt;')
+                cursor.execute('DROP TABLE GEN_TASK_1_LF;')
+                cursor.execute('DROP TABLE GEN_TASK_1_RT;')
             except Exception as e:
                 pass
 

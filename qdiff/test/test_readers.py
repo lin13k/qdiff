@@ -2,6 +2,7 @@ from django.test import TestCase, TransactionTestCase
 from django.db import connection
 from random import randint
 from qdiff.readers import DatabaseReader, CsvReader
+from django.conf import settings
 
 
 class DatabaseReaderTestCase(TransactionTestCase):
@@ -95,7 +96,8 @@ class DatabaseReaderTestCase(TransactionTestCase):
             {'fields': [
                 {'name': 'col1', 'type': 'integer',
                                  'format': 'default'},
-                {'name': 'col2', 'type': 'integer', 'format': 'default'}]})
+                {'name': 'col2', 'type': 'integer', 'format': 'default'}],
+             'missingValues': settings.SCHEMA_DATABASE_MISSING_VALUES})
 
 
 class CsvReaderTestCase(TestCase):
@@ -133,7 +135,7 @@ class CsvReaderTestCase(TestCase):
             {'fields': [
                 {'name': 'id', 'type': 'integer', 'format': 'default'},
                 {'name': 'address', 'type': 'string', 'format': 'default'},
-                {'name': 'price', 'type': 'string', 'format': 'default'},
+                {'name': 'price', 'type': 'number', 'format': 'default'},
                 {'name': 'qan', 'type': 'integer', 'format': 'default'},
                 {'name': 'start', 'type': 'date', 'format': 'default'}],
-             'missingValues': ['']})
+             'missingValues': settings.SCHEMA_CSV_MISSING_VALUES})

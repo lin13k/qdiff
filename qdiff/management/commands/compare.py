@@ -3,7 +3,6 @@ from qdiff.models import Task
 from qdiff.managers import TaskManager
 from django.conf import settings
 import json
-import getpass
 import re
 # from qdiff.models import Task
 
@@ -83,28 +82,31 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        print(options)
         # validate the input options
         # header check and json format check
         # fields check, id, engine, etc
         rds1 = options['rds1']
         self.headerCheck('rds1', rds1)
-        obj = self.jsonFormatCheck('rds1', rds1)
-        self.fieldCheck('rds1', obj, settings.SOURCE_REQUIRED_FIELDS)
+        if rds1.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
+            obj = self.jsonFormatCheck('rds1', rds1)
+            self.fieldCheck('rds1', obj, settings.SOURCE_REQUIRED_FIELDS)
         rds2 = options['rds2']
         self.headerCheck('rds2', rds2)
-        obj = self.jsonFormatCheck('rds2', rds2)
-        self.fieldCheck('rds2', obj, settings.SOURCE_REQUIRED_FIELDS)
+        if rds2.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
+            obj = self.jsonFormatCheck('rds2', rds2)
+            self.fieldCheck('rds2', obj, settings.SOURCE_REQUIRED_FIELDS)
         wsd1 = options.get('wsd1', None)
         if wsd1:
             self.headerCheck('wsd1', wsd1)
-            obj = self.jsonFormatCheck('wsd1', wsd1)
-            self.fieldCheck('wsd1', obj, settings.SOURCE_REQUIRED_FIELDS)
+            if wsd1.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
+                obj = self.jsonFormatCheck('wsd1', wsd1)
+                self.fieldCheck('wsd1', obj, settings.SOURCE_REQUIRED_FIELDS)
         wsd2 = options.get('wsd2', None)
         if wsd2:
             self.headerCheck('wsd2', wsd2)
-            obj = self.jsonFormatCheck('wsd2', wsd2)
-            self.fieldCheck('wsd2', obj, settings.SOURCE_REQUIRED_FIELDS)
+            if wsd2.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
+                obj = self.jsonFormatCheck('wsd2', wsd2)
+                self.fieldCheck('wsd2', obj, settings.SOURCE_REQUIRED_FIELDS)
 
         # TODO validate the sqls
         # TODO validate the ignored fields
@@ -124,6 +126,10 @@ class Command(BaseCommand):
         # call manager and compare
         manager = TaskManager(model)
         manager.compare()
-        print(model.result)
-        print(model.result_detail)
 
+        # display basic information
+        self.stdout.write('Comparing between\n -: %s\n +: %s' % (
+            manager.reader1, manager.reader2))
+        self.stdout.write(model.result)
+        if model.result_detail:
+            self.stdout.write(model.result_detail.replace('<@#$>', '\n'))
