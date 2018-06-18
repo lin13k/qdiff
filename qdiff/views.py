@@ -1,3 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def task_list_view(request):
+    context = {}
+    return render(request, 'qdiff/task_list.html', context)
