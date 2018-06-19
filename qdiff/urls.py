@@ -4,5 +4,5 @@ from qdiff import views
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    url(r'^task_list/?$', views.task_list_view)
+    url(r'^tasks/?$', views.task_list_view, name='task_list')
 ]
