@@ -75,7 +75,7 @@
         $('#grouping_fields_input').on('input', function() {
             var groupingFields = $('#grouping_fields_input').val().split(',');
             var groupingFieldsIndex = [];
-            var columns = [];
+            var columns = {{ columns|safe }};
             var columnDefs = [];
             var order = [];
             $('.table > thead > tr > th').each(function(){
@@ -89,8 +89,8 @@
                     order.push([groupingFieldsIndex[i], 'asc']);
                 }
             }
-            var groupColumn = 2;
-            var table = $().DataTable({
+            // var groupColumn = 2;
+            $('#dataTable').DataTable({
                 "columnDefs": columnDefs,
                 "order": order,
                 "displayLength": 50,
@@ -98,30 +98,34 @@
                     var api = this.api();
                     var rows = api.rows( {page:'current'} ).nodes();
                     var last=null;
-         
-                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-                        if ( last !== group ) {
-                            $(rows).eq( i ).before(
-                                '<tr class="group"><td colspan="' + columns.length + '">'+group+'</td></tr>'
-                            );
-         
-                            last = group;
+                    
+                    for (var i = groupingFieldsIndex.length - 1; i >= 0; i--) {
+                        if (groupingFieldsIndex[i] >= 0) {
+                            api.column(groupingFieldsIndex[i], {page:'current'} ).data().each( function ( group, i ) {
+                                if ( last !== group ) {
+                                    $(rows).eq( i ).before(
+                                        '<tr class="group"><td colspan="' + columns.length + '">'+group+'</td></tr>'
+                                    );
+                 
+                                    last = group;
+                                }
+                            });
                         }
-                    });
-                }
+                    }         
+                },
+                "bDestroy": true
             });
-            // $('#dataTable').insertBefore(table)
          
             // Order by the grouping
-            $('#dataTable tbody').on( 'click', 'tr.group', function () {
-                var currentOrder = table.order()[0];
-                if ( currentOrder[0] === groupColumn && currentOrder[1] === 'asc' ) {
-                    table.order( [ groupColumn, 'desc' ] ).draw();
-                }
-                else {
-                    table.order( [ groupColumn, 'asc' ] ).draw();
-                }
-            } );
+            // $('#dataTable tbody').on( 'click', 'tr.group', function () {
+            //     var currentOrder = table.order()[0];
+            //     if ( currentOrder[0] === groupColumn && currentOrder[1] === 'asc' ) {
+            //         table.order( [ groupColumn, 'desc' ] ).draw();
+            //     }
+            //     else {
+            //         table.order( [ groupColumn, 'asc' ] ).draw();
+            //     }
+            // } );
         } );
     </script>
 {% endblock %}
