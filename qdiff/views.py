@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from qdiff.models import Task, ConflictRecord
 from qdiff.readers import DatabaseReader
 from django.conf import settings
+from qdiff.utils import getMaskedSources
+import json
 
 
 def task_list_view(request):
@@ -38,6 +40,8 @@ def task_detail_view(request, pk):
                for item in datareader2.getRowsList()]
     conflictResults = result1 + result2
     columns = datareader1.getColumns()
+
+    context['source1'], context['source2'] = getMaskedSources(task)
     context['task'] = task
     context['columns'] = columns
     context['conflictResults'] = conflictResults
