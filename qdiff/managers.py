@@ -44,6 +44,7 @@ class TaskManager:
             self._isValuesSame()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
             # write the result summary
+        # TODO write end time
 
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
