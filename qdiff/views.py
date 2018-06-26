@@ -42,3 +42,14 @@ def task_detail_view(request, pk):
     context['columns'] = columns
     context['conflictResults'] = conflictResults
     return render(request, 'qdiff/task_detail.html', context)
+
+
+def task_create_view(request):
+    context = {}
+    if request.method == 'GET':
+        return render(request, 'qdiff/task_create.html', context)
+    if request.POST:
+        print(request.POST)
+    if request.FILES:
+        print(request.FILES)
+    return render(request, 'qdiff/task_create.html', context)

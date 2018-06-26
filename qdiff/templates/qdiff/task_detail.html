@@ -1,7 +1,7 @@
 {% extends "qdiff/base.html" %}
 {% load staticfiles %}
 {% block sidebar %}
-    <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+    <!-- <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
         <a class="nav-link" href="index.html">
             <i class="fa fa-fw fa-plus-circle"></i>
             <span class="nav-link-text">Create Task</span>
@@ -12,7 +12,7 @@
             <i class="fa fa-fw fa-th-list"></i>
             <span class="nav-link-text">Task List</span>
         </a>
-    </li>
+    </li> -->
 {% endblock %}
 {% block topbar %}
 {% endblock %}
@@ -22,7 +22,7 @@
             <a href="#">Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="#">Task List</a>
+            <a href="{% url 'task_list' %}">Task List</a>
         </li>
         <li class="breadcrumb-item active">Task {{ task.id }}</li>
     </ol>
@@ -30,7 +30,7 @@
 {% block content %}
     <div class="card mb-3">
         <div class="card-header">
-        <i class="fa fa-table"></i>Task List
+        <i class="fa fa-table"></i>Conflicted Records
             <div style="float: right;">
                 <i class="fa fa-object-group"></i>Group By:
                 <input type="text" id="grouping_fields_input" name="grouping_fields">
@@ -115,6 +115,9 @@
                 },
                 "bDestroy": true
             });
+
+            // $("tr td:last-child:contains('LF')").parent().css("background-color", "red");
+            // $("tr td:last-child:contains('RT')").parent().css("background-color", "green");
          
             // Order by the grouping
             // $('#dataTable tbody').on( 'click', 'tr.group', function () {
@@ -127,6 +130,8 @@
             //     }
             // } );
         } );
+        $("tr td:last-child:contains('LF')").parent().css("background-color", "indianred");
+        $("tr td:last-child:contains('RT')").parent().css("background-color", "seagreen");
     </script>
 {% endblock %}
 {% block footer %}

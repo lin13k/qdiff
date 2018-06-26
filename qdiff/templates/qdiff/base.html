@@ -135,6 +135,18 @@
           </a>
         </li> -->
         {% endblock %}
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+            <a class="nav-link" href="{% url 'task_create' %}">
+                <i class="fa fa-fw fa-plus-circle"></i>
+                <span class="nav-link-text">Create Task</span>
+            </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+            <a class="nav-link" href="{% url 'task_list' %}">
+                <i class="fa fa-fw fa-th-list"></i>
+                <span class="nav-link-text">Task List</span>
+            </a>
+        </li>
       </ul>
       <ul class="navbar-nav sidenav-toggler">
         <li class="nav-item">
