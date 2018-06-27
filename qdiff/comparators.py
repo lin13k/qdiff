@@ -93,7 +93,6 @@ class ValueComparator:
             item1 = dataList1[index1]
             item2 = dataList2[index2]
 
-            # TODO, apply ignoreFields in hash
             h1 = hash(tuple(item1[i] for i in range(len(item1)) if mask1[i]))
             h2 = hash(tuple(item2[i] for i in range(len(item2)) if mask2[i]))
             # h1 = hash(item1)
