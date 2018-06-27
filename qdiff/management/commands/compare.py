@@ -124,8 +124,12 @@ class Command(BaseCommand):
             # owner=getpass.getuser(),
         )
         # call manager and compare
-        manager = TaskManager(model)
-        manager.compare()
+        try:
+            manager = TaskManager(model)
+            manager.compare()
+        except Exception as e:
+            model.result = Task.STATUS_OF_TASK_ERROR
+            model.result_detail = str(e)
 
         # display basic information
         self.stdout.write('Comparing between\n -: %s\n +: %s' % (
