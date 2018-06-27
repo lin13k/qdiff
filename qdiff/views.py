@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from qdiff.models import Task, ConflictRecord
 from qdiff.readers import DatabaseReader
 from django.conf import settings
-from qdiff.utils import getMaskedSources
-import json
+from qdiff.utils.model import getMaskedSources
 
 
 def task_list_view(request):

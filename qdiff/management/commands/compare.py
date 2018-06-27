@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from qdiff.models import Task
 from qdiff.managers import TaskManager
 from django.conf import settings
+from qdiff.utils.validations import Validator
 import json
 import re
 # from qdiff.models import Task
@@ -83,49 +84,37 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # validate the input options
-        # header check and json format check
-        # fields check, id, engine, etc
-        rds1 = options['rds1']
-        self.headerCheck('rds1', rds1)
-        if rds1.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
-            obj = self.jsonFormatCheck('rds1', rds1)
-            self.fieldCheck('rds1', obj, settings.SOURCE_REQUIRED_FIELDS)
-        rds2 = options['rds2']
-        self.headerCheck('rds2', rds2)
-        if rds2.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
-            obj = self.jsonFormatCheck('rds2', rds2)
-            self.fieldCheck('rds2', obj, settings.SOURCE_REQUIRED_FIELDS)
-        wsd1 = options.get('wsd1', None)
-        if wsd1:
-            self.headerCheck('wsd1', wsd1)
-            if wsd1.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
-                obj = self.jsonFormatCheck('wsd1', wsd1)
-                self.fieldCheck('wsd1', obj, settings.SOURCE_REQUIRED_FIELDS)
-        wsd2 = options.get('wsd2', None)
-        if wsd2:
-            self.headerCheck('wsd2', wsd2)
-            if wsd2.startswith(settings.SOURCE_TYPE_DATABASE_PREFIX):
-                obj = self.jsonFormatCheck('wsd2', wsd2)
-                self.fieldCheck('wsd2', obj, settings.SOURCE_REQUIRED_FIELDS)
-
-        # TODO validate the sqls
-        # TODO validate the ignored fields
-        # TODO validate the summary
+        v = Validator(
+            options.get('summary', None),
+            options.get('rds1', None),
+            options.get('rds2', None),
+            options.get('sql1', None),
+            options.get('sql2', None),
+            options.get('ignore1', None),
+            options.get('ignore2', None),
+            options.get('wds1', None),
+            options.get('wsd2', None))
+        errs = v.validate()
+        if len(errs) > 0:
+            raise CommandError(', '.join(errs))
 
         # init the model
         model = Task.objects.create(
-            summary=options['summary'],
-            left_source=rds1,
-            left_query_sql=options['sql1'],
-            left_ignore_fields=options['ignore1'],
-            right_source=rds2,
-            right_query_sql=options['sql2'],
-            right_ignore_fields=options['ignore2'],
+            summary=options.get('summary', None),
+            left_source=options.get('rds1', None),
+            left_query_sql=options.get('sql1', None),
+            left_ignore_fields=options.get('ignore1', None),
+            right_source=options.get('rds2', None),
+            right_query_sql=options.get('sql2', None),
+            right_ignore_fields=options.get('ignore2', None),
             # owner=getpass.getuser(),
         )
         # call manager and compare
         try:
-            manager = TaskManager(model)
+            manager = TaskManager(
+                model,
+                options.get('wsd1', None),
+                options.get('wsd2', None))
             manager.compare()
         except Exception as e:
             model.result = Task.STATUS_OF_TASK_ERROR
