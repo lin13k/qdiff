@@ -2,3 +2,4 @@ django
 mysqlclient
 django-extensions
 tableschema
+Celery
