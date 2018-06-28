@@ -27,18 +27,22 @@ def task_detail_view(request, pk):
         str(task.id),
         ConflictRecord.POSITION_IN_TASK_RIGHT
     )
-    datareader1 = DatabaseReader(
-        defaultConfigs,
-        'SELECT * FROM %s;' % (tableName1))
-    result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
-               for item in datareader1.getRowsList()]
-    datareader2 = DatabaseReader(
-        defaultConfigs,
-        'SELECT * FROM %s;' % (tableName2))
-    result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
-               for item in datareader2.getRowsList()]
-    conflictResults = result1 + result2
-    columns = datareader1.getColumns()
+    conflictResults = []
+    columns = []
+    # condition for pending case
+    if task.status == Task.STATUS_OF_TASK_COMPLETED:
+        datareader1 = DatabaseReader(
+            defaultConfigs,
+            'SELECT * FROM %s;' % (tableName1))
+        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+                   for item in datareader1.getRowsList()]
+        datareader2 = DatabaseReader(
+            defaultConfigs,
+            'SELECT * FROM %s;' % (tableName2))
+        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+                   for item in datareader2.getRowsList()]
+        conflictResults = result1 + result2
+        columns = datareader1.getColumns()
 
     context['source1'], context['source2'] = getMaskedSources(task)
     context['task'] = task
