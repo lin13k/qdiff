@@ -57,30 +57,6 @@ class Command(BaseCommand):
             # nargs='*',
         )
 
-    def headerCheck(self, name, string):
-        validPrefixes = settings.SOURCE_TYPE_PREFIXES
-        if not re.match('^(' + '|'.join(validPrefixes) + ')', string):
-            raise CommandError(
-                '%s:%s is leading with invalid header' % (name, string))
-
-    def jsonFormatCheck(self, name, string):
-        validPrefixes = settings.SOURCE_TYPE_PREFIXES
-        r = re.match('(' + '|'.join(validPrefixes) + ')', string)
-        obj = None
-        try:
-            obj = json.loads(string[len(r.group(0)):])
-        except Exception as e:
-            raise CommandError(
-                '%s:%s is not a valid json string, %s' %
-                (name, string[len(r.group(0)):], e))
-        return obj
-
-    def fieldCheck(self, name, obj, fieldList):
-        for requriedField in fieldList:
-            if requriedField not in obj:
-                raise CommandError('%s: must have field %s' %
-                                   (name, requriedField))
-
     def handle(self, *args, **options):
 
         # validate the input options
