@@ -51,6 +51,8 @@ def task_detail_view(request, pk):
     context['source1'], context['source2'] = getMaskedSources(task)
     context['task'] = task
     context['columns'] = columns
+    context['detail'] = task.result_detail.replace(
+        settings.RESULT_SPLITTING_TOKEN, '<br>') if task.result_detail else ''
     context['conflictResults'] = conflictResults
     return render(request, 'qdiff/task_detail.html', context)
 
