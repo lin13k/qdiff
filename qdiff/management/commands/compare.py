@@ -69,7 +69,7 @@ class Command(BaseCommand):
             options.get('ignore1', None),
             options.get('ignore2', None),
             options.get('wds1', None),
-            options.get('wsd2', None))
+            options.get('wds2', None))
         errs = v.validate()
         if len(errs) > 0:
             raise CommandError(', '.join(errs))
@@ -83,14 +83,13 @@ class Command(BaseCommand):
             right_source=options.get('rds2', None),
             right_query_sql=options.get('sql2', None),
             right_ignore_fields=options.get('ignore2', None),
-            # owner=getpass.getuser(),
         )
         # call manager and compare
         try:
             manager = TaskManager(
                 model,
-                options.get('wsd1', None),
-                options.get('wsd2', None))
+                options.get('wds1', None),
+                options.get('wds2', None))
             manager.compare()
         except Exception as e:
             model.result = Task.STATUS_OF_TASK_ERROR
@@ -101,4 +100,5 @@ class Command(BaseCommand):
             manager.reader1, manager.reader2))
         self.stdout.write(model.result)
         if model.result_detail:
-            self.stdout.write(model.result_detail.replace('<@#$>', '\n'))
+            self.stdout.write(model.result_detail.replace(
+                settings.RESULT_SPLITTING_TOKEN, '\n'))

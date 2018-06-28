@@ -1,4 +1,5 @@
 from difflib import Differ
+from django.conf import settings
 import re
 
 
@@ -37,7 +38,8 @@ class FieldComparator:
         if len(result) > 0:
             if self._model:
                 self._model.result = 'Fields are inconsistent!'
-                self._model.result_detail = '<@#$>'.join(result)
+                self._model.result_detail = (
+                    settings.RESULT_SPLITTING_TOKEN.join(result))
                 self._model.save()
             return False
         return True
