@@ -22,17 +22,24 @@ class Validator:
         self.report = []
 
     def validate(self):
-        if self.summary is None:
+        if self.summary is None or len(self.summary) == 0:
             self.report.append('Summary is required')
+        if self.rds1 is None or len(self.rds1) == 0:
+            self.report.append('read data source 1 is required')
+        if self.rds2 is None or len(self.rds2) == 0:
+            self.report.append('read data source 2 is required')
 
         # for each datasource field
         #   header check
         #   if db:
         #       format check
         #       field check
-        datasources = {
-            'read data source 1': self.rds1,
-            'read data source 2': self.rds2}
+        datasources = {}
+        if self.rds1:
+            datasources['read data source 1'] = self.rds1
+        if self.rds2:
+            datasources['read data source 2'] = self.rds2
+
         if self.wds1:
             datasources['write data source 1'] = self.wds1
         if self.wds2:
