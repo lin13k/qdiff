@@ -11,8 +11,8 @@ class ValidatorTestCase(TestCase):
         errs = v.validate()
         self.assertEqual(
             errs,
-            ['read data source 1: is leading with invalid header',
-             'read data source 2: is leading with invalid header'])
+            ['read data source 1 is required',
+             'read data source 2 is required'])
 
     def testValidateLogic2(self):
         v = Validator('s', 'database:', 'csv:')
