@@ -91,6 +91,8 @@ class ValueComparator:
         tempDict2 = {}
         isSame = True
         diffCount = 0
+        buff1 = []
+        buff2 = []
         while index1 < len(dataList1) and index2 < len(dataList2):
             item1 = dataList1[index1]
             item2 = dataList2[index2]
@@ -106,13 +108,13 @@ class ValueComparator:
                 if h1 in tempDict2:
                     tempDict2.pop(h1)
                     diffCount += len(tempDict2)
-                    self._writer2.writeAll(tempDict2.values())
+                    buff2.extend(tempDict2.values())
                     tempDict2 = {}
                     index1 += 1
                 if h2 in tempDict1:
                     tempDict1.pop(h2)
                     diffCount += len(tempDict1)
-                    self._writer1.writeAll(tempDict1.values())
+                    buff1.extend(tempDict1.values())
                     tempDict1 = {}
                     index2 += 1
             else:
@@ -125,21 +127,24 @@ class ValueComparator:
         if len(tempDict2) > 0:
             diffCount += len(tempDict2)
             isSame = False
-            self._writer2.writeAll(tempDict2.values())
+            buff2.extend(tempDict2.values())
         if len(tempDict1) > 0:
             diffCount += len(tempDict1)
             isSame = False
-            self._writer1.writeAll(tempDict1.values())
+            buff1.extend(tempDict1.values())
 
         if index1 != len(dataList1):
             isSame = False
             diffCount += len(dataList1[index1:])
-            self._writer1.writeAll(dataList1[index1:])
+            buff1.extend(dataList1[index1:])
 
         if index2 != len(dataList2):
             isSame = False
             diffCount += len(dataList2[index2:])
-            self._writer2.writeAll(dataList2[index2:])
+            buff2.extend(dataList2[index2:])
+
+        self._writer1.writeAll(buff1)
+        self._writer2.writeAll(buff2)
 
         if isSame is False:
             if self._model:
