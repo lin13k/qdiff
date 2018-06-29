@@ -61,10 +61,6 @@ def task_create_view(request):
     context = {}
     if request.method == 'GET':
         return render(request, 'qdiff/task_create.html', context)
-    if request.POST:
-        print(request.POST)
-    if request.FILES:
-        print(request.FILES)
     # save the csv if file uploaded
     rds1 = rds2 = path1 = path2 = None
     file1 = request.FILES.get('file1', None)
