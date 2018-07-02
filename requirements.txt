@@ -3,3 +3,4 @@ mysqlclient
 django-extensions
 tableschema
 Celery
+pytest

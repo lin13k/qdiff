@@ -12,7 +12,7 @@ def test(s):
 @task(name="compare_command")
 def compareCommand(
         taskId,
-        wds1, wds2):
+        wds1=None, wds2=None):
 
     # init the model
     model = Task.objects.get(id=taskId)
