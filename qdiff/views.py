@@ -115,3 +115,9 @@ def task_create_view(request):
     # return submitted view ??
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
     # return render(request, 'qdiff/task_create.html', context)
+
+
+def database_config_file_view(request):
+    context = {}
+    print(request.POST)
+    return render(request, 'qdiff/create_config.html', context)
