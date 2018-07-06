@@ -6,3 +6,5 @@ Celery
 pytest
 coverage
 codecov
+djangorestframework
+cryptography

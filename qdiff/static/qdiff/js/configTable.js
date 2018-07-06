@@ -5,7 +5,7 @@ var $EXPORT = $('#export');
 
 $('.table-add').click(function () {
   var $newLine = '<tr class="data">' +
-    '    <td class="pt-3-half" contenteditable="true">Elisa Gallagher</td>' +
+    '    <td class="pt-3-half custom-name" contenteditable="true">Elisa Gallagher</td>' +
     '    <td class="pt-3-half" contenteditable="true">31</td>' +
     '    <td>' +
     '        <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>' +
@@ -16,6 +16,13 @@ $('.table-add').click(function () {
   $('.table-remove').click(function () {
     $(this).parents('tr').detach();
   });
+  $('.custom-name').each(function(index, value){
+    $( this ).on('input', function(){
+      console.log('edited!');
+      $(this)[0].textContent = $(this)[0].textContent.toUpperCase();
+      $(this).next()[0].setAttribute('name', $(this)[0].textContent);
+    })
+  })
 });
 
 $('.table-remove').click(function () {

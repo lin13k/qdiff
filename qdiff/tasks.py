@@ -27,3 +27,6 @@ def compareCommand(
         model.result = Task.STATUS_OF_TASK_ERROR
         model.result_detail = str(e)
         model.save()
+    finally:
+        # delete db config
+        pass

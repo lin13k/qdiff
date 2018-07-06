@@ -6,7 +6,17 @@ from qdiff.utils.model import getMaskedSources
 from qdiff.tasks import compareCommand
 from qdiff.utils.validations import Validator
 from qdiff.utils.files import saveUploadedFile
+from qdiff.utils.convertors import listInPostDataToList
+from django.http import HttpResponse
+from wsgiref.util import FileWrapper
 import os
+from io import StringIO
+from rest_framework.views import APIView, Response
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+import json
+from qdiff.utils.ciphers import FernetCipher
+from hashlib import sha256
 
 
 def task_list_view(request):
@@ -119,5 +129,59 @@ def task_create_view(request):
 
 def database_config_file_view(request):
     context = {}
-    print(request.POST)
     return render(request, 'qdiff/create_config.html', context)
+
+
+class Database_Config_APIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, format=None):
+        errors = []
+        configsList = listInPostDataToList(request.POST)
+        configDict = {config[0]: config[1] for config in configsList}
+        # memoryFile = StringIO()
+        # DatabaseReader to test if it can show table
+        try:
+            dr = DatabaseReader(configDict, 'show tables')
+            if len(dr.getRowsList()) == 0:
+                errors.append('Cannot access the database')
+        except Exception as e:
+            errors.append('Invalid database configuration')
+
+        if len(errors) > 0:
+            return Response({'errors': errors})
+        fc = FernetCipher()
+        configJsonStr = json.dumps(configDict)
+        code = fc.encode(configJsonStr)
+        filename = sha256(configJsonStr.encode()).hexdigest()
+
+        if not os.path.exists('tmp'):
+            os.makedirs('tmp')
+
+        with open(os.path.join('tmp', filename + '.csv'), 'w+') as f:
+            f.write(code)
+            f.flush()
+            f.seek(0)
+
+        return Response({'key': filename})
+
+    def get(self, request, format=None):
+        print(request.GET.get('key'))
+        key = request.GET.get('key', None)
+        if key is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            memoryFile = StringIO()
+            with open(os.path.join('tmp', key + '.csv'), 'r') as f:
+
+                memoryFile.write(f.read())
+                memoryFile.flush()
+                memoryFile.seek(0)
+                os.remove(os.path.join('tmp', key + '.csv'))
+
+            r = HttpResponse(FileWrapper(memoryFile), content_type='text/plain')
+            r['Content-Disposition'
+              ] = 'attachment; filename="databaseConfig.txt"'
+            return r
+        except Exception as e:
+            return Response(status=status.HTTP_404_NOT_FOUND)
