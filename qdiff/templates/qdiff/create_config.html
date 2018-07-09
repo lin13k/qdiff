@@ -74,11 +74,15 @@
                                 $('.errors-msg').append('<p style="color: red;">' + value + '</p>')
                             })
                         }
+                    }else{
+                        var key = data.key;
+                        var src = "{% url 'create_config_file_upload' %}?key=" + key
+                        $('.errors-msg').remove();
+                        $('.downloadBtn').remove();
+                        var downloadBtn = $('<a class="btn btn-primary btn-block downloadBtn" href="' + src + '">Download</a>');
+                        downloadBtn.insertAfter('.submitBtn');
+                        
                     }
-                    var key = data.key;
-                    var src = "{% url 'create_config_file_upload' %}?key=" + key
-                    var downloadBtn = $('<a class="btn btn-primary btn-block downloadBtn" href="' + src + '">Download</a>');
-                    downloadBtn.insertAfter('.submitBtn');
                     // var iframe = $("<iframe/>").attr({
                     //     src: "{% url 'create_config_file_upload' %}?key=" + key,
                     //     style: "visibility:hidden;display:none"

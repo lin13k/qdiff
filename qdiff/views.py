@@ -142,8 +142,10 @@ class Database_Config_APIView(APIView):
         # memoryFile = StringIO()
         # DatabaseReader to test if it can show table
         try:
+            print('check db')
             dr = DatabaseReader(configDict, 'show tables')
-            if len(dr.getRowsList()) == 0:
+            print('end check db')
+            if dr.getCursor() is None:
                 errors.append('Cannot access the database')
         except Exception as e:
             errors.append('Invalid database configuration')
@@ -154,7 +156,7 @@ class Database_Config_APIView(APIView):
         configJsonStr = json.dumps(configDict)
         code = fc.encode(configJsonStr)
         filename = sha256(configJsonStr.encode()).hexdigest()
-
+        print(filename)
         if not os.path.exists('tmp'):
             os.makedirs('tmp')
 
@@ -177,11 +179,12 @@ class Database_Config_APIView(APIView):
                 memoryFile.write(f.read())
                 memoryFile.flush()
                 memoryFile.seek(0)
-                os.remove(os.path.join('tmp', key + '.csv'))
-
-            r = HttpResponse(FileWrapper(memoryFile), content_type='text/plain')
+            os.remove(os.path.join('tmp', key + '.csv'))
+            r = HttpResponse(
+                FileWrapper(memoryFile), content_type='text/plain')
             r['Content-Disposition'
               ] = 'attachment; filename="databaseConfig.txt"'
             return r
         except Exception as e:
+            print(e)
             return Response(status=status.HTTP_404_NOT_FOUND)
