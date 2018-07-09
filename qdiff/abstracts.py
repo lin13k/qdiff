@@ -14,7 +14,17 @@ class AbstractDatabaseAccessUnit:
         del connections.databases
 
     def getCursor(self):
-        if self.label not in connections:
-            self.register()
-        c = connections[self.label].cursor()
+        try:
+            if self.label not in connections:
+                self.register()
+            c = connections[self.label].cursor()
+        except Exception as e:
+            self.destroy()
+            raise e
         return c
+
+    def destroy(self):
+        connections._databases.pop(self.label)
+        del connections.databases
+
+
