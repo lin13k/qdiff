@@ -113,6 +113,9 @@ class TaskManager:
             CREATE TABLE %s (%s);
         ''' % (tableName, colSql)).strip()
 
+    def _getDropSql(self, tableName):
+        return "DROP TABLE `qdiff`.`%s`" % tableName
+
     def _setUpWriters(self):
         logging.debug('start setup writers')
         if not hasattr(self, 'reader1') or not hasattr(self, 'reader2'):
@@ -124,8 +127,14 @@ class TaskManager:
         dbConfig['id'] = 'default'
         if not self._ws1:
             with connection.cursor() as cursor:
-                cursor.execute(self._getCreateSql(
-                    columns1, tableName1))
+                try:
+                    cursor.execute(self._getCreateSql(
+                        columns1, tableName1))
+                except Exception as e:
+                    # if table exists
+                    cursor.execute(self._getDropSql(tableName1))
+                    cursor.execute(self._getCreateSql(
+                        columns1, tableName1))
                 self.writer1 = DatabaseWriter(dbConfig, tableName1)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName1,
@@ -138,8 +147,14 @@ class TaskManager:
                 'external write source not support yet')
         if not self._ws2:
             with connection.cursor() as cursor:
-                cursor.execute(self._getCreateSql(
-                    columns2, tableName2))
+                try:
+                    cursor.execute(self._getCreateSql(
+                        columns2, tableName2))
+                except Exception as e:
+                    # if table exists
+                    cursor.execute(self._getDropSql(tableName2))
+                    cursor.execute(self._getCreateSql(
+                        columns2, tableName2))
                 self.writer2 = DatabaseWriter(dbConfig, tableName2)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName2,
