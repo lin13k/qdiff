@@ -142,9 +142,7 @@ class Database_Config_APIView(APIView):
         # memoryFile = StringIO()
         # DatabaseReader to test if it can show table
         try:
-            print('check db')
             dr = DatabaseReader(configDict, 'show tables')
-            print('end check db')
             if dr.getCursor() is None:
                 errors.append('Cannot access the database')
         except Exception as e:
@@ -155,8 +153,11 @@ class Database_Config_APIView(APIView):
         fc = FernetCipher()
         configJsonStr = json.dumps(configDict)
         code = fc.encode(configJsonStr)
-        filename = sha256(configJsonStr.encode()).hexdigest()
-        print(filename)
+        filename = (str(configDict.get('NAME', None)) +
+                    '_' +
+                    str(configDict.get('HOST', None)) +
+                    '_')
+        filename += sha256(configJsonStr.encode()).hexdigest()
         if not os.path.exists('tmp'):
             os.makedirs('tmp')
 
@@ -168,12 +169,12 @@ class Database_Config_APIView(APIView):
         return Response({'key': filename})
 
     def get(self, request, format=None):
-        print(request.GET.get('key'))
         key = request.GET.get('key', None)
         if key is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
             memoryFile = StringIO()
+            filename = '_'.join(key.split('_')[:2])
             with open(os.path.join('tmp', key + '.csv'), 'r') as f:
 
                 memoryFile.write(f.read())
@@ -183,8 +184,8 @@ class Database_Config_APIView(APIView):
             r = HttpResponse(
                 FileWrapper(memoryFile), content_type='text/plain')
             r['Content-Disposition'
-              ] = 'attachment; filename="databaseConfig.txt"'
+              ] = 'attachment; filename="' + filename + '_databaseConfig.txt"'
             return r
         except Exception as e:
             print(e)
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
