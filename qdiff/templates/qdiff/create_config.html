@@ -80,7 +80,11 @@
                         $('.errors-msg').remove();
                         $('.downloadBtn').remove();
                         var downloadBtn = $('<a class="btn btn-primary btn-block downloadBtn" href="' + src + '">Download</a>');
+                        downloadBtn.click(function(){
+                            $('.downloadBtn').remove();
+                        });
                         downloadBtn.insertAfter('.submitBtn');
+                        $('.submitBtn').remove();
                         
                     }
                     // var iframe = $("<iframe/>").attr({
