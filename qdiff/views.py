@@ -176,7 +176,6 @@ class Database_Config_APIView(APIView):
             memoryFile = StringIO()
             filename = '_'.join(key.split('_')[:2])
             with open(os.path.join('tmp', key + '.csv'), 'r') as f:
-
                 memoryFile.write(f.read())
                 memoryFile.flush()
                 memoryFile.seek(0)
