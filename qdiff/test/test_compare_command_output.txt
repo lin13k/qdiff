@@ -1,0 +1,5 @@
+Comparing between
+ -: csv:qdiff/test/testcsv.csv
+ +: database:test_qdiff_test@localhost
+No difference found, congrats
+Searched total 10 records

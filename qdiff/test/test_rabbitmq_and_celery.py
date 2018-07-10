@@ -14,8 +14,8 @@ class CompareCommandTestCase(TestCase):
             left_source='csv:dummy.csv',
             right_source='csv:dummy.csv',
         )
-        compareCommand(task.pk, None, None)
-        manager.assert_called_with(task, None, None)
+        compareCommand(task.pk, 'csv:dummy', 'csv:dummy')
+        manager.assert_called_with(task, 'csv:dummy', 'csv:dummy', None, None)
 
     @patch('qdiff.tasks.TaskManager.compare')
     def testCallCompareSuccess(self, compareFunction):
@@ -24,7 +24,7 @@ class CompareCommandTestCase(TestCase):
             left_source='csv:dummy.csv',
             right_source='csv:dummy.csv',
         )
-        compareCommand(task.pk, None, None)
+        compareCommand(task.pk, 'csv:dummy', 'csv:dummy')
         compareFunction.assert_called_with()
 
     @pytest.mark.celery(result_backend=settings.CELERY_RESULT_BACKEND)
