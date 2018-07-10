@@ -2,7 +2,6 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from qdiff.models import Task, ConflictRecord
 from qdiff.readers import DatabaseReader
 from django.conf import settings
-from qdiff.utils.model import getMaskedSources
 from qdiff.tasks import compareCommand
 from qdiff.utils.validations import Validator
 from qdiff.utils.files import saveUploadedFile
@@ -15,7 +14,8 @@ from rest_framework.views import APIView, Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 import json
-from qdiff.utils.ciphers import FernetCipher
+from qdiff.utils.ciphers import FernetCipher, decodedContent
+from qdiff.utils.model import getMaskedSourceFromString
 from hashlib import sha256
 
 
@@ -58,7 +58,9 @@ def task_detail_view(request, pk):
         conflictResults = result1 + result2
         columns = datareader1.getColumns()
 
-    context['source1'], context['source2'] = getMaskedSources(task)
+    # not required masking, since remove the pw before saving into DB
+    context['source1'] = task.left_source
+    context['source2'] = task.right_source
     context['task'] = task
     context['columns'] = columns
     context['detail'] = task.result_detail.replace(
@@ -81,15 +83,18 @@ def task_create_view(request):
     if file2:
         path2 = saveUploadedFile(file2)
         rds2 = settings.SOURCE_TYPE_CSV_PREFIX + path2
+    dbfile1 = request.FILES.get('dbfile1', None)
+    if dbfile1:
+        rds1 = settings.SOURCE_TYPE_DATABASE_PREFIX + decodedContent(dbfile1)
+    dbfile2 = request.FILES.get('dbfile2', None)
+    if dbfile2:
+        rds2 = settings.SOURCE_TYPE_DATABASE_PREFIX + decodedContent(dbfile2)
 
     # validate the input
     ignore1 = request.POST.get('ignoreList1', None)
     ignore2 = request.POST.get('ignoreList2', None)
     summary = request.POST.get('summary', None)
 
-    # TODO support database
-    # database1 = request.POST.get('database1', None)
-    # database2 = request.POST.get('database2', None)
     sql1 = request.POST.get('sql1', None)
     sql2 = request.POST.get('sql2', None)
     wds1 = request.POST.get('wds1', None)
@@ -113,15 +118,16 @@ def task_create_view(request):
     # create model
     model = Task.objects.create(
         summary=summary,
-        left_source=rds1,
+        left_source=getMaskedSourceFromString(rds1),
         left_query_sql=sql1,
         left_ignore_fields=ignore1,
-        right_source=rds2,
+        right_source=getMaskedSourceFromString(rds2),
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
     # invoke async compare_command with model id
-    compareCommand.delay(model.id, wds1, wds2)
+    # TODO send source for read
+    compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
     # return submitted view ??
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
     # return render(request, 'qdiff/task_create.html', context)

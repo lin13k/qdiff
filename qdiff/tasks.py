@@ -2,8 +2,6 @@ from __future__ import absolute_import, unicode_literals
 from celery.decorators import task
 from qdiff.models import Task
 from qdiff.managers import TaskManager
-from tableschema.exceptions import CastError
-import traceback
 
 
 @task(name="test_task")
@@ -13,15 +11,19 @@ def test(s):
 
 @task(name="compare_command")
 def compareCommand(
-        taskId,
+        taskId, rds1, rds2,
         wds1=None, wds2=None):
 
+    # TODO get read source from parameters
     # init the model
     model = Task.objects.get(id=taskId)
     # call manager and compare
     try:
+        # TODO send in read source to task manager
         manager = TaskManager(
             model,
+            rds1,
+            rds2,
             wds1,
             wds2)
         manager.compare()

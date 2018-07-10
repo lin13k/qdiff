@@ -14,3 +14,8 @@ class FernetCipher:
 
     def decode(self, ciphertext):
         return self.cipher.decrypt(ciphertext.encode('ascii')).decode('ascii')
+
+
+def decodedContent(file):
+    fc = FernetCipher()
+    return fc.decode(file.read())

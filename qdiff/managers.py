@@ -26,11 +26,15 @@ class TaskManager:
             6. set the task as completed/error after run
     """
 
-    def __init__(self, taskModel, writeSource1=None, writeSource2=None):
+    def __init__(self, taskModel, rds1, rds2,
+                 writeSource1=None, writeSource2=None):
         self._model = taskModel
         self._model.save()
+        self._rds1 = rds1
+        self._rds2 = rds2
         self._ws1 = writeSource1
         self._ws2 = writeSource2
+        # TODO get readsource from parameters
 
     def compare(self):
         logging.debug('start compare')
@@ -39,12 +43,9 @@ class TaskManager:
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         if not self._isFieldsSame():
             self._changeStatus(Task.STATUS_OF_TASK_ERROR)
-            # write the result summary
         else:
             self._isValuesSame()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
-            # write the result summary
-        # TODO write end time
 
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
@@ -63,41 +64,41 @@ class TaskManager:
         logging.debug('start setup readers')
         if not hasattr(self, 'reader1'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
-                        self._model.left_source, re.I):
+                        self._rds1, re.I):
                 # left config is database source
                 self.reader1 = DatabaseReader(
                     json.loads(
-                        self._model.left_source[len(
+                        self._rds1[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
                     self._model.left_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
-                          self._model.left_source, re.I):
+                          self._rds1, re.I):
                 self.reader1 = CsvReader(
-                    self._model.left_source[len(
+                    self._rds1[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
                 raise InvalidDataSourceException(
-                    self._model.left_source + ' is not a valid source type')
+                    self._rds1 + ' is not a valid source type')
 
         if not hasattr(self, 'reader2'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
-                        self._model.right_source, re.I):
+                        self._rds2, re.I):
                 # right config is database source
                 self.reader2 = DatabaseReader(
                     json.loads(
-                        self._model.right_source[len(
+                        self._rds2[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
                     self._model.right_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
-                          self._model.right_source, re.I):
+                          self._rds2, re.I):
                 self.reader2 = CsvReader(
-                    self._model.right_source[len(
+                    self._rds2[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
                 raise InvalidDataSourceException(
-                    self._model.right_source + ' is not a valid source type')
+                    self._rds2 + ' is not a valid source type')
 
         return (self.reader1, self.reader2)
 

@@ -36,3 +36,22 @@ def getMaskedSources(task):
         pass
 
     return (source1, source2)
+
+
+def getMaskedSourceFromString(readSource):
+    maskedSource = ''
+    if readSource.lower().startswith(settings.SOURCE_TYPE_CSV_PREFIX):
+        maskedSource = readSource[
+            len(settings.SOURCE_TYPE_CSV_PREFIX):]
+    elif readSource.lower().startswith(
+            settings.SOURCE_TYPE_DATABASE_PREFIX):
+        tmpObj = json.loads(readSource[
+            len(settings.SOURCE_TYPE_DATABASE_PREFIX):])
+        if 'PASSWORD' in tmpObj:
+            tmpObj.pop('PASSWORD')
+        if 'USER' in tmpObj:
+            tmpObj.pop('USER')
+        maskedSource = tmpObj
+    else:
+        pass
+    return maskedSource
