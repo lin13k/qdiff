@@ -18,4 +18,4 @@ class FernetCipher:
 
 def decodedContent(file):
     fc = FernetCipher()
-    return fc.decode(file.read())
+    return fc.decode(file.read().decode('ascii'))
