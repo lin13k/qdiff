@@ -4,3 +4,7 @@ class NotImplementedException(Exception):
 
 class InvalidDataSourceException(Exception):
     pass
+
+
+class InvalidCsvHeaderException(Exception):
+    pass

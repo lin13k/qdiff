@@ -72,8 +72,12 @@ class ValueComparator:
         return result
 
     def isSame(self):
-        dataList1 = sorted(self._dataReader1.getRowsList())
-        dataList2 = sorted(self._dataReader2.getRowsList())
+        dataList1 = sorted(
+            self._dataReader1.getRowsList(),
+            key=lambda x: str(x))
+        dataList2 = sorted(
+            self._dataReader2.getRowsList(),
+            key=lambda x: str(x))
         mask1 = self._getMask(
             self._dataReader1.getColumns(),
             self._ignoredFields1)
