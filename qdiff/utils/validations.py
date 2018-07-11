@@ -89,3 +89,10 @@ class Validator:
             if requriedField not in obj:
                 self.report.append('%s: must have field %s' %
                                    (name, requriedField))
+
+
+def isAllHex(string):
+    r = re.match(r'^[0-9a-f]+$', string)
+    if r:
+        return True
+    return False
