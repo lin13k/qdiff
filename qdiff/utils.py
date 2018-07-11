@@ -3,6 +3,11 @@ import json
 
 
 def getMaskedSources(task):
+    '''
+    input, a task model
+    output, tuple contains two masked data source config
+    if the source type is database, remove the password and user name
+    '''
     source1 = ''
     source2 = ''
     if task.left_source.lower().startswith(settings.SOURCE_TYPE_CSV_PREFIX):

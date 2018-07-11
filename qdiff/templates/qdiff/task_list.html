@@ -64,9 +64,6 @@
     </div>
     <script type="text/javascript">
         $('.table > tbody > tr').click(function(self) {
-            console.log('clicked');
-            console.log(self);
-            console.log(this);
             var id = $(this).find('td:first').text();
             location.href = "{% url 'task_detail' pk=0 %}".replace('0', id);
         });        
