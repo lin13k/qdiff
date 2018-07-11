@@ -1,9 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from qdiff.models import Task, ConflictRecord
-from qdiff.readers import DatabaseReader
 from django.conf import settings
-from qdiff.utils import getMaskedSources
-import json
+from qdiff.utils import getMaskedSources, ConflictRecordReader
 
 
 def task_list_view(request):
@@ -17,29 +15,24 @@ def task_list_view(request):
 def task_detail_view(request, pk):
     context = {}
     task = get_object_or_404(Task, id=pk)
-    defaultConfigs = settings.DATABASES['default'].copy()
-    tableName1 = '%s_TASK_%s_%s' % (
-        settings.GENERATED_TABLE_PREFIX,
-        str(task.id),
-        ConflictRecord.POSITION_IN_TASK_LEFT
+    tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(task.id),
+        position=ConflictRecord.POSITION_IN_TASK_LEFT
     )
-    tableName2 = '%s_TASK_%s_%s' % (
-        settings.GENERATED_TABLE_PREFIX,
-        str(task.id),
-        ConflictRecord.POSITION_IN_TASK_RIGHT
+    tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(task.id),
+        position=ConflictRecord.POSITION_IN_TASK_RIGHT
     )
-    datareader1 = DatabaseReader(
-        defaultConfigs,
-        'SELECT * FROM %s;' % (tableName1))
+    crr1 = ConflictRecordReader(tableName1)
     result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
-               for item in datareader1.getRowsList()]
-    datareader2 = DatabaseReader(
-        defaultConfigs,
-        'SELECT * FROM %s;' % (tableName2))
+               for item in crr1.getConflictRecords()]
+    crr2 = ConflictRecordReader(tableName2)
     result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
-               for item in datareader2.getRowsList()]
+               for item in crr2.getConflictRecords()]
     conflictResults = result1 + result2
-    columns = datareader1.getColumns()
+    columns = crr1.getColumns()
 
     context['source1'], context['source2'] = getMaskedSources(task)
     context['task'] = task
