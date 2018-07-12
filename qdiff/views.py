@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from qdiff.models import Task, ConflictRecord
-from qdiff.readers import DatabaseReader
 from django.conf import settings
+from qdiff.utils.model import ConflictRecordReader
 from qdiff.tasks import compareCommand
 from qdiff.utils.validations import Validator
 from qdiff.utils.files import saveUploadedFile
@@ -17,6 +17,7 @@ import json
 from qdiff.utils.ciphers import FernetCipher, decodedContent
 from qdiff.utils.model import getMaskedSourceFromString
 from qdiff.utils.validations import isAllHex
+from qdiff.readers import DatabaseReader
 from hashlib import sha256
 
 
@@ -31,33 +32,26 @@ def task_list_view(request):
 def task_detail_view(request, pk):
     context = {}
     task = get_object_or_404(Task, id=pk)
-    defaultConfigs = settings.DATABASES['default'].copy()
-    tableName1 = '%s_TASK_%s_%s' % (
-        settings.GENERATED_TABLE_PREFIX,
-        str(task.id),
-        ConflictRecord.POSITION_IN_TASK_LEFT
+    tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(task.id),
+        position=ConflictRecord.POSITION_IN_TASK_LEFT
     )
-    tableName2 = '%s_TASK_%s_%s' % (
-        settings.GENERATED_TABLE_PREFIX,
-        str(task.id),
-        ConflictRecord.POSITION_IN_TASK_RIGHT
+    tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(task.id),
+        position=ConflictRecord.POSITION_IN_TASK_RIGHT
     )
     conflictResults = []
     columns = []
-    # condition for pending case
-    if task.status == Task.STATUS_OF_TASK_COMPLETED:
-        datareader1 = DatabaseReader(
-            defaultConfigs,
-            'SELECT * FROM %s;' % (tableName1))
-        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
-                   for item in datareader1.getRowsList()]
-        datareader2 = DatabaseReader(
-            defaultConfigs,
-            'SELECT * FROM %s;' % (tableName2))
-        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
-                   for item in datareader2.getRowsList()]
-        conflictResults = result1 + result2
-        columns = datareader1.getColumns()
+    crr1 = ConflictRecordReader(tableName1)
+    result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+               for item in crr1.getConflictRecords()]
+    crr2 = ConflictRecordReader(tableName2)
+    result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+               for item in crr2.getConflictRecords()]
+    conflictResults = result1 + result2
+    columns = crr1.getColumns()
 
     # not required masking, since remove the pw before saving into DB
     context['source1'] = task.left_source

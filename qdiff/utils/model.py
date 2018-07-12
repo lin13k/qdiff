@@ -1,8 +1,14 @@
 from django.conf import settings
 import json
+from qdiff.readers import DatabaseReader
 
 
 def getMaskedSources(task):
+    '''
+    input, a task model
+    output, tuple contains two masked data source config
+    if the source type is database, remove the password and user name
+    '''
     source1 = ''
     source2 = ''
     if task.left_source.lower().startswith(settings.SOURCE_TYPE_CSV_PREFIX):
@@ -55,3 +61,17 @@ def getMaskedSourceFromString(readSource):
     else:
         pass
     return maskedSource
+
+
+class ConflictRecordReader:
+    def __init__(self, tableName):
+        defaultConfigs = settings.DATABASES['default'].copy()
+        self.dr = DatabaseReader(
+            defaultConfigs,
+            'SELECT * FROM %s;' % (tableName))
+
+    def getConflictRecords(self):
+        return self.dr.getRowsList()
+
+    def getColumns(self):
+        return self.dr.getColumns()
