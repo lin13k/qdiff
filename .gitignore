@@ -66,3 +66,4 @@ data/
 
 # Celery
 results.sqlite
+data/
