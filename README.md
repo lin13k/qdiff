@@ -57,6 +57,26 @@ A tool for finding the difference between multiple data sources which should hav
     python3 manage.py migrate
     ```
 
+## install rabbitmq as broker for celery
+## start rabbitmq
+    run the command
+
+    ```
+    rabbitmq-server
+    ```
+
+## start celery worker
+    use daemon or inline cli
+    check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+
+    ```
+    celery -A qdiff worker -l info
+    ```
+
+    after add new task, you have to restart the worker to register new task
+
+
+
 ## Sanity test
 1. run command
     ```shell

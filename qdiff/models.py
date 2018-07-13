@@ -28,7 +28,9 @@ class Task(models.Model):
     start_datetime = models.DateTimeField(
         auto_now_add=True,
         null=True, blank=True)
-    end_datetime = models.DateTimeField(null=True, blank=True)
+    end_datetime = models.DateTimeField(
+        auto_now=True,
+        null=True, blank=True)
     owner = models.ForeignKey(
         'auth.User', on_delete=models.SET_NULL,
         null=True, related_name='tasks')

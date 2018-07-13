@@ -1,0 +1,95 @@
+{% extends "qdiff/base.html" %}
+{% load staticfiles %}
+{% block sidebar %}
+{% endblock %}
+{% block topbar %}
+{% endblock %}
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="#">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'task_list' %}">Task List</a>
+        </li>
+        <li class="breadcrumb-item active">Creating Task</li>
+    </ol>
+{% endblock %}
+{% block content %}
+    <div class="card card-register mt-5">
+        <div class="card-header">Create a Task
+            <div style="float: right;">
+                <i class="fa fa-undo"></i>
+                <button onclick="location.replace(location.href);">Reset</button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if errors %}
+                <div>
+                    {% for error in errors %}
+                        <p style="color: red;">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <form enctype="multipart/form-data" method="POST" action="{% url 'task_create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="summary">Summary</label>
+                    <input id="summary" class="form-control" type="text" placeholder="Enter Summary of this task" name="summary" value="{{summary}}">
+                </div>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-5">
+                            <label for="fileInput1">Upload File 1</label>
+                            <input class="form-control" id="fileInput1" type="file" name="file1" accept=".csv">
+                        </div>
+                        <div class="col-md-1">
+                            <a>OR</a>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sourceSelect1">Select Database 1</label>
+                            <select class="form-control" id="sourceSelect1" name="database1">
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                        <label for="sqlInput1">SQL Query 1</label>
+                        <textarea style="height: 200px;" class="form-control" id="sqlInput1" placeholder="Enter SQL Here" name="sql1"></textarea>
+                        <label for="ignoreList1">Ignore Fields 1</label>
+                        <input class="form-control" id="ignoreList1" placeholder="field,field,...." name="ignoreList1"/>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="col-md-5">
+                            <label for="fileInput2">Upload File 2</label>
+                            <input class="form-control" id="fileInput2" type="file" name="file2" accept=".csv">
+                        </div>
+                        <div class="col-md-1">
+                            <a>OR</a>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sourceSelect2">Select Database 2</label>
+                            <select class="form-control" id="sourceSelect2" name="database2">
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                        <label for="sqlInput2">SQL Query 2</label>
+                        <textarea style="height: 200px;" class="form-control" id="sqlInput2" placeholder="Enter SQL Here" name="sql2"></textarea>
+                        <label for="ignoreList2">Ignore Fields 2</label>
+                        <input class="form-control" id="ignoreList2" placeholder="field,field,...." name="ignoreList2"/>
+                    </div>
+                </div>
+                <input type="submit" class="btn btn-primary btn-block" href="login.html" />
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block footer %}
+{% endblock %}

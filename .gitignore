@@ -63,3 +63,7 @@ env.bak/
 venv.bak/
 p3venv/
 data/
+
+# Celery
+results.sqlite
+data/

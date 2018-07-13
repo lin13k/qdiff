@@ -2,3 +2,7 @@ django
 mysqlclient
 django-extensions
 tableschema
+Celery
+pytest
+coverage
+codecov

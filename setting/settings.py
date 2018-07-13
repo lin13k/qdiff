@@ -175,7 +175,8 @@ LOGGING = {
 
 # qDiff
 GENERATED_TABLE_PREFIX = 'GEN'
-DEFAULT_DATA_LENGTH = 500
+CONFLICT_TABLE_NAME_FORMAT = '{prefix}_TASK_{id}_{position}'
+DEFAULT_DATA_LENGTH = 80
 SOURCE_TYPE_DATABASE_PREFIX = 'database:'
 SOURCE_TYPE_CSV_PREFIX = 'csv:'
 SOURCE_TYPE_PREFIXES = [
@@ -185,3 +186,15 @@ SCHEMA_INFER_LIMIT = 30
 SCHEMA_INFER_CONFIDENCE = 0.95
 SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None]
 SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None]
+RESULT_SPLITTING_TOKEN = '<@#$>'
+FILE_UPLOAD_FOLDER = 'data'
+
+
+# CELERY
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
+CELERY_TASK_SERIALIZER = 'json'
