@@ -28,6 +28,40 @@
     </ol>
 {% endblock %}
 {% block content %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-briefcase"></i>Task Detail
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <h4 style="width: 10%;">Summary:</h4>
+                <h4>{{ task.summary }}</h4>
+                <div style="flex: 1"></div>
+                <div>
+                    <h4>Create Time:</h4>
+                    <h4>{{ task.start_datetime }}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <h4 style="width: 10%;">Status:</h4>
+                <h4>{{ task.get_status_display }}</h4>
+                <div style="flex: 1"></div>
+                <div>
+                    <h4>Update Time:</h4>
+                    <h4>{{ task.end_datetime }}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <h4 style="width: 10%;">Result:</h4>
+                <h4>{{ task.result }}</h4>
+            </div>
+            <div class="row">
+                <h4 style="width: 10%;">Detail:</h4>
+                <h4>{{ detail|safe }}</h4>
+            </div>
+        </div>
+    </div>
+    <br>
     <div class="row">
         <div class="col-xl-6 col-sm-12 mb-6">
             <div class="card mb-6">
@@ -75,49 +109,51 @@
         </div>
     </div>
     <br>
-    <div class="card mb-3">
-        <div class="card-header">
-        <i class="fa fa-table"></i>Conflicted Records
-            <div style="float: right;">
-                <i class="fa fa-object-group"></i>Group By:
-                <input type="text" id="grouping_fields_input" name="grouping_fields">
+    {% if conflictResults|length > 0 %}
+        <div class="card mb-3">
+            <div class="card-header">
+            <i class="fa fa-table"></i>Conflicted Records
+                <div style="float: right;">
+                    <i class="fa fa-object-group"></i>Group By:
+                    <input type="text" id="grouping_fields_input" name="grouping_fields">
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            {% for column in columns %}
-                                <th>{{ column }}</th>
-                            {% endfor %}
-                            <th>Source</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                    <tr>
-                        <tr>
-                            {% for column in columns %}
-                                <th>{{ column }}</th>
-                            {% endfor %}
-                            <th>Source</th>
-                        </tr>
-                    </tr>
-                    </tfoot>
-                    <tbody>
-                        {% for record in conflictResults %}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
                             <tr>
-                                {% for row in record %}
-                                    <td>{{ row }}</td>
+                                {% for column in columns %}
+                                    <th>{{ column }}</th>
                                 {% endfor %}
+                                <th>Source</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <tr>
+                                {% for column in columns %}
+                                    <th>{{ column }}</th>
+                                {% endfor %}
+                                <th>Source</th>
+                            </tr>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                            {% for record in conflictResults %}
+                                <tr>
+                                    {% for row in record %}
+                                        <td>{{ row }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            <div class="card-footer small text-muted">Last Updated {{ task.end_datetime }}</div>
         </div>
-        <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-    </div>
+    {% endif %}
     <script type="text/javascript">
         $('#grouping_fields_input').on('input', function() {
             var groupingFields = $('#grouping_fields_input').val().split(',');

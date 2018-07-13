@@ -1,7 +1,9 @@
 from qdiff.exceptions import NotImplementedException
+from qdiff.exceptions import InvalidCsvHeaderException
 from qdiff.abstracts import AbstractDatabaseAccessUnit
 from tableschema import Table
 from django.conf import settings
+import re
 
 
 class DataReader:
@@ -114,7 +116,18 @@ class CsvReader(DataReader):
         if not self._table.headers:
             self._table.infer(
                 settings.SCHEMA_INFER_LIMIT)
-        return self._table.headers
+        # clean the headers
+        result = []
+        for header in self._table.headers:
+            tmpheader = header.lower()
+            tmpheader = tmpheader.replace(' ', '_').replace('-', '_')
+            r = re.search('\w+', tmpheader)
+            if r:
+                result.append(r.group())
+            else:
+                raise InvalidCsvHeaderException(
+                    '%s is not a valid header' % header)
+        return result
 
     def requery(self):
         self._table = Table(self._filePath)

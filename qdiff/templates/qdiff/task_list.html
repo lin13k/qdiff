@@ -63,6 +63,13 @@
         <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
     </div>
     <script type="text/javascript">
+        $(document).ready(function() {
+            $('#dataTable').DataTable( {
+                "order": [[ 0, "desc" ]],
+                "bDestroy": true,
+                "displayLength": 50,
+            } );
+        } );
         $('.table > tbody > tr').click(function(self) {
             var id = $(this).find('td:first').text();
             location.href = "{% url 'task_detail' pk=0 %}".replace('0', id);
