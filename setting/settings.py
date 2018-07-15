@@ -189,6 +189,8 @@ SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
 SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
 RESULT_SPLITTING_TOKEN = '<@#$>'
 FILE_UPLOAD_FOLDER = 'data'
+REPORT_FILENAME_FORMAT = 'TASK_{task_id}_{report_type}'
+REPORT_FOLDER = 'gen_reports'
 
 
 # CELERY

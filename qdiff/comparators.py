@@ -154,6 +154,10 @@ class ValueComparator:
                 self._model.save()
             return False
         if self._model:
+            self._model.total_left_count = len(dataList1)
+            self._model.total_right_count = len(dataList2)
+            self._model.left_diff_count = len(buff1)
+            self._model.right_diff_count = len(buff2)
             count = len(dataList1) + len(dataList2)
             self._model.result = 'No difference found, congrats'
             self._model.result_detail = (

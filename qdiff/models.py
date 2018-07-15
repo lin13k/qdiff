@@ -53,6 +53,14 @@ class Task(models.Model):
         max_length=500, null=True, blank=True)
     result_detail = models.TextField(
         max_length=2000, null=True, blank=True)
+    total_left_count = models.IntegerField(
+        null=True)
+    total_right_count = models.IntegerField(
+        null=True)
+    left_diff_count = models.IntegerField(
+        null=True)
+    right_diff_count = models.IntegerField(
+        null=True)
 
 
 class ConflictRecord(models.Model):
@@ -100,3 +108,13 @@ class RuleSet(models.Model):
     join_type = models.CharField(
         max_length=2, choices=JOIN_TYPE_IN_RULESET_CHOICES)
     conditions = models.TextField(max_length=2000)
+
+
+class Report(models.Model):
+    report_generator = models.CharField(max_length=256)
+    parameters = models.CharField(max_length=256, blank=True, null=True)
+    file = models.FileField(upload_to='gen_reports')
+    task = models.ForeignKey(
+        'qdiff.task',
+        on_delete=models.CASCADE,
+        related_name='reports')

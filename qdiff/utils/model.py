@@ -1,6 +1,7 @@
 from django.conf import settings
 import json
 from qdiff.readers import DatabaseReader
+from qdiff.models import ConflictRecord
 
 
 def getMaskedSources(task):
@@ -75,3 +76,17 @@ class ConflictRecordReader:
 
     def getColumns(self):
         return self.dr.getColumns()
+
+
+def getConflictRecordTableNames(taskModel):
+    tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(taskModel.id),
+        position=ConflictRecord.POSITION_IN_TASK_LEFT
+    )
+    tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+        prefix=settings.GENERATED_TABLE_PREFIX,
+        id=str(taskModel.id),
+        position=ConflictRecord.POSITION_IN_TASK_RIGHT
+    )
+    return (tableName1, tableName2)

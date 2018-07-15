@@ -16,6 +16,7 @@ from rest_framework import status
 import json
 from qdiff.utils.ciphers import FernetCipher, decodedContent
 from qdiff.utils.model import getMaskedSourceFromString
+from qdiff.utils.model import getConflictRecordTableNames
 from qdiff.utils.validations import isAllHex
 from qdiff.readers import DatabaseReader
 from hashlib import sha256
@@ -32,16 +33,7 @@ def task_list_view(request):
 def task_detail_view(request, pk):
     context = {}
     task = get_object_or_404(Task, id=pk)
-    tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
-        prefix=settings.GENERATED_TABLE_PREFIX,
-        id=str(task.id),
-        position=ConflictRecord.POSITION_IN_TASK_LEFT
-    )
-    tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
-        prefix=settings.GENERATED_TABLE_PREFIX,
-        id=str(task.id),
-        position=ConflictRecord.POSITION_IN_TASK_RIGHT
-    )
+    tableName1, tableName2 = getConflictRecordTableNames(task)
     conflictResults = []
     columns = []
     crr1 = ConflictRecordReader(tableName1)
