@@ -8,6 +8,7 @@ import json
 
 class TaskManagerTestCase(TransactionTestCase):
     def setUp(self):
+
         with connection.cursor() as cursor:
             try:
                 # create table
@@ -45,16 +46,8 @@ class TaskManagerTestCase(TransactionTestCase):
                     for i in range(10)])
             except Exception as e:
                 pass
-            try:
-                cursor.execute('DROP TABLE GEN_TASK_1_LF;')
-                cursor.execute('DROP TABLE GEN_TASK_1_RT;')
-            except Exception as e:
-                pass
 
-        newDBConfig = {}
-        newDBConfig['id'] = 'default'
-        newDBConfig['ENGINE'] = 'django.db.backends.sqlite3'
-        newDBConfig['NAME'] = ':memory:'
+        newDBConfig = settings.DATABASES['default'].copy()
         if not hasattr(self, 'taskModel'):
             self.taskModel = Task.objects.create(
                 summary='test_task',
@@ -69,6 +62,20 @@ class TaskManagerTestCase(TransactionTestCase):
                      json.dumps(newDBConfig))
         self.rds2 = (settings.SOURCE_TYPE_DATABASE_PREFIX +
                      json.dumps(newDBConfig))
+
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE ds1;')
+            cursor.execute('DROP TABLE ds2;')
+            try:
+                cursor.execute(
+                    'DROP TABLE ' +
+                    settings.GENERATED_TABLE_PREFIX + '_TASK_1_LF;')
+                cursor.execute(
+                    'DROP TABLE ' +
+                    settings.GENERATED_TABLE_PREFIX + '_TASK_1_RT;')
+            except Exception as e:
+                pass
 
     def testGetTableNames(self):
         m = TaskManager(self.taskModel, self.rds1, self.rds2)

@@ -1,4 +1,4 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase
 from django.db import connection
 from qdiff.comparators import ValueComparator, FieldComparator
 from qdiff.readers import DatabaseReader
@@ -88,6 +88,13 @@ class ValueComparatorTestCase(TransactionTestCase):
 
             except Exception as e:
                 pass
+
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE r1;')
+            cursor.execute('DROP TABLE r2;')
+            cursor.execute('DROP TABLE w1;')
+            cursor.execute('DROP TABLE w2;')
 
     def testSameDataComparisonWithDatabase(self):
         DbConfig = {}
