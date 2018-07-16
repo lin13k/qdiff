@@ -113,7 +113,7 @@ class RuleSet(models.Model):
 class Report(models.Model):
     report_generator = models.CharField(max_length=256)
     parameters = models.CharField(max_length=256, blank=True, null=True)
-    file = models.FileField(upload_to='gen_reports')
+    file = models.FileField(upload_to='gen_reports', blank=True, null=True)
     task = models.ForeignKey(
         'qdiff.task',
         on_delete=models.CASCADE,

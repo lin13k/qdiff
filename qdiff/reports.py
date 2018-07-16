@@ -6,69 +6,94 @@ from qdiff.models import ConflictRecord
 import os
 import json
 from qdiff.exceptions import InvalidParametersException
+from qdiff.exceptions import InvalidClassNameException
+from qdiff.exceptions import MissingParametersException
+
 from collections import defaultdict
 
 
 class ReportGenerator:
 
-    def factory(className):
+    def factory(className, *args, **kwargs):
         if className == "StaticsReportGenerator":
-            return StaticsReportGenerator()
+            return StaticsReportGenerator(*args, **kwargs)
+        raise InvalidClassNameException('')
     factory = staticmethod(factory)
 
     def __init__(self, reportModel):
         self._reportModel = reportModel
         self.parameters = json.loads(self._reportModel.parameters)
 
-    def generate(self):
-        raise NotImplementedError('Should implement this generate function')
-
-    def getFileName(self):
-        return settings.REPORT_FILENAME_FORMAT.format(
-            task_id=self._reportModel.task.id,
-            report_type=self.__class__.__name__,
-        )
-
-    def saveReportFile(self, file):
-        # self._reportModel.file.save(
-        #     os.path.join(
-        #         settings.REPORT_FOLDER, self.getFileName()),
-        #     file
-        # )
-        # self._reportModel.file.name =
-        pass
-
-    def getParameter(self, key):
-        return self.parameters[key]
-
-
-class StaticsReportGenerator(ReportGenerator):
-    def generate(self):
-        taskModel = self._reportModel.task
-
         # get data
+        taskModel = self._reportModel.task
         tableName1, tableName2 = getConflictRecordTableNames(taskModel)
-        data = []
+        self.conflictRecords = []
         crr1 = ConflictRecordReader(tableName1)
         result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
         result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
                    for item in crr2.getConflictRecords()]
-        columns = crr1.getColumns()
-        data.extend(result1)
-        data.extend(result2)
+        self.conflictRecords.extend(result1)
+        self.conflictRecords.extend(result2)
+        self.conflictRecordColumns = crr1.getColumns()
+
+    def generate(self):
+        data = self.getConflictRecords()
+        columns = self.getConflictRecordColumn()
+        reportObj = self._process(data, columns)
+        self.saveReportFileWithObject(reportObj)
+
+    def _process(self):
+        raise NotImplementedError('Should implement this generate function')
+
+    def _getFileName(self):
+        return settings.REPORT_FILENAME_FORMAT.format(
+            task_id=self._reportModel.task.id,
+            report_type=self.__class__.__name__,
+        )
+
+    def _saveReportFileWithObject(self, obj):
+        filePath = os.path.join(settings.REPORT_FOLDER, self.getFileName())
+        with open(filePath) as f:
+            f.write(json.dumps(obj).encode())
+        self._reportModel.file.name = filePath
+        self._reportModel.save()
+
+    def _saveReportFileWithExistFile(self, filePath):
+        self._reportModel.file.name = filePath
+        self._reportModel.save()
+
+    def _getParameter(self, key):
+        return self.parameters.get(key, None)
+
+    def _getConflictRecords(self):
+        return self.conflictRecords
+
+    def _getConflictRecordColumn(self):
+        return self.conflictRecordColumns
+
+
+class StaticsReportGenerator(ReportGenerator):
+    def _process(self):
+        # get data
+        columns = self._getConflictRecordColumn()
+        data = self._getConflictRecords()
 
         # get grouping index, the index of the grouping fields
-        grouping_fields = self.getParameter('grouping_fields').split(',')
+        grouping_fields = self.getParameter('grouping_fields')
+        if grouping_fields is None:
+            raise MissingParametersException('grouping_fields is required')
+
         grouping_index = []
-        for field in grouping_fields:
+        for field in grouping_fields.split(','):
             try:
                 grouping_index.append(columns.index(field))
             except Exception as e:
                 continue
         if len(grouping_index) == 0:
-            raise InvalidParametersException('')
+            raise InvalidParametersException(
+                'grouping_fields is invalid: %s' % grouping_fields)
 
         # map the rows into dict with the grouping index
         dic = defaultdict(list)
@@ -137,12 +162,7 @@ class StaticsReportGenerator(ReportGenerator):
         reportObj['leftDuplicatedRecords'] = leftDuplicatedRecords
         reportObj['rightDuplicatedCount'] = rightDuplicatedCount
         reportObj['rightDuplicatedRecords'] = rightDuplicatedRecords
-
-        filePath = os.path.join(settings.REPORT_FOLDER, self.getFileName())
-        with open(filePath) as f:
-            f.write(json.dumps(reportObj).encode())
-            self._reportModel.file.name = filePath
-            self._reportModel.save()
+        return reportObj
 
 
 def reportList():
