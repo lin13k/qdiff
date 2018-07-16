@@ -10,4 +10,10 @@ urlpatterns = [
         views.task_detail_view, name='task_detail'),
     url(r'^tasks?/create/?$',
         views.task_create_view, name='task_create'),
+    url(r'^configs?/create/?$',
+        views.database_config_file_view, name='create_config_file'),
+    url(r'^configs?/create/api/?$',
+        views.Database_Config_APIView.as_view(),
+        name='create_config_file_upload'),
+
 ]

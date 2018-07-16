@@ -11,19 +11,29 @@ def test(s):
 
 @task(name="compare_command")
 def compareCommand(
-        taskId,
+        taskId, rds1, rds2,
         wds1=None, wds2=None):
 
+    # TODO get read source from parameters
     # init the model
     model = Task.objects.get(id=taskId)
     # call manager and compare
     try:
+        # TODO send in read source to task manager
         manager = TaskManager(
             model,
+            rds1,
+            rds2,
             wds1,
             wds2)
         manager.compare()
     except Exception as e:
+        # traceback.print_exc(e)
         model.result = Task.STATUS_OF_TASK_ERROR
         model.result_detail = str(e)
+        if hasattr(e, 'errors'):
+            model.result_detail = str(e) + ':' + ' '.join(map(str, e.errors))
         model.save()
+    finally:
+        # delete db config
+        pass

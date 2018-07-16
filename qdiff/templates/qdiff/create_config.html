@@ -1,0 +1,103 @@
+{% extends "qdiff/base.html" %}
+{% load staticfiles %}
+{% block sidebar %}
+{% endblock %}
+{% block topbar %}
+{% endblock %}
+{% block breadcrumbs %}
+{% endblock %}
+{% block content %}
+    <div class="card">
+        <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Database Config Form</h3>
+        <div class="card-body">
+            <div id="table" class="table-editable">
+                <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
+                {% csrf_token %}
+                <table class="table table-bordered table-responsive-md table-striped text-center">
+                    <tr>
+                        <th class="text-center">Parameter Name</th>
+                        <th class="text-center">Value</th>
+                        <th class="text-center">Remove</th>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >ENGINE</td>
+                        <td class="pt-3-half" contenteditable="true" name="ENGINE">django.db.backends.mysql</td><td></td>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >NAME</td>
+                        <td class="pt-3-half" contenteditable="true" name="NAME">qdiff</td><td></td>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >USER</td>
+                        <td class="pt-3-half" contenteditable="true" name="USER">root</td><td></td>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >PASSWORD</td>
+                        <td class="pt-3-half" contenteditable="true" name="PASSWORD">root</td><td></td>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >HOST</td>
+                        <td class="pt-3-half" contenteditable="true" name="HOST">localhost</td><td></td>
+                    </tr>
+                    <tr class="data">
+                        <td class="pt-3-half" >PORT</td>
+                        <td class="pt-3-half" contenteditable="true" name="PORT">3306</td><td></td>
+                    </tr>
+                </table>
+            </div>
+            <button class="btn btn-primary btn-block submitBtn" onclick="post_config()">Submit</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function post_config() {
+            var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+            var data = [];
+            $("tr.data").each(
+                function(index, value){
+                    data.push([$(this).children()[0].textContent,
+                               $(this).children()[1].textContent])});
+                    // data[$(this).children()[0].textContent] = $(this).children()[1].textContent;});
+            // data['csrfmiddlewaretoken'] = CSRFtoken;
+            console.log(data);
+            var post_data = {};
+            post_data['table_data'] = data;
+            post_data['csrfmiddlewaretoken'] = CSRFtoken;
+            $.post("{% url 'create_config_file_upload' %}", post_data,
+                function(data){
+                    console.log(data);
+                    if (data.errors) {
+                        if (data.errors.length!==0) {
+                            console.log(data.errors);
+                            $('.errors-msg').remove();
+                            $('.card-body').prepend($(document.createElement('div')).addClass("errors-msg"));
+                            $.each(data.errors, function(index, value){
+                                $('.errors-msg').append('<p style="color: red;">' + value + '</p>')
+                            })
+                        }
+                    }else{
+                        var key = data.key;
+                        var src = "{% url 'create_config_file_upload' %}?key=" + key
+                        $('.errors-msg').remove();
+                        $('.downloadBtn').remove();
+                        var downloadBtn = $('<a class="btn btn-primary btn-block downloadBtn" href="' + src + '">Download</a>');
+                        downloadBtn.click(function(){
+                            $('.downloadBtn').remove();
+                        });
+                        downloadBtn.insertAfter('.submitBtn');
+                        $('.submitBtn').remove();
+                        
+                    }
+                    // var iframe = $("<iframe/>").attr({
+                    //     src: "{% url 'create_config_file_upload' %}?key=" + key,
+                    //     style: "visibility:hidden;display:none"
+                    // }).appendTo(downloadBtn);
+                    
+                }
+            );
+        }
+        // $('button.submitBtn').click(post_config);
+    </script>
+    <script src="{% static 'qdiff/js/configTable.js' %}"></script>
+{% endblock %}
+{% block footer %}
+{% endblock %}
