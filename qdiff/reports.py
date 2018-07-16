@@ -29,12 +29,14 @@ class ReportGenerator:
             report_type=self.__class__.__name__,
         )
 
-    def writeReport(self, data):
-        self._reportModel.file.save(
-            os.path.join(
-                settings.REPORT_FOLDER, self.getFileName()),
-            data
-        )
+    def saveReportFile(self, file):
+        # self._reportModel.file.save(
+        #     os.path.join(
+        #         settings.REPORT_FOLDER, self.getFileName()),
+        #     file
+        # )
+        # self._reportModel.file.name =
+        pass
 
     def getParameter(self, key):
         return self.parameters[key]
@@ -75,24 +77,72 @@ class StaticsReportGenerator(ReportGenerator):
             dic[key].append(row)
 
         # count the difference by group
-        unpairedRecords = []
-        unpairedCount = 0
-        unpairedCountFromDatasource1 = 0
-        unpairedCountFromDatasource2 = 0
+        leftUnpairedRecords = []
+        leftUnpairedCount = 0
+        rightUnpairedRecords = []
+        rightUnpairedCount = 0
         columnCounts = [0 for i in columns]
         columnRecords = [[] for i in columns]
+        leftDuplicatedCount = 0
+        leftDuplicatedRecords = []
+        rightDuplicatedCount = 0
+        rightDuplicatedRecords = []
+
         for key, value in dic.items():
+            # non-paired record
             if len(value) < 2:
-                unpairedRecords.append(value)
-                unpairedCount += 1
-                if value[-1] == ConflictRecord.POSITION_IN_TASK_LEFT:
-                    unpairedCountFromDatasource1 += 1
+                if value[-1][-1] == ConflictRecord.POSITION_IN_TASK_LEFT:
+                    leftUnpairedRecords.append(* value)
+                    leftUnpairedCount += 1
                 else:
-                    unpairedCountFromDatasource2 += 1
+                    rightUnpairedRecords.append(* value)
+                    rightUnpairedCount += 1
                 continue
+
+            # records more than one pair
+            if len(value) > 2:
+                token = settings.POSITION_IN_TASK_LEFT
+                leftRecords = [i for i in value if i[-1] == token]
+                if len(leftRecords) > 1:
+                    leftDuplicatedCount += 1
+                    leftDuplicatedRecords.append(leftRecords)
+                token = settings.POSITION_IN_TASK_RIGHT
+                rightRecords = [i for i in value if i[-1] == token]
+                if len(rightRecords) > 1:
+                    rightDuplicatedCount += 1
+                    rightDuplicatedRecords.append(rightRecords)
+                continue
+
+            # normal case, two records in the group
             zipPairs = zip(* value)
+            # check records by field
+            for index, pair in enumerate(zipPairs):
+                # check if the two elemets in this field(index) are the same
+                if pair.count(pair[0]) != len(pair):
+                    # diff occurs in this field
+                    # field count increases
+                    columnCounts[index] += 1
+                    # append the value into records
+                    columnRecords[index].append(pair)
 
+        # write report
+        reportObj = {}
+        reportObj['leftUnpairedRecords'] = leftUnpairedRecords
+        reportObj['leftUnpairedCount'] = leftUnpairedCount
+        reportObj['rightUnpairedRecords'] = rightUnpairedRecords
+        reportObj['rightUnpairedCount'] = rightUnpairedCount
+        reportObj['columnCounts'] = columnCounts
+        reportObj['columnRecords'] = columnRecords
+        reportObj['leftDuplicatedCount'] = leftDuplicatedCount
+        reportObj['leftDuplicatedRecords'] = leftDuplicatedRecords
+        reportObj['rightDuplicatedCount'] = rightDuplicatedCount
+        reportObj['rightDuplicatedRecords'] = rightDuplicatedRecords
 
+        filePath = os.path.join(settings.REPORT_FOLDER, self.getFileName())
+        with open(filePath) as f:
+            f.write(json.dumps(reportObj).encode())
+            self._reportModel.file.name = filePath
+            self._reportModel.save()
 
 
 def reportList():
