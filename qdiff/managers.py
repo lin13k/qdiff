@@ -26,11 +26,15 @@ class TaskManager:
             6. set the task as completed/error after run
     """
 
-    def __init__(self, taskModel, writeSource1=None, writeSource2=None):
-        self._model = taskModel
-        self._model.save()
+    def __init__(self, taskModel, rds1, rds2,
+                 writeSource1=None, writeSource2=None):
+        self._taskModel = taskModel
+        self._taskModel.save()
+        self._rds1 = rds1
+        self._rds2 = rds2
         self._ws1 = writeSource1
         self._ws2 = writeSource2
+        # TODO get readsource from parameters
 
     def compare(self):
         logging.debug('start compare')
@@ -39,22 +43,19 @@ class TaskManager:
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         if not self._isFieldsSame():
             self._changeStatus(Task.STATUS_OF_TASK_ERROR)
-            # write the result summary
         else:
             self._isValuesSame()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
-            # write the result summary
-        # TODO write end time
 
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self._model.id),
+            str(self._taskModel.id),
             ConflictRecord.POSITION_IN_TASK_LEFT
         )
         tableName2 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self._model.id),
+            str(self._taskModel.id),
             ConflictRecord.POSITION_IN_TASK_RIGHT
         )
         return (tableName1, tableName2)
@@ -63,41 +64,41 @@ class TaskManager:
         logging.debug('start setup readers')
         if not hasattr(self, 'reader1'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
-                        self._model.left_source, re.I):
+                        self._rds1, re.I):
                 # left config is database source
                 self.reader1 = DatabaseReader(
                     json.loads(
-                        self._model.left_source[len(
+                        self._rds1[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
-                    self._model.left_query_sql
+                    self._taskModel.left_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
-                          self._model.left_source, re.I):
+                          self._rds1, re.I):
                 self.reader1 = CsvReader(
-                    self._model.left_source[len(
+                    self._rds1[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
                 raise InvalidDataSourceException(
-                    self._model.left_source + ' is not a valid source type')
+                    self._rds1 + ' is not a valid source type')
 
         if not hasattr(self, 'reader2'):
             if re.match('^' + settings.SOURCE_TYPE_DATABASE_PREFIX,
-                        self._model.right_source, re.I):
+                        self._rds2, re.I):
                 # right config is database source
                 self.reader2 = DatabaseReader(
                     json.loads(
-                        self._model.right_source[len(
+                        self._rds2[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
-                    self._model.right_query_sql
+                    self._taskModel.right_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
-                          self._model.right_source, re.I):
+                          self._rds2, re.I):
                 self.reader2 = CsvReader(
-                    self._model.right_source[len(
+                    self._rds2[len(
                         settings.SOURCE_TYPE_CSV_PREFIX):])
             else:
                 raise InvalidDataSourceException(
-                    self._model.right_source + ' is not a valid source type')
+                    self._rds2 + ' is not a valid source type')
 
         return (self.reader1, self.reader2)
 
@@ -113,6 +114,9 @@ class TaskManager:
             CREATE TABLE %s (%s);
         ''' % (tableName, colSql)).strip()
 
+    def _getDropSql(self, tableName):
+        return "DROP TABLE `qdiff`.`%s`" % tableName
+
     def _setUpWriters(self):
         logging.debug('start setup writers')
         if not hasattr(self, 'reader1') or not hasattr(self, 'reader2'):
@@ -124,12 +128,18 @@ class TaskManager:
         dbConfig['id'] = 'default'
         if not self._ws1:
             with connection.cursor() as cursor:
-                cursor.execute(self._getCreateSql(
-                    columns1, tableName1))
+                try:
+                    cursor.execute(self._getCreateSql(
+                        columns1, tableName1))
+                except Exception as e:
+                    # if table exists
+                    cursor.execute(self._getDropSql(tableName1))
+                    cursor.execute(self._getCreateSql(
+                        columns1, tableName1))
                 self.writer1 = DatabaseWriter(dbConfig, tableName1)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName1,
-                    task=self._model,
+                    task=self._taskModel,
                     data_source='database:' + json.dumps(dbConfig),
                     position=ConflictRecord.POSITION_IN_TASK_LEFT
                 )
@@ -138,12 +148,18 @@ class TaskManager:
                 'external write source not support yet')
         if not self._ws2:
             with connection.cursor() as cursor:
-                cursor.execute(self._getCreateSql(
-                    columns2, tableName2))
+                try:
+                    cursor.execute(self._getCreateSql(
+                        columns2, tableName2))
+                except Exception as e:
+                    # if table exists
+                    cursor.execute(self._getDropSql(tableName2))
+                    cursor.execute(self._getCreateSql(
+                        columns2, tableName2))
                 self.writer2 = DatabaseWriter(dbConfig, tableName2)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName2,
-                    task=self._model,
+                    task=self._taskModel,
                     data_source=(settings.SOURCE_TYPE_DATABASE_PREFIX +
                                  json.dumps(dbConfig)),
                     position=ConflictRecord.POSITION_IN_TASK_RIGHT
@@ -157,11 +173,11 @@ class TaskManager:
         comparator = ValueComparator(
             self.reader1, self.reader2,
             self.writer1, self.writer2,
-            (self._model.left_ignore_fields.split(',')
-                if self._model.left_ignore_fields else []),
-            (self._model.right_ignore_fields.split(',')
-                if self._model.right_ignore_fields else []),
-            self._model)
+            (self._taskModel.left_ignore_fields.split(',')
+                if self._taskModel.left_ignore_fields else []),
+            (self._taskModel.right_ignore_fields.split(',')
+                if self._taskModel.right_ignore_fields else []),
+            self._taskModel)
         r = comparator.isSame()
         logging.debug('_isValuesSame:' + str(r))
         return r
@@ -169,11 +185,11 @@ class TaskManager:
     def _isFieldsSame(self):
         comparator = FieldComparator(
             self.reader1, self.reader2,
-            (self._model.left_ignore_fields.split(',')
-                if self._model.left_ignore_fields else []),
-            (self._model.right_ignore_fields.split(',')
-                if self._model.right_ignore_fields else []),
-            self._model)
+            (self._taskModel.left_ignore_fields.split(',')
+                if self._taskModel.left_ignore_fields else []),
+            (self._taskModel.right_ignore_fields.split(',')
+                if self._taskModel.right_ignore_fields else []),
+            self._taskModel)
         r = comparator.isSame()
         logging.debug('_isFieldsSame:' + str(r))
         return r
@@ -181,5 +197,5 @@ class TaskManager:
     def _changeStatus(self, status):
         validStatus = [choice[0] for choice in Task.STATUS_OF_TASK_CHOICES]
         if status in validStatus:
-            self._model.status = status
-            self._model.save()
+            self._taskModel.status = status
+            self._taskModel.save()

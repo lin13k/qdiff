@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
     'qdiff',
 ]
 
@@ -88,7 +89,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'init_command': 'SET sql_mode=\'STRICT_TRANS_TABLES\'',
         },
     }
 }
@@ -182,10 +183,10 @@ SOURCE_TYPE_CSV_PREFIX = 'csv:'
 SOURCE_TYPE_PREFIXES = [
     SOURCE_TYPE_DATABASE_PREFIX, SOURCE_TYPE_CSV_PREFIX]
 SOURCE_REQUIRED_FIELDS = ['ENGINE', 'NAME']
-SCHEMA_INFER_LIMIT = 30
-SCHEMA_INFER_CONFIDENCE = 0.95
-SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None]
-SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None]
+SCHEMA_INFER_LIMIT = 300
+SCHEMA_INFER_CONFIDENCE = 1.00
+SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
+SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
 RESULT_SPLITTING_TOKEN = '<@#$>'
 FILE_UPLOAD_FOLDER = 'data'
 
@@ -198,3 +199,18 @@ CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
 CELERY_TASK_SERIALIZER = 'json'
+
+
+# DRF
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+# Key for encryption configs
+FILE_ENCRYPTION_KEY = os.environ.get(
+    'FIELD_ENCRYPTION_KEY',
+    b'rUbndCP4bma9IgiunLeNzwO2mKQVCjjPr-qAQXHf__E=')

@@ -3,6 +3,7 @@ from qdiff.models import Task
 from qdiff.managers import TaskManager
 from django.conf import settings
 from qdiff.utils.validations import Validator
+from qdiff.utils.model import getMaskedSourceFromString
 import json
 import re
 # from qdiff.models import Task
@@ -77,10 +78,10 @@ class Command(BaseCommand):
         # init the model
         model = Task.objects.create(
             summary=options.get('summary', None),
-            left_source=options.get('rds1', None),
+            left_source=getMaskedSourceFromString(options.get('rds1', None)),
             left_query_sql=options.get('sql1', None),
             left_ignore_fields=options.get('ignore1', None),
-            right_source=options.get('rds2', None),
+            right_source=getMaskedSourceFromString(options.get('rds2', None)),
             right_query_sql=options.get('sql2', None),
             right_ignore_fields=options.get('ignore2', None),
         )
@@ -88,6 +89,8 @@ class Command(BaseCommand):
         try:
             manager = TaskManager(
                 model,
+                options.get('rds1', None),
+                options.get('rds2', None),
                 options.get('wds1', None),
                 options.get('wds2', None))
             manager.compare()
