@@ -5,6 +5,10 @@ from qdiff.reports import StaticsReportGenerator
 from qdiff.models import Report, Task, ConflictRecord
 from qdiff.utils.model import getConflictRecordTableNames
 from django.db import connection
+import json
+import os
+from pathlib import Path
+from django.conf import settings
 
 
 class ReportGeneratorTestCase(TransactionTestCase):
@@ -13,7 +17,7 @@ class ReportGeneratorTestCase(TransactionTestCase):
             summary='summary', left_source='dummy', right_source='dummy')
         self.report = Report.objects.create(
             task=self.task, report_generator='StaticsReportGenerator',
-            parameters='{"grouping_fields":["field1,field2"]}')
+            parameters='{"grouping_fields":"field1,field2"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
             data_source='dummy', raw_table_name=tableName1, task=self.task,
@@ -31,12 +35,16 @@ class ReportGeneratorTestCase(TransactionTestCase):
             ['jeming1', '20', 'webapps'],
             ['jeming2', '30', 'dif3'],
             ['lone_in_1', '30', 'webapps'],
+            ['duplicate1', '30', 'webapps'],
+            ['duplicate1', '30', 'webapps'],
         ]
         data2 = [
             ['jeming', '30', 'dif2'],
             ['jeming1', '30', 'webapps'],
             ['jeming2', '30', 'dif4'],
             ['lone_in_2', '30', 'webapps'],
+            ['duplicate2', '30', 'webapps'],
+            ['duplicate2', '30', 'webapps'],
         ]
         with connection.cursor() as cursor:
             # create table
@@ -99,7 +107,7 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
             summary='summary', left_source='dummy', right_source='dummy')
         self.report = Report.objects.create(
             task=self.task, report_generator='StaticsReportGenerator',
-            parameters='{"grouping_fields":["field1,field2"]}')
+            parameters='{"grouping_fields":"unique_name"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
             data_source='dummy', raw_table_name=tableName1, task=self.task,
@@ -117,12 +125,18 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
             ['jeming1', '20', 'webapps'],
             ['jeming2', '30', 'dif3'],
             ['lone_in_1', '30', 'webapps'],
+            ['duplicate1', '30', 'webapps'],
+            ['duplicate1', '30', 'webapps'],
+            ['duplicate2', '30', 'webapps'],
         ]
         data2 = [
             ['jeming', '30', 'dif2'],
             ['jeming1', '30', 'webapps'],
             ['jeming2', '30', 'dif4'],
             ['lone_in_2', '30', 'webapps'],
+            ['duplicate1', '30', 'webapps'],
+            ['duplicate2', '30', 'webapps'],
+            ['duplicate2', '30', 'webapps'],
         ]
         with connection.cursor() as cursor:
             # create table
@@ -160,4 +174,66 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
         self.assertEqual(type(obj), StaticsReportGenerator)
         # when
         # then
-        self.assertEqual(self.columns, obj._getConflictRecordColumn())
+        self.assertEqual(self.columns, obj.getConflictRecordColumn())
+
+    def testLogic1(self):
+        # given
+        className = 'StaticsReportGenerator'
+        obj = ReportGenerator.factory(className, self.report)
+        data = obj.getConflictRecords()
+        columns = obj.getConflictRecordColumn()
+        # when
+        report = obj._process(data, columns)
+        # then
+        self.assertEqual(json.dumps(report), json.dumps(json.loads('''{
+            "leftUnpairedRecords": [
+                ["lone_in_1", "30", "webapps", "LF"]
+            ],
+            "leftUnpairedCount": 1,
+            "rightUnpairedRecords": [
+                ["lone_in_2", "30", "webapps", "RT"]
+            ],
+            "rightUnpairedCount": 1,
+            "columnCounts": [0, 1, 2],
+            "columnRecords": [
+                [],
+                [
+                    ["20", "30"]
+                ],
+                [
+                    ["dif1", "dif2"],
+                    ["dif3", "dif4"]
+                ]
+            ],
+            "leftDuplicatedCount": 1,
+            "leftDuplicatedRecords": [
+                ["duplicate1"]
+            ],
+            "rightDuplicatedCount": 1,
+            "rightDuplicatedRecords": [
+                ["duplicate2"]
+            ]
+        }''')))
+
+    def testSaveFile(self):
+        # given
+        className = 'StaticsReportGenerator'
+        obj = ReportGenerator.factory(className, self.report)
+        try:
+            # when
+            path = obj.generate()
+            # then
+            f = Path(path)
+            # check file exist
+            self.assertTrue(f.exists())
+            self.assertEqual(
+                path,
+                os.path.join(settings.REPORT_FOLDER, obj.getFileName()))
+        except Exception as e:
+            raise e
+        finally:
+            try:
+                os.remove(
+                    os.path.join(settings.REPORT_FOLDER, obj.getFileName()))
+            except Exception as e:
+                pass

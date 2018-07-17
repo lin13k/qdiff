@@ -8,7 +8,7 @@ import json
 from qdiff.exceptions import InvalidParametersException
 from qdiff.exceptions import InvalidClassNameException
 from qdiff.exceptions import MissingParametersException
-
+import errno
 from collections import defaultdict
 
 
@@ -39,15 +39,15 @@ class ReportGenerator:
         self.conflictRecordColumns = crr1.getColumns()
 
     def generate(self):
-        data = self.getConflictRecords()
-        columns = self.getConflictRecordColumn()
-        reportObj = self._process(data, columns)
-        self.saveReportFileWithObject(reportObj)
+        reportObj = self._process(
+            self.getConflictRecords(),
+            self.getConflictRecordColumn())
+        return self._saveReportFileWithObject(reportObj)
 
-    def _process(self):
+    def _process(self, data, columns):
         raise NotImplementedError('Should implement this generate function')
 
-    def _getFileName(self):
+    def getFileName(self):
         return settings.REPORT_FILENAME_FORMAT.format(
             task_id=self._reportModel.task.id,
             report_type=self.__class__.__name__,
@@ -55,30 +55,34 @@ class ReportGenerator:
 
     def _saveReportFileWithObject(self, obj):
         filePath = os.path.join(settings.REPORT_FOLDER, self.getFileName())
-        with open(filePath) as f:
-            f.write(json.dumps(obj).encode())
+        if not os.path.exists(os.path.dirname(filePath)):
+            try:
+                os.makedirs(os.path.dirname(filePath))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise exc
+        with open(filePath, 'w+') as f:
+            f.write(json.dumps(obj))
         self._reportModel.file.name = filePath
         self._reportModel.save()
+        return filePath
 
     def _saveReportFileWithExistFile(self, filePath):
         self._reportModel.file.name = filePath
         self._reportModel.save()
 
-    def _getParameter(self, key):
+    def getParameter(self, key):
         return self.parameters.get(key, None)
 
-    def _getConflictRecords(self):
+    def getConflictRecords(self):
         return self.conflictRecords
 
-    def _getConflictRecordColumn(self):
+    def getConflictRecordColumn(self):
         return self.conflictRecordColumns
 
 
 class StaticsReportGenerator(ReportGenerator):
-    def _process(self):
-        # get data
-        columns = self._getConflictRecordColumn()
-        data = self._getConflictRecords()
+    def _process(self, data, columns):
 
         # get grouping index, the index of the grouping fields
         grouping_fields = self.getParameter('grouping_fields')
@@ -112,7 +116,6 @@ class StaticsReportGenerator(ReportGenerator):
         leftDuplicatedRecords = []
         rightDuplicatedCount = 0
         rightDuplicatedRecords = []
-
         for key, value in dic.items():
             # non-paired record
             if len(value) < 2:
@@ -125,24 +128,30 @@ class StaticsReportGenerator(ReportGenerator):
                 continue
 
             # records more than one pair
-            if len(value) > 2:
-                token = settings.POSITION_IN_TASK_LEFT
-                leftRecords = [i for i in value if i[-1] == token]
-                if len(leftRecords) > 1:
-                    leftDuplicatedCount += 1
-                    leftDuplicatedRecords.append(leftRecords)
-                token = settings.POSITION_IN_TASK_RIGHT
-                rightRecords = [i for i in value if i[-1] == token]
-                if len(rightRecords) > 1:
-                    rightDuplicatedCount += 1
-                    rightDuplicatedRecords.append(rightRecords)
+            token = ConflictRecord.POSITION_IN_TASK_LEFT
+            leftRecords = [i for i in value if i[-1] == token]
+            if len(leftRecords) > 1:
+                leftDuplicatedCount += 1
+                leftDuplicatedRecords.append(
+                    tuple(leftRecords[0][i] for i in grouping_index))
+            token = ConflictRecord.POSITION_IN_TASK_RIGHT
+            rightRecords = [i for i in value if i[-1] == token]
+            if len(rightRecords) > 1:
+                rightDuplicatedCount += 1
+                rightDuplicatedRecords.append(
+                    tuple(leftRecords[0][i] for i in grouping_index))
+            if len(leftRecords) > 1 or len(rightRecords) > 1:
                 continue
 
             # normal case, two records in the group
-            zipPairs = zip(* value)
+            zipPairs = list(zip(* value))
             # check records by field
             for index, pair in enumerate(zipPairs):
                 # check if the two elemets in this field(index) are the same
+                if index in grouping_index or index >= len(columns):
+                    # if it's grouping field, skip the comparison
+                    # skip the last element, which are LF/RT
+                    continue
                 if pair.count(pair[0]) != len(pair):
                     # diff occurs in this field
                     # field count increases
