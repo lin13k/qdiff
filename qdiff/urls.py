@@ -15,5 +15,7 @@ urlpatterns = [
     url(r'^configs?/create/api/?$',
         views.Database_Config_APIView.as_view(),
         name='create_config_file_upload'),
+    url(r'^reports?/(?P<task_id>\d+)/?$',
+        views.Statics_Report_APIView.as_view(), name='statics_report'),
 
 ]

@@ -1,25 +1,27 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
-from qdiff.models import Task, ConflictRecord, Report
 from django.conf import settings
-from qdiff.utils.model import ConflictRecordReader
-from qdiff.tasks import compareCommand
-from qdiff.utils.validations import Validator
-from qdiff.utils.files import saveUploadedFile
-from qdiff.utils.convertors import listInPostDataToList
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from wsgiref.util import FileWrapper
-import os
-from io import StringIO
-from rest_framework.views import APIView, Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-import json
-from qdiff.utils.ciphers import FernetCipher, decodedContent
-from qdiff.utils.model import getMaskedSourceFromString
-from qdiff.utils.model import getConflictRecordTableNames
-from qdiff.utils.validations import isValidFileName
-from qdiff.readers import DatabaseReader
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from hashlib import sha256
+from io import StringIO
+from qdiff.models import Task, ConflictRecord, Report
+from qdiff.readers import DatabaseReader
+from qdiff.tasks import compareCommand
+from qdiff.utils.ciphers import FernetCipher, decodedContent
+from qdiff.utils.convertors import listInPostDataToList
+from qdiff.utils.files import saveUploadedFile
+from qdiff.utils.model import ConflictRecordReader
+from qdiff.utils.model import getConflictRecordTableNames
+from qdiff.utils.model import getMaskedSourceFromString
+from qdiff.utils.validations import isValidFileName
+from qdiff.utils.validations import Validator
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView, Response
+from rest_framework.status import HTTP_404_NOT_FOUND
+from wsgiref.util import FileWrapper
+import json
+import os
 
 
 def task_list_view(request):
@@ -193,3 +195,29 @@ class Database_Config_APIView(APIView):
         except Exception as e:
             print(e)
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+
+
+class Statics_Report_APIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None, task_id=None):
+        taskId = task_id
+        try:
+            taskModel = Task.objects.get(id=taskId)
+        except ObjectDoesNotExist as e:
+            return Response(status=HTTP_404_NOT_FOUND)
+        sReportModel = taskModel.reports.filter(
+            report_generator='StaticsReportGenerator').last()
+        with open(sReportModel.file.path, 'r') as f:
+            report = f.read()
+
+        return Response(json.loads(report))
+
+
+
+
+
+
+
+
+
