@@ -132,7 +132,6 @@ class Database_Config_APIView(APIView):
         errors = []
         configsList = listInPostDataToList(request.POST)
         configDict = {config[0]: config[1] for config in configsList}
-        # memoryFile = StringIO()
         # DatabaseReader to test if it can show table
         try:
             dr = DatabaseReader(configDict, 'show tables')
@@ -151,10 +150,11 @@ class Database_Config_APIView(APIView):
                     str(configDict.get('HOST', None)) +
                     '_')
         filename += sha256(configJsonStr.encode()).hexdigest()
-        if not os.path.exists('tmp'):
-            os.makedirs('tmp')
+        if not os.path.exists(settings.TEMP_FOLDER):
+            os.makedirs(settings.TEMP_FOLDER)
 
-        with open(os.path.join('tmp', filename + '.csv'), 'w+') as f:
+        with open(os.path.join(
+                settings.TEMP_FOLDER, filename + '.csv'), 'w+') as f:
             f.write(code)
             f.flush()
             f.seek(0)
@@ -170,11 +170,13 @@ class Database_Config_APIView(APIView):
         try:
             memoryFile = StringIO()
             filename = '_'.join(key.split('_')[:2])
-            with open(os.path.join('tmp', key + '.csv'), 'r') as f:
+            with open(
+                os.path.join(
+                    settings.TEMP_FOLDER, key + '.csv'), 'r') as f:
                 memoryFile.write(f.read())
                 memoryFile.flush()
                 memoryFile.seek(0)
-            os.remove(os.path.join('tmp', key + '.csv'))
+            os.remove(os.path.join(settings.TEMP_FOLDER, key + '.csv'))
             r = HttpResponse(
                 FileWrapper(memoryFile), content_type='text/plain')
             r['Content-Disposition'
