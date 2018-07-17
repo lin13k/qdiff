@@ -14,12 +14,10 @@ def compareCommand(
         taskId, rds1, rds2,
         wds1=None, wds2=None):
 
-    # TODO get read source from parameters
     # init the model
     model = Task.objects.get(id=taskId)
     # call manager and compare
     try:
-        # TODO send in read source to task manager
         manager = TaskManager(
             model,
             rds1,

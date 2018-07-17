@@ -6,6 +6,7 @@ from qdiff.exceptions import InvalidDataSourceException
 from qdiff.models import Task, ConflictRecord
 from qdiff.readers import DatabaseReader, CsvReader
 from qdiff.writers import DatabaseWriter
+from qdiff.reports import ReportGenerator
 import json
 import re
 import logging
@@ -34,7 +35,6 @@ class TaskManager:
         self._rds2 = rds2
         self._ws1 = writeSource1
         self._ws2 = writeSource2
-        # TODO get readsource from parameters
 
     def compare(self):
         logging.debug('start compare')
@@ -46,6 +46,7 @@ class TaskManager:
         else:
             self._isValuesSame()
             self._changeStatus(Task.STATUS_OF_TASK_COMPLETED)
+            self._generateReports()
 
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
@@ -59,6 +60,20 @@ class TaskManager:
             ConflictRecord.POSITION_IN_TASK_RIGHT
         )
         return (tableName1, tableName2)
+
+    def _generateReports(self):
+        errors = []
+        for report in self._taskModel.reports.all():
+            try:
+                reportGenerator = ReportGenerator.factory(
+                    report.report_generator, report)
+                reportGenerator.generate()
+            except Exception as e:
+                errors.append(str(e))
+        if len(errors) > 0:
+            self._taskModel.result_detail += \
+                settings.RESULT_SPLITTING_TOKEN.join(errors)
+            self._taskModel.save()
 
     def _setUpReaders(self):
         logging.debug('start setup readers')
