@@ -16,12 +16,8 @@ from rest_framework import status
 import json
 from qdiff.utils.ciphers import FernetCipher, decodedContent
 from qdiff.utils.model import getMaskedSourceFromString
-<<<<<<< HEAD
 from qdiff.utils.model import getConflictRecordTableNames
-from qdiff.utils.validations import isAllHex
-=======
 from qdiff.utils.validations import isValidFileName
->>>>>>> master
 from qdiff.readers import DatabaseReader
 from hashlib import sha256
 
