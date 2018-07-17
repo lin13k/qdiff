@@ -36,14 +36,15 @@ def task_detail_view(request, pk):
     tableName1, tableName2 = getConflictRecordTableNames(task)
     conflictResults = []
     columns = []
-    crr1 = ConflictRecordReader(tableName1)
-    result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
-               for item in crr1.getConflictRecords()]
-    crr2 = ConflictRecordReader(tableName2)
-    result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
-               for item in crr2.getConflictRecords()]
-    conflictResults = result1 + result2
-    columns = crr1.getColumns()
+    if task.status == Task.STATUS_OF_TASK_COMPLETED:
+        crr1 = ConflictRecordReader(tableName1)
+        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+                   for item in crr1.getConflictRecords()]
+        crr2 = ConflictRecordReader(tableName2)
+        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+                   for item in crr2.getConflictRecords()]
+        conflictResults = result1 + result2
+        columns = crr1.getColumns()
 
     # not required masking, since remove the pw before saving into DB
     context['source1'] = task.left_source
