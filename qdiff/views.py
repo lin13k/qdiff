@@ -16,8 +16,12 @@ from rest_framework import status
 import json
 from qdiff.utils.ciphers import FernetCipher, decodedContent
 from qdiff.utils.model import getMaskedSourceFromString
+<<<<<<< HEAD
 from qdiff.utils.model import getConflictRecordTableNames
 from qdiff.utils.validations import isAllHex
+=======
+from qdiff.utils.validations import isValidFileName
+>>>>>>> master
 from qdiff.readers import DatabaseReader
 from hashlib import sha256
 
@@ -165,7 +169,7 @@ class Database_Config_APIView(APIView):
         key = request.GET.get('key', None)
 
         # clean the key
-        if key is None or not isAllHex(key):
+        if key is None or not isValidFileName(key):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
             memoryFile = StringIO()

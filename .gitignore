@@ -67,3 +67,4 @@ tmp/
 
 # Celery
 results.sqlite
+data/

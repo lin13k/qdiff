@@ -28,8 +28,8 @@ class TaskManager:
 
     def __init__(self, taskModel, rds1, rds2,
                  writeSource1=None, writeSource2=None):
-        self._model = taskModel
-        self._model.save()
+        self._taskModel = taskModel
+        self._taskModel.save()
         self._rds1 = rds1
         self._rds2 = rds2
         self._ws1 = writeSource1
@@ -50,12 +50,12 @@ class TaskManager:
     def getTableNames(self):
         tableName1 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self._model.id),
+            str(self._taskModel.id),
             ConflictRecord.POSITION_IN_TASK_LEFT
         )
         tableName2 = '%s_TASK_%s_%s' % (
             settings.GENERATED_TABLE_PREFIX,
-            str(self._model.id),
+            str(self._taskModel.id),
             ConflictRecord.POSITION_IN_TASK_RIGHT
         )
         return (tableName1, tableName2)
@@ -70,7 +70,7 @@ class TaskManager:
                     json.loads(
                         self._rds1[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
-                    self._model.left_query_sql
+                    self._taskModel.left_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
                           self._rds1, re.I):
@@ -89,7 +89,7 @@ class TaskManager:
                     json.loads(
                         self._rds2[len(
                             settings.SOURCE_TYPE_DATABASE_PREFIX):]),
-                    self._model.right_query_sql
+                    self._taskModel.right_query_sql
                 )
             elif re.match('^' + settings.SOURCE_TYPE_CSV_PREFIX,
                           self._rds2, re.I):
@@ -139,7 +139,7 @@ class TaskManager:
                 self.writer1 = DatabaseWriter(dbConfig, tableName1)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName1,
-                    task=self._model,
+                    task=self._taskModel,
                     data_source='database:' + json.dumps(dbConfig),
                     position=ConflictRecord.POSITION_IN_TASK_LEFT
                 )
@@ -159,7 +159,7 @@ class TaskManager:
                 self.writer2 = DatabaseWriter(dbConfig, tableName2)
                 ConflictRecord.objects.create(
                     raw_table_name=tableName2,
-                    task=self._model,
+                    task=self._taskModel,
                     data_source=(settings.SOURCE_TYPE_DATABASE_PREFIX +
                                  json.dumps(dbConfig)),
                     position=ConflictRecord.POSITION_IN_TASK_RIGHT
@@ -173,11 +173,11 @@ class TaskManager:
         comparator = ValueComparator(
             self.reader1, self.reader2,
             self.writer1, self.writer2,
-            (self._model.left_ignore_fields.split(',')
-                if self._model.left_ignore_fields else []),
-            (self._model.right_ignore_fields.split(',')
-                if self._model.right_ignore_fields else []),
-            self._model)
+            (self._taskModel.left_ignore_fields.split(',')
+                if self._taskModel.left_ignore_fields else []),
+            (self._taskModel.right_ignore_fields.split(',')
+                if self._taskModel.right_ignore_fields else []),
+            self._taskModel)
         r = comparator.isSame()
         logging.debug('_isValuesSame:' + str(r))
         return r
@@ -185,11 +185,11 @@ class TaskManager:
     def _isFieldsSame(self):
         comparator = FieldComparator(
             self.reader1, self.reader2,
-            (self._model.left_ignore_fields.split(',')
-                if self._model.left_ignore_fields else []),
-            (self._model.right_ignore_fields.split(',')
-                if self._model.right_ignore_fields else []),
-            self._model)
+            (self._taskModel.left_ignore_fields.split(',')
+                if self._taskModel.left_ignore_fields else []),
+            (self._taskModel.right_ignore_fields.split(',')
+                if self._taskModel.right_ignore_fields else []),
+            self._taskModel)
         r = comparator.isSame()
         logging.debug('_isFieldsSame:' + str(r))
         return r
@@ -197,5 +197,5 @@ class TaskManager:
     def _changeStatus(self, status):
         validStatus = [choice[0] for choice in Task.STATUS_OF_TASK_CHOICES]
         if status in validStatus:
-            self._model.status = status
-            self._model.save()
+            self._taskModel.status = status
+            self._taskModel.save()
