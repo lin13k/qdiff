@@ -194,6 +194,7 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
                 ["lone_in_2", "30", "webapps", "RT"]
             ],
             "rightUnpairedCount": 1,
+            "columns": ["unique_name", "age", "dept"],
             "columnCounts": [0, 1, 2],
             "columnRecords": [
                 [],

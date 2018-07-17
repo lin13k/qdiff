@@ -165,6 +165,7 @@ class StaticsReportGenerator(ReportGenerator):
         reportObj['leftUnpairedCount'] = leftUnpairedCount
         reportObj['rightUnpairedRecords'] = rightUnpairedRecords
         reportObj['rightUnpairedCount'] = rightUnpairedCount
+        reportObj['columns'] = columns
         reportObj['columnCounts'] = columnCounts
         reportObj['columnRecords'] = columnRecords
         reportObj['leftDuplicatedCount'] = leftDuplicatedCount
