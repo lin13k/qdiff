@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
-from qdiff.models import Task, ConflictRecord
+from qdiff.models import Task, ConflictRecord, Report
 from django.conf import settings
 from qdiff.utils.model import ConflictRecordReader
 from qdiff.tasks import compareCommand
@@ -82,6 +82,7 @@ def task_create_view(request):
     ignore1 = request.POST.get('ignoreList1', None)
     ignore2 = request.POST.get('ignoreList2', None)
     summary = request.POST.get('summary', None)
+    grouping_fields = request.POST.get('grouping_fields', None)
 
     sql1 = request.POST.get('sql1', None)
     sql2 = request.POST.get('sql2', None)
@@ -113,8 +114,14 @@ def task_create_view(request):
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
+    # TODO create report model
+    if grouping_fields:
+        Report.objects.create(
+            report_generator='StaticsReportGenerator',
+            parameters='{"grouping_fields":"%s"}' % grouping_fields,
+            task=model)
+
     # invoke async compare_command with model id
-    # TODO send source for read
     compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
     # return submitted view ??
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
