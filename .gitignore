@@ -64,6 +64,7 @@ venv.bak/
 p3venv/
 data/
 tmp/
+gen_reports/
 
 # Celery
 results.sqlite
