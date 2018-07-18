@@ -116,10 +116,10 @@ def task_create_view(request):
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
-    # TODO create report model
+    # create report model
     if grouping_fields and len(grouping_fields) > 0:
         Report.objects.create(
-            report_generator='StaticsReportGenerator',
+            report_generator='AggregatedReportGenerator',
             parameters='{"grouping_fields":"%s"}' % grouping_fields,
             task=model)
 
@@ -135,7 +135,7 @@ def database_config_file_view(request):
     return render(request, 'qdiff/create_config.html', context)
 
 
-def statics_report_view(request, task_id=None):
+def aggregated_report_view(request, task_id=None):
     context = {}
     taskId = task_id
     try:
@@ -143,7 +143,7 @@ def statics_report_view(request, task_id=None):
     except ObjectDoesNotExist as e:
         return Response(status=HTTP_404_NOT_FOUND)
     context['task'] = taskModel
-    return render(request, 'qdiff/statics_report.html', context)
+    return render(request, 'qdiff/aggregated_report.html', context)
 
 
 class Database_Config_APIView(APIView):
@@ -208,7 +208,7 @@ class Database_Config_APIView(APIView):
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
-class Statics_Report_APIView(APIView):
+class Agregated_Report_APIView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None, task_id=None):
@@ -218,7 +218,7 @@ class Statics_Report_APIView(APIView):
         except ObjectDoesNotExist as e:
             return Response(status=HTTP_404_NOT_FOUND)
         sReportModel = taskModel.reports.filter(
-            report_generator='StaticsReportGenerator').last()
+            report_generator='AggregatedReportGenerator').last()
         if sReportModel is None:
             return Response(status=HTTP_404_NOT_FOUND)
         with open(sReportModel.file.path, 'r') as f:

@@ -15,8 +15,8 @@ from collections import defaultdict
 class ReportGenerator:
 
     def factory(className, *args, **kwargs):
-        if className == "StaticsReportGenerator":
-            return StaticsReportGenerator(*args, **kwargs)
+        if className == "AggregatedReportGenerator":
+            return AggregatedReportGenerator(*args, **kwargs)
         raise InvalidClassNameException('')
     factory = staticmethod(factory)
 
@@ -81,7 +81,7 @@ class ReportGenerator:
         return self.conflictRecordColumns
 
 
-class StaticsReportGenerator(ReportGenerator):
+class AggregatedReportGenerator(ReportGenerator):
     def _process(self, data, columns):
 
         # get grouping index, the index of the grouping fields

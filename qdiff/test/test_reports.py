@@ -1,7 +1,7 @@
 from django.test import TransactionTestCase
 from qdiff.reports import ReportGenerator
 from qdiff.exceptions import InvalidClassNameException
-from qdiff.reports import StaticsReportGenerator
+from qdiff.reports import AggregatedReportGenerator
 from qdiff.models import Report, Task, ConflictRecord
 from qdiff.utils.model import getConflictRecordTableNames
 from django.db import connection
@@ -16,7 +16,7 @@ class ReportGeneratorTestCase(TransactionTestCase):
         self.task = Task.objects.create(
             summary='summary', left_source='dummy', right_source='dummy')
         self.report = Report.objects.create(
-            task=self.task, report_generator='StaticsReportGenerator',
+            task=self.task, report_generator='AggregatedReportGenerator',
             parameters='{"grouping_fields":"field1,field2"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
@@ -89,24 +89,24 @@ class ReportGeneratorTestCase(TransactionTestCase):
 
     def testExistClassFactory(self):
         # given
-        className = 'StaticsReportGenerator'
+        className = 'AggregatedReportGenerator'
 
         try:
             # when
             obj = ReportGenerator.factory(className, self.report)
-            self.assertEqual(type(obj), StaticsReportGenerator)
+            self.assertEqual(type(obj), AggregatedReportGenerator)
         except Exception as e:
             # then
             self.assertTrue(type(e) is InvalidClassNameException)
 
 
-class StaticsReportGeneratorTestCase(TransactionTestCase):
+class AggregatedReportGeneratorTestCase(TransactionTestCase):
     def setUp(self):
         self.task = Task.objects.create(
             # id=999,
             summary='summary', left_source='dummy', right_source='dummy')
         self.report = Report.objects.create(
-            task=self.task, report_generator='StaticsReportGenerator',
+            task=self.task, report_generator='AggregatedReportGenerator',
             parameters='{"grouping_fields":"unique_name"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
@@ -169,16 +169,16 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
 
     def testGetColumns(self):
         # given
-        className = 'StaticsReportGenerator'
+        className = 'AggregatedReportGenerator'
         obj = ReportGenerator.factory(className, self.report)
-        self.assertEqual(type(obj), StaticsReportGenerator)
+        self.assertEqual(type(obj), AggregatedReportGenerator)
         # when
         # then
         self.assertEqual(self.columns, obj.getConflictRecordColumn())
 
     def testLogic1(self):
         # given
-        className = 'StaticsReportGenerator'
+        className = 'AggregatedReportGenerator'
         obj = ReportGenerator.factory(className, self.report)
         data = obj.getConflictRecords()
         columns = obj.getConflictRecordColumn()
@@ -218,7 +218,7 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
 
     def testSaveFile(self):
         # given
-        className = 'StaticsReportGenerator'
+        className = 'AggregatedReportGenerator'
         obj = ReportGenerator.factory(className, self.report)
         try:
             # when
