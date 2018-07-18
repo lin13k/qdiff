@@ -27,7 +27,8 @@ def compareCommand(
         manager.compare()
     except Exception as e:
         # traceback.print_exc(e)
-        model.result = Task.STATUS_OF_TASK_ERROR
+        model.status = Task.STATUS_OF_TASK_ERROR
+        model.result = 'Errors happened'
         model.result_detail = str(e)
         if hasattr(e, 'errors'):
             model.result_detail = str(e) + ':' + ' '.join(map(str, e.errors))
