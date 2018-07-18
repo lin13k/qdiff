@@ -137,6 +137,12 @@ def database_config_file_view(request):
 
 def statics_report_view(request, task_id=None):
     context = {}
+    taskId = task_id
+    try:
+        taskModel = Task.objects.get(id=taskId)
+    except ObjectDoesNotExist as e:
+        return Response(status=HTTP_404_NOT_FOUND)
+    context['task'] = taskModel
     return render(request, 'qdiff/statics_report.html', context)
 
 
