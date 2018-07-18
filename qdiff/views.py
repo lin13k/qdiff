@@ -135,6 +135,11 @@ def database_config_file_view(request):
     return render(request, 'qdiff/create_config.html', context)
 
 
+def statics_report_view(request, task_id=None):
+    context = {}
+    return render(request, 'qdiff/statics_report.html', context)
+
+
 class Database_Config_APIView(APIView):
     permission_classes = (AllowAny,)
 
@@ -211,13 +216,36 @@ class Statics_Report_APIView(APIView):
         with open(sReportModel.file.path, 'r') as f:
             report = f.read()
 
-        return Response(json.loads(report))
+        reportObj = json.loads(report)
 
+        returnObj = {'name': 'Root', 'children': []}
+        lurObj = {'name': 'Left Unpaired Records'}
+        lurObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['leftUnpairedRecords']]
+        returnObj['children'].append(lurObj)
 
+        rurObj = {'name': 'Right Unpaired Records'}
+        rurObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['rightUnpairedRecords']]
+        returnObj['children'].append(rurObj)
 
+        fbdOjb = {'name': 'Field Based Difference', 'children': []}
+        for index, column in enumerate(reportObj['columns']):
+            columnObj = {'name': column, 'children': []}
+            for diff in reportObj['columnRecords'][index]:
+                columnObj['children'].append({'name': diff, 'size': 1})
+            fbdOjb['children'].append(columnObj)
+        returnObj['children'].append(fbdOjb)
 
+        ldrObj = {'name': 'Left Duplicated Records'}
+        ldrObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['leftDuplicatedRecords']]
+        returnObj['children'].append(ldrObj)
 
+        ldrObj = {'name': 'Right Duplicated Records'}
+        ldrObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj[
+                'rightDuplicatedRecords']]
+        returnObj['children'].append(ldrObj)
 
-
-
-
+        return Response(returnObj)

@@ -1,4 +1,3 @@
-from django.urls import path
 from django.conf.urls import url
 from qdiff import views
 
@@ -15,7 +14,8 @@ urlpatterns = [
     url(r'^configs?/create/api/?$',
         views.Database_Config_APIView.as_view(),
         name='create_config_file_upload'),
+    url(r'^reports?/(?P<task_id>\d+)/api/?$',
+        views.Statics_Report_APIView.as_view(), name='statics_report_api'),
     url(r'^reports?/(?P<task_id>\d+)/?$',
-        views.Statics_Report_APIView.as_view(), name='statics_report'),
-
+        views.statics_report_view, name='statics_report'),
 ]
