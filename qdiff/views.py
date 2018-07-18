@@ -117,7 +117,7 @@ def task_create_view(request):
         right_ignore_fields=ignore2,
     )
     # TODO create report model
-    if grouping_fields:
+    if grouping_fields and len(grouping_fields) > 0:
         Report.objects.create(
             report_generator='StaticsReportGenerator',
             parameters='{"grouping_fields":"%s"}' % grouping_fields,
