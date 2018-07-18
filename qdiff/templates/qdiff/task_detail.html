@@ -28,6 +28,15 @@
     </ol>
 {% endblock %}
 {% block content %}
+    <style type="text/css">
+        h4.num_detail_label {
+            width: 10%
+        }
+        h4.num_detail_value {
+            width: 10%
+        }
+
+    </style>
     <div class="card mb-3">
         <div class="card-header">
             <i class="fa fa-briefcase"></i>Task Detail
@@ -59,8 +68,41 @@
                 <h4 style="width: 10%;">Detail:</h4>
                 <h4>{{ detail|safe }}</h4>
             </div>
+            <div class="row">
+                <h4 class="num_detail_label">Source1 Rows:</h4>
+                <h4 class="num_detail_value">{{ task.total_left_count }}</h4>
+                <h4 class="num_detail_label">Source1 Diff:</h4>
+                <h4 class="num_detail_value">{{ task.left_diff_count }}</h4>
+            </div>
+            <div class="row">
+                <h4 class="num_detail_label">Source2 Rows:</h4>
+                <h4 class="num_detail_value">{{ task.total_right_count }}</h4>
+                <h4 class="num_detail_label">Source2 Diff:</h4>
+                <h4 class="num_detail_value">{{ task.right_diff_count }}</h4>
+            </div>
+            <div class="row">
+                <h4 class="num_detail_label">Total Rows:</h4>
+                <h4 class="num_detail_value">{{ task.total_left_count|add:task.total_right_count }}</h4>
+            </div>
+            <div class="row">
+                <h4 class="num_detail_label">Different Rows:</h4>
+                <h4 class="num_detail_value">{{ task.left_diff_count|add:task.right_diff_count }}</h4>
+            </div>
         </div>
     </div>
+    <br>
+    {% if conflictResults|length > 0 %}
+        {% for report in task.reports.all %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-table"></i>Aggregated Report
+                </div>
+                <div class="card-body">
+                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
     <br>
     <div class="row">
         <div class="col-xl-6 col-sm-12 mb-6">
@@ -108,19 +150,6 @@
             </div>
         </div>
     </div>
-    <br>
-    {% if conflictResults|length > 0 %}
-        {% for report in task.reports.all %}
-            <div class="card mb-3">
-                <div class="card-header">
-                    <i class="fa fa-table"></i>Aggregated Report
-                </div>
-                <div class="card-body">
-                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
     <br>
     {% if conflictResults|length > 0 %}
         <div class="card mb-3">
