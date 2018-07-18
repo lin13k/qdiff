@@ -6,11 +6,11 @@
         <style type="text/css">
         body {
         font: 300 36px "Helvetica Neue";
-        height: 640px;
-        margin: 80px 160px 80px 160px;
+        /*height: 640px;*/
+        /*margin: 80px 160px 80px 360px;*/
         overflow: hidden;
         position: relative;
-        width: 960px;
+        /*width: 960px;*/
         }
         a:link, a:visited {
         color: #777;
@@ -88,7 +88,7 @@
         </style>
         <style type="text/css">
         svg {
-        font-size: 14px;
+        font-size: 24px;
         }
         rect.background {
         fill: none;
@@ -102,19 +102,27 @@
         stroke: #000;
         stroke-width: .5px;
         }
+        #parentDiv {
+           margin:0 auto;
+           overflow:scroll;
+           max-height:448px;
+        }
         </style>
     </head>
-    <body>
+    <body style="width: 100%">
         <h2>
-        Flare code size<br>
-        hierarchical bar chart
+        Aggregated Statics Data
         </h2>
+        <div id="parentDiv" width="100%">
+            <div id="categoryHierarchy"></div>
+        </div>
+        <script src="{% static 'qdiff/vendor/jquery/jquery.min.js' %}"></script>
         <script src="{% static 'qdiff/vendor/d3/d3.js' %}"></script>
         <script src="{% static 'qdiff/vendor/d3/d3.layout.js' %}"></script>
         <script src="{% static 'qdiff/js/statics_report.js' %}"></script>
         <script type="text/javascript">
-            var m = [80, 160, 0, 160], // top right bottom left
-                w = 1280 - m[1] - m[3], // width
+            var m = [30, 240, 0, 560], // top right bottom left
+                w = $(window).width() - m[1] - m[3], // width
                 h = 800 - m[0] - m[2], // height
                 x = d3.scale.linear().range([0, w]),
                 y = 25, // bar height
@@ -123,11 +131,17 @@
                 return d.size;
             });
             var xAxis = d3.svg.axis().scale(x).orient("top");
-            var svg = d3.select("body").append("svg:svg").attr("width", w + m[1] + m[3]).attr("height", h + m[0] + m[2]).append("svg:g").attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+            var svg = d3.select("#categoryHierarchy")
+                        .append("svg:svg")
+                        // .attr("viewBox", "0,0,100,200")
+                        .attr("width", w + m[1] + m[3])
+                        .attr("height", h + m[0] + m[2])
+                        .append("svg:g")
+                        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
             svg.append("svg:rect").attr("class", "background").attr("width", w).attr("height", h).on("click", up);
             svg.append("svg:g").attr("class", "x axis");
             svg.append("svg:g").attr("class", "y axis").append("svg:line").attr("y1", "100%");
-            d3.json("./api", function(root) {
+            d3.json("{% url 'statics_report_api' task_id=task.id %}", function(root) {
                 hierarchy.nodes(root);
                 x.domain([0, root.value]).nice();
                 down(root, 0);

@@ -110,6 +110,19 @@
     </div>
     <br>
     {% if conflictResults|length > 0 %}
+        {% for report in task.reports.all %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-table"></i>Aggregated Report
+                </div>
+                <div class="card-body">
+                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <br>
+    {% if conflictResults|length > 0 %}
         <div class="card mb-3">
             <div class="card-header">
             <i class="fa fa-table"></i>Conflicted Records
