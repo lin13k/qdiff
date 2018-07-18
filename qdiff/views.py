@@ -219,6 +219,8 @@ class Statics_Report_APIView(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
         sReportModel = taskModel.reports.filter(
             report_generator='StaticsReportGenerator').last()
+        if sReportModel is None:
+            return Response(status=HTTP_404_NOT_FOUND)
         with open(sReportModel.file.path, 'r') as f:
             report = f.read()
 
