@@ -119,11 +119,13 @@ class StaticsReportGenerator(ReportGenerator):
         for key, value in dic.items():
             # non-paired record
             if len(value) < 2:
-                if value[-1][-1] == ConflictRecord.POSITION_IN_TASK_LEFT:
-                    leftUnpairedRecords.append(* value)
+                if value[0][-1] == ConflictRecord.POSITION_IN_TASK_LEFT:
+                    leftUnpairedRecords.append(
+                        [value[0][i] for i in grouping_index])
                     leftUnpairedCount += 1
                 else:
-                    rightUnpairedRecords.append(* value)
+                    rightUnpairedRecords.append(
+                        [value[0][i] for i in grouping_index])
                     rightUnpairedCount += 1
                 continue
 

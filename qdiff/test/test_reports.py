@@ -187,11 +187,11 @@ class StaticsReportGeneratorTestCase(TransactionTestCase):
         # then
         self.assertEqual(json.dumps(report), json.dumps(json.loads('''{
             "leftUnpairedRecords": [
-                ["lone_in_1", "30", "webapps", "LF"]
+                ["lone_in_1"]
             ],
             "leftUnpairedCount": 1,
             "rightUnpairedRecords": [
-                ["lone_in_2", "30", "webapps", "RT"]
+                ["lone_in_2"]
             ],
             "rightUnpairedCount": 1,
             "columns": ["unique_name", "age", "dept"],
