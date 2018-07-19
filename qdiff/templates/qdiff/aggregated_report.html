@@ -105,7 +105,7 @@
         #parentDiv {
            margin:0 auto;
            overflow:scroll;
-           max-height:448px;
+           max-height:100vh;
         }
         </style>
     </head>
@@ -123,7 +123,7 @@
         <script type="text/javascript">
             var m = [30, 240, 0, 560], // top right bottom left
                 w = $(window).width() - m[1] - m[3], // width
-                h = 800 - m[0] - m[2], // height
+                h = 2600 - m[0] - m[2], // height
                 x = d3.scale.linear().range([0, w]),
                 y = 25, // bar height
                 z = d3.scale.ordinal().range(["steelblue", "#aaa"]); // bar color
