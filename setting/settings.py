@@ -193,6 +193,11 @@ REPORT_FILENAME_FORMAT = 'TASK_{task_id}_{report_type}'
 REPORT_FOLDER = 'gen_reports'
 TEMP_FOLDER = 'tmp'
 
+# qDiff report
+# if field based difference of given field is over this number
+# the rest will not be save into report object
+REPORT_MAX_DIFF_PAIR = 80
+
 
 # CELERY
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'

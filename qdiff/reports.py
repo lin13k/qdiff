@@ -159,7 +159,9 @@ class AggregatedReportGenerator(ReportGenerator):
                     # field count increases
                     columnCounts[index] += 1
                     # append the value into records
-                    columnRecords[index].append(pair)
+                    # only when count <= max pair number
+                    if columnCounts[index] <= settings.REPORT_MAX_DIFF_PAIR:
+                        columnRecords[index].append(pair)
 
         # write report
         reportObj = {}
