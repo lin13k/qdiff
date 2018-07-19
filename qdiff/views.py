@@ -146,6 +146,21 @@ def aggregated_report_view(request, task_id=None):
     return render(request, 'qdiff/aggregated_report.html', context)
 
 
+def statics_pie_report_view(request, task_id=None):
+    context = {}
+    taskId = task_id
+    try:
+        taskModel = Task.objects.get(id=taskId)
+    except ObjectDoesNotExist as e:
+        return Response(status=HTTP_404_NOT_FOUND)
+    context['identical_rows_number'] = (
+        taskModel.total_left_count + taskModel.total_right_count -
+        taskModel.left_diff_count - taskModel.right_diff_count)
+    context['different_rows_number'] = taskModel.left_diff_count +\
+        taskModel.right_diff_count
+    return render(request, 'qdiff/statics_pie_report.html', context)
+
+
 class Database_Config_APIView(APIView):
     permission_classes = (AllowAny,)
 

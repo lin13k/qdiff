@@ -30,10 +30,10 @@
 {% block content %}
     <style type="text/css">
         h4.num_detail_label {
-            width: 10%
+            width: 20%
         }
         h4.num_detail_value {
-            width: 10%
+            width: 20%
         }
 
     </style>
@@ -43,50 +43,53 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <h4 style="width: 10%;">Summary:</h4>
-                <h4>{{ task.summary }}</h4>
-                <div style="flex: 1"></div>
-                <div>
-                    <h4>Create Time:</h4>
-                    <h4>{{ task.start_datetime }}</h4>
+                <div class="card-body">
+                    <div class="row">
+                        <h4 class="num_detail_label">Summary:</h4>
+                        <h4>{{ task.summary }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Status:</h4>
+                        <h4>{{ task.get_status_display }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Create Time:</h4>
+                        <h4>{{ task.start_datetime }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Update Time:</h4>
+                        <h4>{{ task.end_datetime }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Result:</h4>
+                        <h4>{{ task.result }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Detail:</h4>
+                        <h4>{{ detail|safe }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Source1 Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_left_count }}</h4>
+                        <h4 class="num_detail_label">Source1 Diff:</h4>
+                        <h4 class="num_detail_value">{{ task.left_diff_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Source2 Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_right_count }}</h4>
+                        <h4 class="num_detail_label">Source2 Diff:</h4>
+                        <h4 class="num_detail_value">{{ task.right_diff_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Total Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_left_count|add:task.total_right_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Different Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.left_diff_count|add:task.right_diff_count }}</h4>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <h4 style="width: 10%;">Status:</h4>
-                <h4>{{ task.get_status_display }}</h4>
-                <div style="flex: 1"></div>
-                <div>
-                    <h4>Update Time:</h4>
-                    <h4>{{ task.end_datetime }}</h4>
-                </div>
-            </div>
-            <div class="row">
-                <h4 style="width: 10%;">Result:</h4>
-                <h4>{{ task.result }}</h4>
-            </div>
-            <div class="row">
-                <h4 style="width: 10%;">Detail:</h4>
-                <h4>{{ detail|safe }}</h4>
-            </div>
-            <div class="row">
-                <h4 class="num_detail_label">Source1 Rows:</h4>
-                <h4 class="num_detail_value">{{ task.total_left_count }}</h4>
-                <h4 class="num_detail_label">Source1 Diff:</h4>
-                <h4 class="num_detail_value">{{ task.left_diff_count }}</h4>
-            </div>
-            <div class="row">
-                <h4 class="num_detail_label">Source2 Rows:</h4>
-                <h4 class="num_detail_value">{{ task.total_right_count }}</h4>
-                <h4 class="num_detail_label">Source2 Diff:</h4>
-                <h4 class="num_detail_value">{{ task.right_diff_count }}</h4>
-            </div>
-            <div class="row">
-                <h4 class="num_detail_label">Total Rows:</h4>
-                <h4 class="num_detail_value">{{ task.total_left_count|add:task.total_right_count }}</h4>
-            </div>
-            <div class="row">
-                <h4 class="num_detail_label">Different Rows:</h4>
-                <h4 class="num_detail_value">{{ task.left_diff_count|add:task.right_diff_count }}</h4>
+                <iframe width="30%" height="400px" src="{% url 'static_pie_report' task_id=task.id %}"></iframe>
             </div>
         </div>
     </div>
