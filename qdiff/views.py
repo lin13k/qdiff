@@ -175,9 +175,11 @@ class Database_Config_APIView(APIView):
                 errors.append('Cannot access the database')
         except Exception as e:
             errors.append('Invalid database configuration')
+            errors.append(str(e))
 
         if len(errors) > 0:
-            return Response({'errors': errors})
+            return Response({'errors': errors},
+                            status=status.HTTP_400_BAD_REQUEST)
         fc = FernetCipher()
         configJsonStr = json.dumps(configDict)
         code = fc.encode(configJsonStr)
@@ -199,7 +201,6 @@ class Database_Config_APIView(APIView):
 
     def get(self, request, format=None):
         key = request.GET.get('key', None)
-
         # clean the key
         if key is None or not isValidFileName(key):
             return Response(status=status.HTTP_400_BAD_REQUEST)
