@@ -258,7 +258,7 @@ class Agregated_Report_APIView(APIView):
             columnObj = {'name': column, 'children': []}
             for diff in reportObj['columnRecords'][index]:
                 columnObj['children'].append(
-                    {'name': diff[0] + ' , ' + diff[1], 'size': 1})
+                    {'name': diff[0][0] + '\t' + str(diff[1:]), 'size': 1})
             fbdOjb['children'].append(columnObj)
         returnObj['children'].append(fbdOjb)
 
