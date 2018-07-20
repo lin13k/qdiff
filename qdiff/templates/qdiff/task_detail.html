@@ -96,28 +96,10 @@
         </div>
     </div>
     <br>
-    {% if conflictResults|length > 0 %}
-        {% for report in task.reports.all %}
-            <div class="card mb-3">
-                <div class="card-header">
-                    <i class="fa fa-table"></i>Aggregated Report
-                    <div style="float: right;">
-                        <a href="{% url report.report_generator task_id=task.id %}" target="_blank">
-                            <i class="fa fa-object-group"></i>Open In Tab
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
-    <br>
     <div class="row">
         <div class="col-xl-6 col-sm-12 mb-6">
             <div class="card mb-6">
-                <div class="card-header" style="background-color:indianred;">Source 1 Detail
+                <div class="card-header" style="background-color:#ffade2;">Source 1 Detail
                 </div>
                 <h4>Source</h4>
                 <div class="card-body">
@@ -139,7 +121,7 @@
         </div>
         <div class="col-xl-6 col-sm-12 mb-6">
             <div class="card mb-6">
-                <div class="card-header"  style="background-color:seagreen;">Source 2 Detail
+                <div class="card-header"  style="background-color:#ade2ff;">Source 2 Detail
                 </div>
                 <h4>Source</h4>
                 <div class="card-body">
@@ -160,6 +142,24 @@
             </div>
         </div>
     </div>
+    <br>
+    {% if conflictResults|length > 0 %}
+        {% for report in task.reports.all %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-table"></i>Aggregated Report
+                    <div style="float: right;">
+                        <a href="{% url report.report_generator task_id=task.id %}" target="_blank">
+                            <i class="fa fa-object-group"></i>Open In Tab
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
     <br>
     {% if conflictResults|length > 0 %}
         <div class="card mb-3">
@@ -265,8 +265,8 @@
             //     }
             // } );
         } );
-        $("tr td:last-child:contains('LF')").parent().css("background-color", "indianred");
-        $("tr td:last-child:contains('RT')").parent().css("background-color", "seagreen");
+        $("tr td:last-child:contains('LF')").parent().css("background-color", "#ffd8f1");
+        $("tr td:last-child:contains('RT')").parent().css("background-color", "#d8f1ff");
     </script>
 {% endblock %}
 {% block footer %}
