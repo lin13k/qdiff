@@ -99,7 +99,7 @@ def isAllHex(string):
 
 
 def isValidFileName(string):
-    r = re.match(r'^[.0-9a-zA-Z_]+$', string)
+    r = re.match(r'^[:.0-9a-zA-Z_]+$', string)
     if r:
         return True
     return False
