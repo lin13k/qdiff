@@ -38,9 +38,9 @@ class TaskManager:
 
     def compare(self):
         logging.debug('start compare')
+        self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         self._setUpReaders()
         self._setUpWriters()
-        self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         if not self._isFieldsSame():
             self._changeStatus(Task.STATUS_OF_TASK_ERROR)
         else:
