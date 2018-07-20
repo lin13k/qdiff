@@ -22,19 +22,38 @@ function down(d, i) {
     // Update the x-axis.
     svg.selectAll(".x.axis").transition().duration(duration).call(xAxis);
     // Transition entering bars to their new position.
-    var enterTransition = enter.transition().duration(duration).delay(function(d, i) {
-        return i * delay;
-    }).attr("transform", function(d, i) {
-        return "translate(0," + y * i * 1.2 + ")";
-    });
-    // Transition entering text.
-    enterTransition.select("text").style("fill-opacity", 1);
-    // Transition entering rects to the new x-scale.
-    enterTransition.select("rect").attr("width", function(d) {
-        return x(d.value);
-    }).style("fill", function(d) {
-        return z(!!d.children);
-    });
+    // if every child dont have child, dont display rect
+    if (d.children.every(function(d){return !d.children})) {
+        var enterTransition = enter.transition().duration(duration).delay(function(d, i) {
+            return i * delay;
+        }).attr("transform", function(d, i) {
+            return "translate(" + w + "," + y * i * 1.2 + ")";
+        });
+        // Transition entering text.
+        enterTransition.select("text").style("fill-opacity", 1);
+        // Transition entering rects to the new x-scale.
+        enterTransition.select("rect").attr("width", function(d) {
+            return 0;
+        }).style("fill", function(d) {
+            return z(!!d.children);
+        });
+    }else{
+        var enterTransition = enter.transition().duration(duration).delay(function(d, i) {
+            return i * delay;
+        }).attr("transform", function(d, i) {
+            return "translate(0," + y * i * 1.2 + ")";
+        });
+        // Transition entering text.
+        enterTransition.select("text").style("fill-opacity", 1);
+        // Transition entering rects to the new x-scale.
+        enterTransition.select("rect").attr("width", function(d) {
+            return x(d.value);
+        }).style("fill", function(d) {
+            return z(!!d.children);
+        });
+        
+    }
+    
     // Transition exiting bars to fade out.
     var exitTransition = exit.transition().duration(duration).style("opacity", 1e-6).remove();
     // Transition exiting bars to the new x-scale.

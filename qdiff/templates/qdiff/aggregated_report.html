@@ -130,7 +130,7 @@
             var hierarchy = d3.layout.partition().value(function(d) {
                 return d.size;
             });
-            var xAxis = d3.svg.axis().scale(x).orient("top");
+            var xAxis = d3.svg.axis().scale(x).orient("top").tickFormat(d3.format("d"));
             var svg = d3.select("#categoryHierarchy")
                         .append("svg:svg")
                         // .attr("viewBox", "0,0,100,200")
