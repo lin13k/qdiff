@@ -199,11 +199,17 @@ class AggregatedReportGeneratorTestCase(TransactionTestCase):
             "columnRecords": [
                 [],
                 [
-                    ["20", "30"]
+                    [
+                        ["jeming1"], "20", "30"
+                    ]
                 ],
                 [
-                    ["dif1", "dif2"],
-                    ["dif3", "dif4"]
+                    [
+                        ["jeming"], "dif1", "dif2"
+                    ],
+                    [
+                        ["jeming2"], "dif3", "dif4"
+                    ]
                 ]
             ],
             "leftDuplicatedCount": 1,

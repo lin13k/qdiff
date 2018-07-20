@@ -161,7 +161,10 @@ class AggregatedReportGenerator(ReportGenerator):
                     # append the value into records
                     # only when count <= max pair number
                     if columnCounts[index] <= settings.REPORT_MAX_DIFF_PAIR:
-                        columnRecords[index].append(pair)
+                        keyWithPair = [
+                            tuple(value[0][i] for i in grouping_index)]\
+                            + list(pair)
+                        columnRecords[index].append(keyWithPair)
 
         # write report
         reportObj = {}
