@@ -72,12 +72,16 @@ sudo yum install socat
 ```
 sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
 sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
-sudo service rabbitmq-server start
 ```
 ## start rabbitmq, run the command
     ```
     rabbitmq-server
     ```
+## or you can start rabbitmq as service
+    ```
+    sudo service rabbitmq-server start
+    ```
+
 
 ## start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
     ```
