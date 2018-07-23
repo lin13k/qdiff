@@ -58,17 +58,28 @@ A tool for finding the difference between multiple data sources which should hav
     ```
 
 ## install rabbitmq as broker for celery
-## start rabbitmq
-    run the command
-
+### install Erlang Version 20.1
+```
+cd /opt
+sudo wget https://github.com/rabbitmq/erlang-rpm/releases/download/v20.1.7/erlang-20.1.7-1.el6.x86_64.rpm
+sudo rpm -ivh erlang-20.1.7-1.el6.x86_64.rpm
+```
+### install Socat
+```
+sudo yum install socat
+```
+### RabbitMQ v3.7.0
+```
+sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
+sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
+sudo service rabbitmq-server start
+```
+## start rabbitmq, run the command
     ```
     rabbitmq-server
     ```
 
-## start celery worker
-    use daemon or inline cli
-    check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
-
+## start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
     ```
     celery -A qdiff worker -l info
     ```
