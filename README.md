@@ -58,39 +58,35 @@ A tool for finding the difference between multiple data sources which should hav
     ```
 
 ## install rabbitmq as broker for celery
-### install Erlang Version 20.1
-```
-cd /opt
-sudo wget https://github.com/rabbitmq/erlang-rpm/releases/download/v20.1.7/erlang-20.1.7-1.el6.x86_64.rpm
-sudo rpm -ivh erlang-20.1.7-1.el6.x86_64.rpm
-```
-### install Socat
-```
-sudo yum install socat
-```
-### RabbitMQ v3.7.0
-```
-sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
-sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
-```
-## start rabbitmq, run the command
+1. install Erlang Version 20.1
+    ```
+    cd /opt
+    sudo wget https://github.com/rabbitmq/erlang-rpm/releases/download/v20.1.7/erlang-20.1.7-1.el6.x86_64.rpm
+    sudo rpm -ivh erlang-20.1.7-1.el6.x86_64.rpm
+    ```
+1. install Socat
+    ```
+    sudo yum install socat
+    ```
+1. RabbitMQ v3.7.0
+    ```
+    sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
+    sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
+    ```
+1. start rabbitmq, run the command
     ```
     rabbitmq-server
     ```
-## or you can start rabbitmq as service
+1. or you can start rabbitmq as service
     ```
     sudo service rabbitmq-server start
     ```
 
 
 ## start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
-    ```
-    celery -A qdiff worker -l info
-    ```
-
-    after add new task, you have to restart the worker to register new task
-
-
+```
+celery -A qdiff worker -l info --detach
+```
 
 ## Sanity test
 1. run command

@@ -743,10 +743,92 @@ pre {
 </ol>
 <hr>
 <h2>
+<a id="user-content-install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+<ol>
+<li>install mysql
+<div class="highlight highlight-source-shell"><pre>sudo yum install mysql-server</pre></div>
+</li>
+<li>install python 3.6
+<div class="highlight highlight-source-shell"><pre>sudo yum install python36</pre></div>
+</li>
+<li>clone repository
+<div class="highlight highlight-source-shell"><pre>ssh-agent bash -c <span class="pl-s"><span class="pl-pds">'</span>ssh-add /path/to/your/private/rsakey; git clone git@github.com:analyticsMD/datadiff.git<span class="pl-pds">'</span></span></pre></div>
+</li>
+<li>install gcc for compiling mysql-connector
+<div class="highlight highlight-source-shell"><pre>sudo yum install gcc</pre></div>
+</li>
+<li>install python-devel for compiling mysql-connector
+<div class="highlight highlight-source-shell"><pre>sudo yum install -y python36-devel</pre></div>
+</li>
+<li>install dependency
+<div class="highlight highlight-source-shell"><pre>python3 -m pip install -r datadiff/requirements.txt --user</pre></div>
+</li>
+</ol>
+<h2>
+<a id="user-content-setup-database---mysql" class="anchor" href="#setup-database---mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup database - mysql</h2>
+<ol>
+<li>start mysql server
+<div class="highlight highlight-source-shell"><pre>sudo service mysqld start</pre></div>
+</li>
+<li>login into mysql with root user
+<div class="highlight highlight-source-shell"><pre>mysql -u root -p</pre></div>
+</li>
+<li>create database qdiff and qdiff_test
+<div class="highlight highlight-source-shell"><pre>mysql<span class="pl-k">&gt;</span> create database qdiff<span class="pl-k">;</span>
+mysql<span class="pl-k">&gt;</span> create database qdiff_test<span class="pl-k">;</span></pre></div>
+</li>
+<li>change database password in the /qdiff/setting/settings.py and settings_test.py</li>
+<li>install the database schema
+<div class="highlight highlight-source-shell"><pre>python3 manage.py makemigrations
+python3 manage.py migrate</pre></div>
+</li>
+</ol>
+<h2>
+<a id="user-content-install-rabbitmq-as-broker-for-celery" class="anchor" href="#install-rabbitmq-as-broker-for-celery" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install rabbitmq as broker for celery</h2>
+<ol>
+<li>install Erlang Version 20.1
+<pre><code>cd /opt
+sudo wget https://github.com/rabbitmq/erlang-rpm/releases/download/v20.1.7/erlang-20.1.7-1.el6.x86_64.rpm
+sudo rpm -ivh erlang-20.1.7-1.el6.x86_64.rpm
+</code></pre>
+</li>
+<li>install Socat
+<pre><code>sudo yum install socat
+</code></pre>
+</li>
+<li>RabbitMQ v3.7.0
+<pre><code>sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
+sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
+</code></pre>
+</li>
+<li>start rabbitmq, run the command
+<pre><code>rabbitmq-server
+</code></pre>
+</li>
+<li>or you can start rabbitmq as service
+<pre><code>sudo service rabbitmq-server start
+</code></pre>
+</li>
+</ol>
+<h2>
+<a id="user-content-start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli. check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a>
+</h2>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+<h2>
+<a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h2>
+<ol>
+<li>run command
+<div class="highlight highlight-source-shell"><pre>python3 manage.py <span class="pl-c1">test</span> --settings=setting.settings_test</pre></div>
+</li>
+<li>Cheers if all the test cases are successful</li>
+</ol>
+<hr>
+<h2>
 <a id="user-content-system-architecture" class="anchor" href="#system-architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>System architecture</h2>
 <h3>
 <a id="user-content-architecture" class="anchor" href="#architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Architecture</h3>
-<pre><code>For database, the user should config access in django setting.
+<pre><code>For database, the user should config access in qDiff database.
 For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
 </code></pre>
 <p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" style="max-width:100%;"></a></p>
@@ -776,7 +858,7 @@ For API, the user should input an description for the API, including endpoint, m
 <ol>
 <li>
 <p>Brief description</p>
-<p>data1, data2: the input data</p>
+<p>data1, data2: the input data, can be queryset, list, dictionary</p>
 <p>item1, item2: the elements from data1 and data2</p>
 <p>list1, list2: the list for saving unmatch records</p>
 </li>
