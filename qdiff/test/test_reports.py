@@ -180,10 +180,11 @@ class AggregatedReportGeneratorTestCase(TransactionTestCase):
         # given
         className = 'AggregatedReportGenerator'
         obj = ReportGenerator.factory(className, self.report)
-        data = obj.getConflictRecords()
+        data1 = obj.conflictRecords1
+        data2 = obj.conflictRecords2
         columns = obj.getConflictRecordColumn()
         # when
-        report = obj._process(data, columns)
+        report = obj._process(data1, data2, columns)
         # then
         self.assertEqual(json.dumps(report), json.dumps(json.loads('''{
             "leftUnpairedRecords": [

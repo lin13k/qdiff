@@ -13,6 +13,10 @@ from collections import defaultdict
 
 
 class ReportGenerator:
+    '''
+    base class for report generators
+    it provides the factory design pattern
+    '''
 
     def factory(className, *args, **kwargs):
         if className == "AggregatedReportGenerator":
@@ -27,24 +31,26 @@ class ReportGenerator:
         # get data
         taskModel = self._reportModel.task
         tableName1, tableName2 = getConflictRecordTableNames(taskModel)
-        self.conflictRecords = []
+        self.conflictRecords1 = []
+        self.conflictRecords2 = []
         crr1 = ConflictRecordReader(tableName1)
         result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
         result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
                    for item in crr2.getConflictRecords()]
-        self.conflictRecords.extend(result1)
-        self.conflictRecords.extend(result2)
+        self.conflictRecords1.extend(result1)
+        self.conflictRecords2.extend(result2)
         self.conflictRecordColumns = crr1.getColumns()
 
     def generate(self):
         reportObj = self._process(
-            self.getConflictRecords(),
+            self.conflictRecords1,
+            self.conflictRecords2,
             self.getConflictRecordColumn())
         return self._saveReportFileWithObject(reportObj)
 
-    def _process(self, data, columns):
+    def _process(self, data1, data2, columns):
         raise NotImplementedError('Should implement this generate function')
 
     def getFileName(self):
@@ -75,14 +81,14 @@ class ReportGenerator:
         return self.parameters.get(key, None)
 
     def getConflictRecords(self):
-        return self.conflictRecords
+        return self.conflictRecords1 + self.conflictRecords2
 
     def getConflictRecordColumn(self):
         return self.conflictRecordColumns
 
 
 class AggregatedReportGenerator(ReportGenerator):
-    def _process(self, data, columns):
+    def _process(self, data1, data2, columns):
 
         # get grouping index, the index of the grouping fields
         grouping_fields = self.getParameter('grouping_fields')
@@ -100,6 +106,7 @@ class AggregatedReportGenerator(ReportGenerator):
                 'grouping_fields is invalid: %s' % grouping_fields)
 
         # map the rows into dict with the grouping index
+        data = data1 + data2
         dic = defaultdict(list)
         for row in data:
             key = tuple(row[i] for i in grouping_index)
