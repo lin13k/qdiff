@@ -295,30 +295,48 @@ class Agregated_Report_CSV_Download_APIVIEW(APIView):
 
         reportObj = json.loads(report)
         memoryFile = StringIO()
+        indent = ['']
         csvWriter = csv.writer(
             memoryFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         with open(sReportModel.file.path) as f:
-            csvWriter.writerow(['Field Based Difference'])
+            csvWriter.writerow(
+                ['Field Based Differences ' +
+                 str(sum(map(len, reportObj['columnRecords']))),
+                 'Field Name', 'Differences'])
             for index, column in enumerate(reportObj['columns']):
-                csvWriter.writerow(['', column])
+                csvWriter.writerow(
+                    indent +
+                    [column, len(reportObj['columnRecords'][index])])
                 for record in reportObj['columnRecords'][index]:
-                    csvWriter.writerow(['', ''] + record)
+                    csvWriter.writerow(indent * 2 + record)
             csvWriter.writerow([])
-            csvWriter.writerow(['Left Unpaired Records'])
+            csvWriter.writerow(
+                ['Left Unpaired Records ' +
+                 str(len(reportObj['leftUnpairedRecords'])),
+                 'Keys'])
             for record in reportObj['leftUnpairedRecords']:
-                csvWriter.writerow([''] + record)
+                csvWriter.writerow(indent + record)
             csvWriter.writerow([])
-            csvWriter.writerow(['Right Unpaired Records'])
+            csvWriter.writerow(
+                ['Right Unpaired Records ' +
+                 str(len(reportObj['rightUnpairedRecords'])),
+                 'Keys'])
             for record in reportObj['rightUnpairedRecords']:
-                csvWriter.writerow([''] + record)
+                csvWriter.writerow(indent + record)
             csvWriter.writerow([])
-            csvWriter.writerow(['Left Duplicated Records'])
+            csvWriter.writerow(
+                ['Left Duplicated Records ' +
+                 str(len(reportObj['leftDuplicatedRecords'])),
+                 'keys'])
             for record in reportObj['leftDuplicatedRecords']:
-                csvWriter.writerow([''] + record)
+                csvWriter.writerow(indent + record)
             csvWriter.writerow([])
-            csvWriter.writerow(['Right Duplicated Records'])
+            csvWriter.writerow(
+                ['Right Duplicated Records ' +
+                 str(len(reportObj['rightDuplicatedRecords'])),
+                 'keys'])
             for record in reportObj['rightDuplicatedRecords']:
-                csvWriter.writerow([''] + record)
+                csvWriter.writerow(indent + record)
         memoryFile.flush()
         memoryFile.seek(0)
         r = HttpResponse(
