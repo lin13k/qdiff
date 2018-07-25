@@ -20,10 +20,10 @@ class ReportGeneratorTestCase(TransactionTestCase):
             parameters='{"grouping_fields":"field1,field2"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
-            data_source='dummy', raw_table_name=tableName1, task=self.task,
+            raw_table_name=tableName1, task=self.task,
             position=ConflictRecord.POSITION_IN_TASK_LEFT)
         ConflictRecord.objects.create(
-            data_source='dummy', raw_table_name=tableName1, task=self.task,
+            raw_table_name=tableName1, task=self.task,
             position=ConflictRecord.POSITION_IN_TASK_RIGHT)
 
         # create raw_table
@@ -110,10 +110,10 @@ class AggregatedReportGeneratorTestCase(TransactionTestCase):
             parameters='{"grouping_fields":"unique_name"}')
         tableName1, tableName2 = getConflictRecordTableNames(self.task)
         ConflictRecord.objects.create(
-            data_source='dummy', raw_table_name=tableName1, task=self.task,
+            raw_table_name=tableName1, task=self.task,
             position=ConflictRecord.POSITION_IN_TASK_LEFT)
         ConflictRecord.objects.create(
-            data_source='dummy', raw_table_name=tableName1, task=self.task,
+            raw_table_name=tableName1, task=self.task,
             position=ConflictRecord.POSITION_IN_TASK_RIGHT)
 
         # create raw_table

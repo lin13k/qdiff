@@ -155,7 +155,6 @@ class TaskManager:
                 ConflictRecord.objects.create(
                     raw_table_name=tableName1,
                     task=self._taskModel,
-                    data_source='database:' + json.dumps(dbConfig),
                     position=ConflictRecord.POSITION_IN_TASK_LEFT
                 )
         else:
@@ -175,8 +174,6 @@ class TaskManager:
                 ConflictRecord.objects.create(
                     raw_table_name=tableName2,
                     task=self._taskModel,
-                    data_source=(settings.SOURCE_TYPE_DATABASE_PREFIX +
-                                 json.dumps(dbConfig)),
                     position=ConflictRecord.POSITION_IN_TASK_RIGHT
                 )
         else:

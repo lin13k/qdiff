@@ -67,9 +67,6 @@ class ConflictRecord(models.Model):
     """
     ConflictRecord is the model for linking Tasks with dynamic raw tables
     """
-    data_source = models.TextField(
-        max_length=1000,
-        null=True, blank=True)
     raw_table_name = models.TextField(max_length=100)
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE,
