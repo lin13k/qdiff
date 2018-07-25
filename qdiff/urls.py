@@ -26,4 +26,7 @@ urlpatterns = [
     url(r'^aggregated_reports?/(?P<task_id>\d+)/?$',
         views.aggregated_report_view, name='AggregatedReportGenerator'),
     #                                 name from class
+    url(r'^aggregated_reports?/(?P<task_id>\d+)/download/?$',
+        views.Agregated_Report_CSV_Download_APIVIEW.as_view(),
+        name='AggregatedReportGenerator_download'),
 ]

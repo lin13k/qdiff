@@ -22,6 +22,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND
 from wsgiref.util import FileWrapper
 import json
 import os
+import csv
 
 
 def task_list_view(request):
@@ -274,3 +275,54 @@ class Agregated_Report_APIView(APIView):
         returnObj['children'].append(ldrObj)
 
         return Response(returnObj)
+
+
+class Agregated_Report_CSV_Download_APIVIEW(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None, task_id=None):
+        taskId = task_id
+        try:
+            taskModel = Task.objects.get(id=taskId)
+        except ObjectDoesNotExist as e:
+            return Response(status=HTTP_404_NOT_FOUND)
+        sReportModel = taskModel.reports.filter(
+            report_generator='AggregatedReportGenerator').last()
+        if sReportModel is None:
+            return Response(status=HTTP_404_NOT_FOUND)
+        with open(sReportModel.file.path, 'r') as f:
+            report = f.read()
+
+        reportObj = json.loads(report)
+        memoryFile = StringIO()
+        csvWriter = csv.writer(
+            memoryFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
+        with open(sReportModel.file.path) as f:
+            csvWriter.writerow(['Field Based Difference'])
+            for index, column in enumerate(reportObj['columns']):
+                csvWriter.writerow(['', column])
+                for record in reportObj['columnRecords'][index]:
+                    csvWriter.writerow(['', ''] + record)
+            csvWriter.writerow([])
+            csvWriter.writerow(['Left Unpaired Records'])
+            for record in reportObj['leftUnpairedRecords']:
+                csvWriter.writerow([''] + record)
+            csvWriter.writerow([])
+            csvWriter.writerow(['Right Unpaired Records'])
+            for record in reportObj['rightUnpairedRecords']:
+                csvWriter.writerow([''] + record)
+            csvWriter.writerow([])
+            csvWriter.writerow(['Left Duplicated Records'])
+            for record in reportObj['leftDuplicatedRecords']:
+                csvWriter.writerow([''] + record)
+            csvWriter.writerow([])
+            csvWriter.writerow(['Right Duplicated Records'])
+            for record in reportObj['rightDuplicatedRecords']:
+                csvWriter.writerow([''] + record)
+        memoryFile.flush()
+        memoryFile.seek(0)
+        r = HttpResponse(
+            FileWrapper(memoryFile), content_type='text/plain')
+        r['Content-Disposition'
+          ] = 'attachment; filename="TASK_%s_Report.csv"' % task_id
+        return r
