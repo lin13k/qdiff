@@ -26,6 +26,7 @@ import csv
 
 
 def task_list_view(request):
+    '''view for providing task list'''
     context = {}
     taskList = Task.objects.all()
     taskList.reverse()
@@ -34,6 +35,11 @@ def task_list_view(request):
 
 
 def task_detail_view(request, pk):
+    '''
+    view for providing task detail view
+    Positional arguements
+    pk -- primary key for task model
+    '''
     context = {}
     task = get_object_or_404(Task, id=pk)
     tableName1, tableName2 = getConflictRecordTableNames(task)
@@ -49,7 +55,6 @@ def task_detail_view(request, pk):
         conflictResults = result1 + result2
         columns = crr1.getColumns()
 
-    # not required masking, since remove the pw before saving into DB
     context['source1'] = task.left_source
     context['source2'] = task.right_source
     context['task'] = task
@@ -61,6 +66,15 @@ def task_detail_view(request, pk):
 
 
 def task_create_view(request):
+    '''
+    view for creating task
+    it does following items
+    1. save the file
+    2. validate the input
+    3. create models
+    4. invoke async function call, compareCommand
+
+    '''
     context = {}
     if request.method == 'GET':
         return render(request, 'qdiff/task_create.html', context)
@@ -126,19 +140,18 @@ def task_create_view(request):
 
     # invoke async compare_command with model id
     compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
-    # return submitted view ??
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
-    # return render(request, 'qdiff/task_create.html', context)
 
 
 def database_config_file_view(request):
+    '''view for configuration'''
     context = {}
     return render(request, 'qdiff/create_config.html', context)
 
 
-def aggregated_report_view(request, task_id=None):
+def aggregated_report_view(request, taskId=None):
+    '''view for aggregated report'''
     context = {}
-    taskId = task_id
     try:
         taskModel = Task.objects.get(id=taskId)
     except ObjectDoesNotExist as e:
@@ -147,9 +160,10 @@ def aggregated_report_view(request, task_id=None):
     return render(request, 'qdiff/aggregated_report.html', context)
 
 
-def statics_pie_report_view(request, task_id=None):
+def statics_pie_report_view(request, taskId=None):
+    '''view for pie chart in task detail page'''
     context = {}
-    taskId = task_id
+    taskId = taskId
     try:
         taskModel = Task.objects.get(id=taskId)
     except ObjectDoesNotExist as e:
@@ -163,9 +177,18 @@ def statics_pie_report_view(request, task_id=None):
 
 
 class Database_Config_APIView(APIView):
+    '''
+    this class is from drf
+    it receive database configurations in post method
+    and provide download link as get method
+    '''
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
+        '''
+        create configuration file for download and return the file name.
+        it also encrypt the file.
+        '''
         errors = []
         configsList = listInPostDataToList(request.POST)
         configDict = {config[0]: config[1] for config in configsList}
@@ -201,6 +224,7 @@ class Database_Config_APIView(APIView):
         return Response({'key': filename})
 
     def get(self, request, format=None):
+        '''return the configuration file and delete it'''
         key = request.GET.get('key', None)
         # clean the key
         if key is None or not isValidFileName(key):
@@ -226,10 +250,14 @@ class Database_Config_APIView(APIView):
 
 
 class Agregated_Report_APIView(APIView):
+    '''
+    this class is from drf
+    it provide the data in json format for the aggregated report
+    '''
     permission_classes = (AllowAny,)
 
-    def get(self, request, format=None, task_id=None):
-        taskId = task_id
+    def get(self, request, format=None, taskId=None):
+        taskId = taskId
         try:
             taskModel = Task.objects.get(id=taskId)
         except ObjectDoesNotExist as e:
@@ -278,10 +306,14 @@ class Agregated_Report_APIView(APIView):
 
 
 class Agregated_Report_CSV_Download_APIVIEW(APIView):
+    '''
+    this class is from drf
+    it provide the data in json format for downloading the report
+    '''
     permission_classes = (AllowAny,)
 
-    def get(self, request, format=None, task_id=None):
-        taskId = task_id
+    def get(self, request, format=None, taskId=None):
+        taskId = taskId
         try:
             taskModel = Task.objects.get(id=taskId)
         except ObjectDoesNotExist as e:
@@ -342,5 +374,5 @@ class Agregated_Report_CSV_Download_APIVIEW(APIView):
         r = HttpResponse(
             FileWrapper(memoryFile), content_type='text/plain')
         r['Content-Disposition'
-          ] = 'attachment; filename="TASK_%s_Report.csv"' % task_id
+          ] = 'attachment; filename="TASK_%s_Report.csv"' % taskId
         return r

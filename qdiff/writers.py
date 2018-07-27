@@ -3,14 +3,23 @@ from qdiff.abstracts import AbstractDatabaseAccessUnit
 
 
 class DatabaseWriter(AbstractDatabaseAccessUnit):
-    def __init__(self, config_dict, tableName):
-        super(DatabaseWriter, self).__init__(config_dict)
+    '''
+    Database writer, which can write date into the given table name
+    '''
 
-        # TODO purify the tableName
+    def __init__(self, configDict, tableName):
+        '''
+        Positional arguments:
+        configDict --  the database configuration dictionary
+            ref https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+        tableName -- the table name the writer instance targets
+        '''
+        super(DatabaseWriter, self).__init__(configDict)
+
         self.tableName = tableName
-        # TODO should get header from outside
 
     def getColumns(self):
+        '''return the column names as a list'''
         columns = []
         with self.getCursor() as cursor:
             cursor.execute("SELECT * FROM %s LIMIT 1;" % (self.tableName))
@@ -19,6 +28,7 @@ class DatabaseWriter(AbstractDatabaseAccessUnit):
         return columns
 
     def getInsertStatement(self):
+        '''return insert statement as string for the given table'''
         if not hasattr(self, 'columns'):
             self.columns = self.getColumns()
         statement = 'INSERT INTO %s ' % self.tableName
@@ -27,6 +37,12 @@ class DatabaseWriter(AbstractDatabaseAccessUnit):
         return statement
 
     def writeAll(self, rows):
+        '''
+        write rows into database
+
+        Positional arguements
+        rows -- two dimentional list
+        '''
         if not hasattr(self, 'insert_statement'):
             self.insert_statement = self.getInsertStatement()
         with self.getCursor() as cursor:
@@ -34,6 +50,9 @@ class DatabaseWriter(AbstractDatabaseAccessUnit):
 
 
 class CsvWriter:
+    '''
+    CSV writer wrapper
+    '''
 
     def __init__(self, *args, **kwargs):
         headers = kwargs.pop('headers', None)
@@ -49,6 +68,9 @@ class CsvWriter:
 
 
 class ConsoleWriter:
+    '''
+    Console writer wrapper, mainly for testing
+    '''
 
     def writeAll(self, rows):
         self.rows = rows

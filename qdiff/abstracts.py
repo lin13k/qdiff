@@ -2,6 +2,10 @@ from django.db import connections
 
 
 class AbstractDatabaseAccessUnit:
+    '''
+    This abstract class is used by database reader and writer
+    '''
+
     def __init__(self, config_dict):
         self.config_dict = config_dict
         if 'id' in config_dict:
@@ -26,5 +30,3 @@ class AbstractDatabaseAccessUnit:
     def destroy(self):
         connections._databases.pop(self.label)
         del connections.databases
-
-
