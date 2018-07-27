@@ -10,6 +10,7 @@ from qdiff.reports import ReportGenerator
 import json
 import re
 import logging
+import os
 logging.basicConfig(filename='managers.log', level=logging.DEBUG)
 
 
@@ -37,6 +38,9 @@ class TaskManager:
         self._ws2 = writeSource2
 
     def compare(self):
+        '''
+        the main logic of comparing process
+        '''
         logging.debug('start compare')
         self._changeStatus(Task.STATUS_OF_TASK_RUNNING)
         self._setUpReaders()
@@ -49,17 +53,36 @@ class TaskManager:
             self._generateReports()
 
     def getTableNames(self):
-        tableName1 = '%s_TASK_%s_%s' % (
-            settings.GENERATED_TABLE_PREFIX,
-            str(self._taskModel.id),
-            ConflictRecord.POSITION_IN_TASK_LEFT
+        tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+            prefix=settings.GENERATED_TABLE_PREFIX,
+            id=str(self._taskModel.id),
+            position=ConflictRecord.POSITION_IN_TASK_LEFT
         )
-        tableName2 = '%s_TASK_%s_%s' % (
-            settings.GENERATED_TABLE_PREFIX,
-            str(self._taskModel.id),
-            ConflictRecord.POSITION_IN_TASK_RIGHT
+        tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
+            prefix=settings.GENERATED_TABLE_PREFIX,
+            id=str(self._taskModel.id),
+            position=ConflictRecord.POSITION_IN_TASK_RIGHT
         )
         return (tableName1, tableName2)
+
+    def cleanUp(self):
+        if re.match(
+            '^' + settings.SOURCE_TYPE_CSV_PREFIX,
+                self._rds1, re.I):
+            try:
+                os.remove(
+                    self._rds1[len(settings.SOURCE_TYPE_CSV_PREFIX):])
+            except Exception as e:
+                pass
+
+        if re.match(
+            '^' + settings.SOURCE_TYPE_CSV_PREFIX,
+                self._rds2, re.I):
+            try:
+                os.remove(
+                    self._rds2[len(settings.SOURCE_TYPE_CSV_PREFIX):])
+            except Exception as e:
+                pass
 
     def _generateReports(self):
         errors = []

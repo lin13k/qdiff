@@ -6,6 +6,7 @@ from qdiff.managers import TaskManager
 
 @task(name="test_task")
 def test(s):
+    '''this test task is for testcases'''
     return str(s) + 'complete'
 
 
@@ -13,10 +14,12 @@ def test(s):
 def compareCommand(
         taskId, rds1, rds2,
         wds1=None, wds2=None):
+    '''this is an async wrapper for taskManager'''
 
-    # init the model
+    # get the model
     model = Task.objects.get(id=taskId)
     # call manager and compare
+    manager = None
     try:
         manager = TaskManager(
             model,
@@ -26,7 +29,6 @@ def compareCommand(
             wds2)
         manager.compare()
     except Exception as e:
-        # traceback.print_exc(e)
         model.status = Task.STATUS_OF_TASK_ERROR
         model.result = 'Errors happened'
         model.result_detail = str(e)
@@ -34,5 +36,5 @@ def compareCommand(
             model.result_detail = str(e) + ':' + ' '.join(map(str, e.errors))
         model.save()
     finally:
-        # delete db config
-        pass
+        if manager is not None:
+            manager.cleanUp()
