@@ -20,19 +20,19 @@ urlpatterns = [
         name='create_config_file_upload'),
 
     # statics pie report
-    url(r'^statics_pie_reports?/(?P<taskId>\d+)/?$',
+    url(r'^report/statics_pie_reports?/(?P<taskId>\d+)/?$',
         views.statics_pie_report_view, name='static_pie_report'),
 
     # aggregated report page
-    url(r'^aggregated_reports?/(?P<taskId>\d+)/?$',
+    url(r'^report/aggregated_reports?/(?P<taskId>\d+)/?$',
         views.aggregated_report_view, name='AggregatedReportGenerator'),
     #                                 name from class
     # aggregated report data content
-    url(r'^aggregated_reports?/(?P<taskId>\d+)/api/?$',
+    url(r'^report/aggregated_reports?/(?P<taskId>\d+)/api/?$',
         views.Agregated_Report_APIView.as_view(),
         name='AggregatedReportGenerator_api'),
     # aggregated report csv download
-    url(r'^aggregated_reports?/(?P<taskId>\d+)/download/?$',
+    url(r'^report/aggregated_reports?/(?P<taskId>\d+)/download/?$',
         views.Agregated_Report_CSV_Download_APIVIEW.as_view(),
         name='AggregatedReportGenerator_download'),
 ]
