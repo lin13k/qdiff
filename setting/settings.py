@@ -152,15 +152,15 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'dev.log'),
             'formatter': 'standard',
         },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
+        # 'console': {
+        #     'level': 'INFO',
+        #     'class': 'logging.StreamHandler',
+        #     'formatter': 'standard'
+        # },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['logfile'],
             'propagate': True,
             'level': 'WARN',
         },
