@@ -137,7 +137,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # logging
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s "
@@ -148,8 +148,8 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'main.log'),
+            'class': 'logging.StreamHandler',
+            'filename': os.path.join(BASE_DIR, 'dev.log'),
             'maxBytes': 1024 * 1024 * 20,  # 20MB
             'backupCount': 2,
             'formatter': 'standard',
@@ -169,7 +169,6 @@ LOGGING = {
         'django.db.backends': {
             'handlers': ['logfile'],
             'level': 'DEBUG',
-            'propagate': False,
         },
     }
 }
