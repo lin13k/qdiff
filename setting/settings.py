@@ -148,10 +148,8 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+            'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'dev.log'),
-            'maxBytes': 1024 * 1024 * 20,  # 20MB
-            'backupCount': 2,
             'formatter': 'standard',
         },
         'console': {
@@ -162,14 +160,15 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'logfile'],
             'propagate': True,
             'level': 'WARN',
         },
-        'django.db.backends': {
-            'handlers': ['logfile'],
-            'level': 'DEBUG',
-        },
+        # 'django.db.backends': {
+        #     'handlers': ['logfile'],
+        #     'level': 'DEBUG',
+        #     'propagate': False,
+        # },
     }
 }
 
