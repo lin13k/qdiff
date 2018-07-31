@@ -743,7 +743,9 @@ pre {
 </ol>
 <hr>
 <h2>
-<a id="user-content-install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+<a id="user-content-setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>setup</h2>
+<h3>
+<a id="user-content-install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h3>
 <ol>
 <li>install mysql
 <div class="highlight highlight-source-shell"><pre>sudo yum install mysql-server</pre></div>
@@ -764,8 +766,8 @@ pre {
 <div class="highlight highlight-source-shell"><pre>python3 -m pip install -r datadiff/requirements.txt --user</pre></div>
 </li>
 </ol>
-<h2>
-<a id="user-content-setup-database---mysql" class="anchor" href="#setup-database---mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup database - mysql</h2>
+<h3>
+<a id="user-content-setup-database---mysql" class="anchor" href="#setup-database---mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup database - mysql</h3>
 <ol>
 <li>start mysql server
 <div class="highlight highlight-source-shell"><pre>sudo service mysqld start</pre></div>
@@ -783,8 +785,8 @@ mysql<span class="pl-k">&gt;</span> create database qdiff_test<span class="pl-k"
 python3 manage.py migrate</pre></div>
 </li>
 </ol>
-<h2>
-<a id="user-content-install-rabbitmq-as-broker-for-celery" class="anchor" href="#install-rabbitmq-as-broker-for-celery" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install rabbitmq as broker for celery</h2>
+<h3>
+<a id="user-content-install-rabbitmq-as-broker-for-celery" class="anchor" href="#install-rabbitmq-as-broker-for-celery" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install rabbitmq as broker for celery</h3>
 <ol>
 <li>install Erlang Version 20.1
 <pre><code>cd /opt
@@ -810,18 +812,170 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 </code></pre>
 </li>
 </ol>
-<h2>
+<h3>
 <a id="user-content-start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli. check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a>
-</h2>
+</h3>
 <pre><code>celery -A qdiff worker -l info --detach
 </code></pre>
-<h2>
-<a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h2>
+<h3>
+<a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h3>
 <ol>
 <li>run command
-<div class="highlight highlight-source-shell"><pre>python3 manage.py <span class="pl-c1">test</span> --settings=setting.settings_test</pre></div>
+<div class="highlight highlight-source-shell"><pre>sudo python3 manage.py <span class="pl-c1">test</span> --settings=setting.settings_test</pre></div>
 </li>
 <li>Cheers if all the test cases are successful</li>
+</ol>
+<hr>
+<h2>
+<a id="user-content-deploy-with-nginx-uwsgi-in-ec2" class="anchor" href="#deploy-with-nginx-uwsgi-in-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Deploy with Nginx, UWSGI in EC2</h2>
+<h3>
+<a id="user-content-pull-the-code-into-the-folder-optdatadiff" class="anchor" href="#pull-the-code-into-the-folder-optdatadiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pull the code into the folder /opt/datadiff/</h3>
+<ol>
+<li>make directory /opt/
+<div class="highlight highlight-source-shell"><pre>sudo mkdir /opt</pre></div>
+</li>
+<li>clone the code with git
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">cd</span> /opt
+git clone git@github.com:analyticsMD/datadiff.git</pre></div>
+</li>
+</ol>
+<h3>
+<a id="user-content-install-uwsgi" class="anchor" href="#install-uwsgi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install uwsgi</h3>
+<ol>
+<li>run command
+<div class="highlight highlight-source-shell"><pre>sudo python3 -m pip install uwsgi</pre></div>
+</li>
+</ol>
+<h3>
+<a id="user-content-install-nginx" class="anchor" href="#install-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install nginx</h3>
+<ol>
+<li>run command
+<div class="highlight highlight-source-shell"><pre>sudo yum install nginx</pre></div>
+</li>
+</ol>
+<h3>
+<a id="user-content-create-qdiffconf-file-for-nginx" class="anchor" href="#create-qdiffconf-file-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff.conf file for nginx</h3>
+<ol>
+<li>run command
+<div class="highlight highlight-source-shell"><pre>sudo vim /etc/nginx/nginx.conf</pre></div>
+</li>
+<li>edit context for your requirement, this is a simple sample
+<pre><code>user ec2-user ec2-user;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /var/run/nginx.pid;
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+http {
+    server_names_hash_bucket_size 128;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enable/*;
+    index   index.html index.htm;
+}
+</code></pre>
+</li>
+</ol>
+<h3>
+<a id="user-content-create-qdiff_nginxconf-for-nginx" class="anchor" href="#create-qdiff_nginxconf-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff_nginx.conf for nginx</h3>
+<ol>
+<li>make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
+<div class="highlight highlight-source-shell"><pre>mkdir /etc/nginx/sites-enable/
+mkdir /etc/nginx/sites-available/</pre></div>
+</li>
+<li>create qdiff_nginx.conf in /etc/nginx/sites-available/
+<div class="highlight highlight-source-shell"><pre>sudo vim /etc/nginx/sites-available/qdiff_nginx.conf</pre></div>
+</li>
+<li>edit content as follow
+<pre><code># the upstream component nginx needs to connect to
+upstream django {
+    server unix:///opt/datadiff/qdiff.sock; # for a file socket
+    # server 127.0.0.1:8001; # for a web port socket
+}
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      8000;
+    # the domain name it will serve for
+    server_name ec2-54-183-250-158.us-west-1.compute.amazonaws.com; # substitute your machine's IP address or FQDN
+    charset     utf-8;
+
+    # max upload size
+    client_max_body_size 1000M;   # adjust to taste
+
+    # Django media
+    location /media  {
+        alias /opt/datadiff/media;  # your Django project's media files - amend as required
+    }
+    location /static {
+        alias /opt/datadiff/static; # your Django project's static files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        uwsgi_pass  django;
+        include     /opt/datadiff/uwsgi_params; # the uwsgi_params file you installed
+    }
+}
+
+</code></pre>
+</li>
+</ol>
+<h3>
+<a id="user-content-make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" class="anchor" href="#make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable</h3>
+<ol>
+<li>check the read write permissions
+<div class="highlight highlight-source-shell"><pre>ls -l /var/lib/nginx/tmp/</pre></div>
+it should return
+<div class="highlight highlight-source-shell"><pre>drwxr-xr-x 2 ec2-user ec2-user 4096 Jul 31 19:36 client_body
+drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 fastcgi
+drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 proxy
+drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 scgi
+drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
+</pre></div>
+</li>
+</ol>
+<h3>
+<a id="user-content-start-the-qdiff" class="anchor" href="#start-the-qdiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start the qdiff</h3>
+<ol>
+<li>
+<p>start the nginx service</p>
+<div class="highlight highlight-source-shell"><pre>sudo service nginx start</pre></div>
+</li>
+<li>
+<p>start uwsgi worker</p>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">cd</span> /opt/datadiff
+uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log</pre></div>
+</li>
+</ol>
+<h3>
+<a id="user-content-start-and-test-your-machine" class="anchor" href="#start-and-test-your-machine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start and test your machine</h3>
+<ol>
+<li>access URL host:port/tasks to check if it works or not</li>
+</ol>
+<p>for example: <a href="http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks" rel="nofollow">http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks</a></p>
+<ol>
+<li>if not working, check following files for debug
+<div class="highlight highlight-source-shell"><pre>/var/log/nginx/error.log    <span class="pl-c"><span class="pl-c">#</span>nginx reverse server log</span>
+/opt/datadiff/uwsgi.log     <span class="pl-c"><span class="pl-c">#</span>uwsgi server log</span>
+/opt/datadiff/dev.log       <span class="pl-c"><span class="pl-c">#</span>qdiff log</span></pre></div>
+</li>
 </ol>
 <hr>
 <h2>
