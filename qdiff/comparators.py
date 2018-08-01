@@ -146,17 +146,19 @@ class ValueComparator:
         self._writer1.writeAll(buff1)
         self._writer2.writeAll(buff2)
 
-        if isSame is False:
-            if self._model:
+        if self._model:
+            self._model.total_left_count = len(dataList1)
+            self._model.total_right_count = len(dataList2)
+            self._model.left_diff_count = len(buff1)
+            self._model.right_diff_count = len(buff2)
+            count = len(dataList1) + len(dataList2)
+            if isSame:
+                self._model.result = 'No difference found, congrats'
+                self._model.result_detail = (
+                    'Searched total %s records' % (count))
+            else:
                 self._model.result = 'Record difference found!'
                 self._model.result_detail = (
                     'Found total %s differences.' % diffCount)
-                self._model.save()
-            return False
-        if self._model:
-            count = len(dataList1) + len(dataList2)
-            self._model.result = 'No difference found, congrats'
-            self._model.result_detail = (
-                'Searched total %s records' % (count))
             self._model.save()
-        return True
+        return isSame

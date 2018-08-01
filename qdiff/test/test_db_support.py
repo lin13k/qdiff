@@ -32,6 +32,11 @@ class DbSupportTestCase(TransactionTestCase):
 
             except Exception as e:
                 pass
+
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE temp;')
+
     '''
     test if django can fetch the fields information of the table
     '''

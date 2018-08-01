@@ -8,3 +8,15 @@ class InvalidDataSourceException(Exception):
 
 class InvalidCsvHeaderException(Exception):
     pass
+
+
+class InvalidParametersException(Exception):
+    pass
+
+
+class InvalidClassNameException(Exception):
+    pass
+
+
+class MissingParametersException(Exception):
+    pass

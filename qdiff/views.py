@@ -1,24 +1,27 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
-from qdiff.models import Task, ConflictRecord
 from django.conf import settings
-from qdiff.utils.model import ConflictRecordReader
-from qdiff.tasks import compareCommand
-from qdiff.utils.validations import Validator
-from qdiff.utils.files import saveUploadedFile
-from qdiff.utils.convertors import listInPostDataToList
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from wsgiref.util import FileWrapper
-import os
+from django.shortcuts import render, get_object_or_404, redirect, reverse
+from hashlib import sha256
 from io import StringIO
-from rest_framework.views import APIView, Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-import json
+from qdiff.models import Task, ConflictRecord, Report
+from qdiff.readers import DatabaseReader
+from qdiff.tasks import compareCommand
 from qdiff.utils.ciphers import FernetCipher, decodedContent
+from qdiff.utils.convertors import listInPostDataToList
+from qdiff.utils.files import saveUploadedFile
+from qdiff.utils.model import ConflictRecordReader
+from qdiff.utils.model import getConflictRecordTableNames
 from qdiff.utils.model import getMaskedSourceFromString
 from qdiff.utils.validations import isValidFileName
-from qdiff.readers import DatabaseReader
-from hashlib import sha256
+from qdiff.utils.validations import Validator
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView, Response
+from rest_framework.status import HTTP_404_NOT_FOUND
+from wsgiref.util import FileWrapper
+import json
+import os
 
 
 def task_list_view(request):
@@ -32,26 +35,18 @@ def task_list_view(request):
 def task_detail_view(request, pk):
     context = {}
     task = get_object_or_404(Task, id=pk)
-    tableName1 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
-        prefix=settings.GENERATED_TABLE_PREFIX,
-        id=str(task.id),
-        position=ConflictRecord.POSITION_IN_TASK_LEFT
-    )
-    tableName2 = settings.CONFLICT_TABLE_NAME_FORMAT.format(
-        prefix=settings.GENERATED_TABLE_PREFIX,
-        id=str(task.id),
-        position=ConflictRecord.POSITION_IN_TASK_RIGHT
-    )
+    tableName1, tableName2 = getConflictRecordTableNames(task)
     conflictResults = []
     columns = []
-    crr1 = ConflictRecordReader(tableName1)
-    result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
-               for item in crr1.getConflictRecords()]
-    crr2 = ConflictRecordReader(tableName2)
-    result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
-               for item in crr2.getConflictRecords()]
-    conflictResults = result1 + result2
-    columns = crr1.getColumns()
+    if task.status == Task.STATUS_OF_TASK_COMPLETED:
+        crr1 = ConflictRecordReader(tableName1)
+        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+                   for item in crr1.getConflictRecords()]
+        crr2 = ConflictRecordReader(tableName2)
+        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+                   for item in crr2.getConflictRecords()]
+        conflictResults = result1 + result2
+        columns = crr1.getColumns()
 
     # not required masking, since remove the pw before saving into DB
     context['source1'] = task.left_source
@@ -89,6 +84,7 @@ def task_create_view(request):
     ignore1 = request.POST.get('ignoreList1', None)
     ignore2 = request.POST.get('ignoreList2', None)
     summary = request.POST.get('summary', None)
+    grouping_fields = request.POST.get('grouping_fields', None)
 
     sql1 = request.POST.get('sql1', None)
     sql2 = request.POST.get('sql2', None)
@@ -120,8 +116,14 @@ def task_create_view(request):
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
+    # create report model
+    if grouping_fields and len(grouping_fields) > 0:
+        Report.objects.create(
+            report_generator='AggregatedReportGenerator',
+            parameters='{"grouping_fields":"%s"}' % grouping_fields,
+            task=model)
+
     # invoke async compare_command with model id
-    # TODO send source for read
     compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
     # return submitted view ??
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
@@ -133,6 +135,32 @@ def database_config_file_view(request):
     return render(request, 'qdiff/create_config.html', context)
 
 
+def aggregated_report_view(request, task_id=None):
+    context = {}
+    taskId = task_id
+    try:
+        taskModel = Task.objects.get(id=taskId)
+    except ObjectDoesNotExist as e:
+        return Response(status=HTTP_404_NOT_FOUND)
+    context['task'] = taskModel
+    return render(request, 'qdiff/aggregated_report.html', context)
+
+
+def statics_pie_report_view(request, task_id=None):
+    context = {}
+    taskId = task_id
+    try:
+        taskModel = Task.objects.get(id=taskId)
+    except ObjectDoesNotExist as e:
+        return Response(status=HTTP_404_NOT_FOUND)
+    context['identical_rows_number'] = (
+        taskModel.total_left_count + taskModel.total_right_count -
+        taskModel.left_diff_count - taskModel.right_diff_count)
+    context['different_rows_number'] = taskModel.left_diff_count +\
+        taskModel.right_diff_count
+    return render(request, 'qdiff/statics_pie_report.html', context)
+
+
 class Database_Config_APIView(APIView):
     permission_classes = (AllowAny,)
 
@@ -140,7 +168,6 @@ class Database_Config_APIView(APIView):
         errors = []
         configsList = listInPostDataToList(request.POST)
         configDict = {config[0]: config[1] for config in configsList}
-        # memoryFile = StringIO()
         # DatabaseReader to test if it can show table
         try:
             dr = DatabaseReader(configDict, 'show tables')
@@ -148,9 +175,11 @@ class Database_Config_APIView(APIView):
                 errors.append('Cannot access the database')
         except Exception as e:
             errors.append('Invalid database configuration')
+            errors.append(str(e))
 
         if len(errors) > 0:
-            return Response({'errors': errors})
+            return Response({'errors': errors},
+                            status=status.HTTP_400_BAD_REQUEST)
         fc = FernetCipher()
         configJsonStr = json.dumps(configDict)
         code = fc.encode(configJsonStr)
@@ -159,10 +188,11 @@ class Database_Config_APIView(APIView):
                     str(configDict.get('HOST', None)) +
                     '_')
         filename += sha256(configJsonStr.encode()).hexdigest()
-        if not os.path.exists('tmp'):
-            os.makedirs('tmp')
+        if not os.path.exists(settings.TEMP_FOLDER):
+            os.makedirs(settings.TEMP_FOLDER)
 
-        with open(os.path.join('tmp', filename + '.csv'), 'w+') as f:
+        with open(os.path.join(
+                settings.TEMP_FOLDER, filename + '.csv'), 'w+') as f:
             f.write(code)
             f.flush()
             f.seek(0)
@@ -171,18 +201,19 @@ class Database_Config_APIView(APIView):
 
     def get(self, request, format=None):
         key = request.GET.get('key', None)
-
         # clean the key
         if key is None or not isValidFileName(key):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
             memoryFile = StringIO()
             filename = '_'.join(key.split('_')[:2])
-            with open(os.path.join('tmp', key + '.csv'), 'r') as f:
+            with open(
+                os.path.join(
+                    settings.TEMP_FOLDER, key + '.csv'), 'r') as f:
                 memoryFile.write(f.read())
                 memoryFile.flush()
                 memoryFile.seek(0)
-            os.remove(os.path.join('tmp', key + '.csv'))
+            os.remove(os.path.join(settings.TEMP_FOLDER, key + '.csv'))
             r = HttpResponse(
                 FileWrapper(memoryFile), content_type='text/plain')
             r['Content-Disposition'
@@ -191,3 +222,55 @@ class Database_Config_APIView(APIView):
         except Exception as e:
             print(e)
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+
+
+class Agregated_Report_APIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None, task_id=None):
+        taskId = task_id
+        try:
+            taskModel = Task.objects.get(id=taskId)
+        except ObjectDoesNotExist as e:
+            return Response(status=HTTP_404_NOT_FOUND)
+        sReportModel = taskModel.reports.filter(
+            report_generator='AggregatedReportGenerator').last()
+        if sReportModel is None:
+            return Response(status=HTTP_404_NOT_FOUND)
+        with open(sReportModel.file.path, 'r') as f:
+            report = f.read()
+
+        reportObj = json.loads(report)
+
+        returnObj = {'name': 'Root', 'children': []}
+        lurObj = {'name': 'Left Unpaired Records'}
+        lurObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['leftUnpairedRecords']]
+        returnObj['children'].append(lurObj)
+
+        rurObj = {'name': 'Right Unpaired Records'}
+        rurObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['rightUnpairedRecords']]
+        returnObj['children'].append(rurObj)
+
+        fbdOjb = {'name': 'Field Based Difference', 'children': []}
+        for index, column in enumerate(reportObj['columns']):
+            columnObj = {'name': column, 'children': []}
+            for diff in reportObj['columnRecords'][index]:
+                columnObj['children'].append(
+                    {'name': diff[0][0] + '\t' + str(diff[1:]), 'size': 1})
+            fbdOjb['children'].append(columnObj)
+        returnObj['children'].append(fbdOjb)
+
+        ldrObj = {'name': 'Left Duplicated Records'}
+        ldrObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj['leftDuplicatedRecords']]
+        returnObj['children'].append(ldrObj)
+
+        ldrObj = {'name': 'Right Duplicated Records'}
+        ldrObj['children'] = [
+            {'name': i, 'size': 1} for i in reportObj[
+                'rightDuplicatedRecords']]
+        returnObj['children'].append(ldrObj)
+
+        return Response(returnObj)

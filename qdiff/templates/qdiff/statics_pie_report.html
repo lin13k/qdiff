@@ -1,0 +1,63 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  width: 960px;
+  height: 500px;
+  position: relative;
+}
+path.slice{
+    stroke-width:2px;
+}
+polyline{
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+} 
+svg text.percent{
+    fill:white;
+    text-anchor:middle;
+    font-size:12px;
+}
+.legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="{% static 'qdiff/vendor/d3/v3/d3.js' %}"></script>
+<script src="{% static 'qdiff/js/statics_pie_report.js' %}"></script>
+<script src="{% static 'qdiff/js/legend.js' %}"></script>
+<script>
+
+var salesData=[
+    {label:"Identical Ratio", color:"#109618", value:{{ identical_rows_number }} },
+    {label:"Difference Ratio", color:"#DC3912", value:{{ different_rows_number }} }
+];
+
+var svg = d3.select("body").append("svg").attr("width",700).attr("height",300);
+
+svg.append("g").attr("id","salesDonut");
+
+Donut3D.draw("salesDonut", salesData, 150, 150, 130, 100, 30, 0.4);
+
+legend = svg.append("g")
+    .attr("class","legend")
+    .attr("transform","translate(50,30)")
+    .style("font-size","12px")
+    .call(d3.legend)
+
+  setTimeout(function() { 
+    legend
+      .style("font-size","20px")
+      .attr("data-style-padding",10)
+      .call(d3.legend)
+  },1000)
+
+</script>
+</body>

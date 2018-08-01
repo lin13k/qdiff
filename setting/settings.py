@@ -189,6 +189,14 @@ SCHEMA_CSV_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
 SCHEMA_DATABASE_MISSING_VALUES = ['', 'None', 'null', None, 'NULL']
 RESULT_SPLITTING_TOKEN = '<@#$>'
 FILE_UPLOAD_FOLDER = 'data'
+REPORT_FILENAME_FORMAT = 'TASK_{task_id}_{report_type}'
+REPORT_FOLDER = 'gen_reports'
+TEMP_FOLDER = 'tmp'
+
+# qDiff report
+# if field based difference of given field is over this number
+# the rest will not be save into report object
+REPORT_MAX_DIFF_PAIR = 80
 
 
 # CELERY

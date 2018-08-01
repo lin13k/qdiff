@@ -95,6 +95,20 @@ class CompareCommandTestCase(TransactionTestCase):
             except Exception as e:
                 pass
 
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE r1;')
+            cursor.execute('DROP TABLE r2;')
+            cursor.execute('DROP TABLE r3;')
+            cursor.execute('DROP TABLE w1;')
+            cursor.execute('DROP TABLE w2;')
+            cursor.execute(
+                'DROP TABLE ' +
+                settings.GENERATED_TABLE_PREFIX + '_TASK_1_LF;')
+            cursor.execute(
+                'DROP TABLE ' +
+                settings.GENERATED_TABLE_PREFIX + '_TASK_1_RT;')
+
     def testCompare1(self):
         with open('qdiff/test/test_compare_command_output.txt', 'w') as f:
             call_command(

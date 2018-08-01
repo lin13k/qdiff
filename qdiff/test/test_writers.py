@@ -31,6 +31,10 @@ class DatabaseWriterTestCase(TransactionTestCase):
             except Exception as e:
                 pass
 
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE temp;')
+
     def testGetColumns(self):
         newDBConfig = {}
         newDBConfig['id'] = 'default'

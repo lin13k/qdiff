@@ -1,4 +1,3 @@
-from django.urls import path
 from django.conf.urls import url
 from qdiff import views
 
@@ -16,4 +15,15 @@ urlpatterns = [
         views.Database_Config_APIView.as_view(),
         name='create_config_file_upload'),
 
+    # statics pie report
+    url(r'^statics_pie_reports?/(?P<task_id>\d+)/?$',
+        views.statics_pie_report_view, name='static_pie_report'),
+
+    # aggregated report
+    url(r'^aggregated_reports?/(?P<task_id>\d+)/api/?$',
+        views.Agregated_Report_APIView.as_view(),
+        name='AggregatedReportGenerator_api'),
+    url(r'^aggregated_reports?/(?P<task_id>\d+)/?$',
+        views.aggregated_report_view, name='AggregatedReportGenerator'),
+    #                                 name from class
 ]
