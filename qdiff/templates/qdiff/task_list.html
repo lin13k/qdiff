@@ -1,0 +1,80 @@
+{% extends "qdiff/base.html" %}
+{% load staticfiles %}
+{% block sidebar %}
+    <!-- <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+        <a class="nav-link" href="index.html">
+            <i class="fa fa-fw fa-plus-circle"></i>
+            <span class="nav-link-text">Create Task</span>
+        </a>
+    </li>
+    <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+        <a class="nav-link" href="index.html">
+            <i class="fa fa-fw fa-th-list"></i>
+            <span class="nav-link-text">Task List</span>
+        </a>
+    </li> -->
+{% endblock %}
+{% block topbar %}
+{% endblock %}
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'task_list' %}">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item active">Task List</li>
+    </ol>
+{% endblock %}
+{% block content %}
+    <div class="card mb-3">
+        <div class="card-header">
+        <i class="fa fa-table"></i>Task List</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Summary</th>
+                            <th>Status</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>ID</th>
+                        <th>Summary</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.id }}</td>
+                                <td>{{ task.summary }}</td>
+                                <td>{{ task.get_status_display }}</td>
+                                <td>{{ task.result}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#dataTable').DataTable( {
+                "order": [[ 0, "desc" ]],
+                "bDestroy": true,
+                "displayLength": 50,
+            } );
+        } );
+        $('.table > tbody > tr').click(function(self) {
+            var id = $(this).find('td:first').text();
+            location.href = "{% url 'task_detail' pk=0 %}".replace('0', id);
+        });        
+    </script>
+{% endblock %}
+{% block footer %}
+{% endblock %}

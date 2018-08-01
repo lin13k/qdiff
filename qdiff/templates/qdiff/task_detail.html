@@ -1,0 +1,273 @@
+{% extends "qdiff/base.html" %}
+{% load staticfiles %}
+{% block sidebar %}
+    <!-- <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+        <a class="nav-link" href="index.html">
+            <i class="fa fa-fw fa-plus-circle"></i>
+            <span class="nav-link-text">Create Task</span>
+        </a>
+    </li>
+    <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+        <a class="nav-link" href="index.html">
+            <i class="fa fa-fw fa-th-list"></i>
+            <span class="nav-link-text">Task List</span>
+        </a>
+    </li> -->
+{% endblock %}
+{% block topbar %}
+{% endblock %}
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="#">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'task_list' %}">Task List</a>
+        </li>
+        <li class="breadcrumb-item active">Task {{ task.id }}</li>
+    </ol>
+{% endblock %}
+{% block content %}
+    <style type="text/css">
+        h4.num_detail_label {
+            width: 20%
+        }
+        h4.num_detail_value {
+            width: 20%
+        }
+
+    </style>
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-briefcase"></i>Task Detail
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="card-body">
+                    <div class="row">
+                        <h4 class="num_detail_label">Summary:</h4>
+                        <h4>{{ task.summary }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Status:</h4>
+                        <h4>{{ task.get_status_display }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Create Time:</h4>
+                        <h4>{{ task.start_datetime }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Update Time:</h4>
+                        <h4>{{ task.end_datetime }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Result:</h4>
+                        <h4>{{ task.result }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Detail:</h4>
+                        <h4>{{ detail|safe }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Source1 Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_left_count }}</h4>
+                        <h4 class="num_detail_label">Source1 Diff:</h4>
+                        <h4 class="num_detail_value">{{ task.left_diff_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Source2 Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_right_count }}</h4>
+                        <h4 class="num_detail_label">Source2 Diff:</h4>
+                        <h4 class="num_detail_value">{{ task.right_diff_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Total Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.total_left_count|add:task.total_right_count }}</h4>
+                    </div>
+                    <div class="row">
+                        <h4 class="num_detail_label">Different Rows:</h4>
+                        <h4 class="num_detail_value">{{ task.left_diff_count|add:task.right_diff_count }}</h4>
+                    </div>
+                </div>
+                {% if conflictResults|length > 0 %}
+                    <iframe width="30%" height="450px" src="{% url 'static_pie_report' taskId=task.id %}"></iframe>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-xl-6 col-sm-12 mb-6">
+            <div class="card mb-6">
+                <div class="card-header" style="background-color:#ffade2;">Source 1 Detail
+                </div>
+                <h4>Source</h4>
+                <div class="card-body">
+                    {{ source1 }}
+                </div>
+                {% if task.left_query_sql %}
+                    <h4>SQL</h4>
+                    <div class="card-body">
+                        {{ task.left_query_sql }}
+                    </div>
+                {% endif %}
+                {% if task.left_ignore_fields %}
+                    <h4>Ignored List</h4>
+                    <div class="card-body">
+                        {{ task.left_ignore_fields }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-xl-6 col-sm-12 mb-6">
+            <div class="card mb-6">
+                <div class="card-header"  style="background-color:#ade2ff;">Source 2 Detail
+                </div>
+                <h4>Source</h4>
+                <div class="card-body">
+                    {{ source2 }}
+                </div>
+                {% if task.right_query_sql %}
+                    <h4>SQL</h4>
+                    <div class="card-body">
+                        {{ task.right_query_sql }}
+                    </div>
+                {% endif %}
+                {% if task.right_ignore_fields %}
+                    <h4>Ignored List</h4>
+                    <div class="card-body">
+                        {{ task.right_ignore_fields }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <br>
+    {% if conflictResults|length > 0 %}
+        {% for report in task.reports.all %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-table"></i>Aggregated Report
+                    <div style="float: right;">
+                        <a href="{% url report.report_generator taskId=task.id %}" target="_blank">
+                            <i class="fa fa-object-group"></i>Open In Tab
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator taskId=task.id %}"></iframe>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <br>
+    {% if conflictResults|length > 0 %}
+        <div class="card mb-3">
+            <div class="card-header">
+            <i class="fa fa-table"></i>Conflicted Records
+                <div style="float: right;">
+                    <i class="fa fa-object-group"></i>Group By:
+                    <input type="text" id="grouping_fields_input" name="grouping_fields">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                {% for column in columns %}
+                                    <th>{{ column }}</th>
+                                {% endfor %}
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <tr>
+                                {% for column in columns %}
+                                    <th>{{ column }}</th>
+                                {% endfor %}
+                                <th>Source</th>
+                            </tr>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                            {% for record in conflictResults %}
+                                <tr>
+                                    {% for row in record %}
+                                        <td>{{ row }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">Last Updated {{ task.end_datetime }}</div>
+        </div>
+    {% endif %}
+    <script type="text/javascript">
+        $('#grouping_fields_input').on('input', function() {
+            var groupingFields = $('#grouping_fields_input').val().split(',');
+            var groupingFieldsIndex = [];
+            var columns = {{ columns|safe }};
+            var columnDefs = [];
+            var order = [];
+            $('.table > thead > tr > th').each(function(){
+                columns.push($.trim($(this).text().toLowerCase()));})
+            for (var i = groupingFields.length - 1; i >= 0; i--) {
+                groupingFieldsIndex.push(columns.indexOf(groupingFields[i]));
+            }
+            for (var i = groupingFieldsIndex.length - 1; i >= 0; i--) {
+                if (groupingFieldsIndex[i] > -1){
+                    columnDefs.push({ "visible": false, "targets": groupingFieldsIndex[i] });
+                    order.push([groupingFieldsIndex[i], 'asc']);
+                }
+            }
+            // var groupColumn = 2;
+            $('#dataTable').DataTable({
+                "columnDefs": columnDefs,
+                "order": order,
+                "displayLength": 50,
+                "drawCallback": function ( settings ) {
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+                    
+                    for (var i = groupingFieldsIndex.length - 1; i >= 0; i--) {
+                        if (groupingFieldsIndex[i] >= 0) {
+                            api.column(groupingFieldsIndex[i], {page:'current'} ).data().each( function ( group, i ) {
+                                if ( last !== group ) {
+                                    $(rows).eq( i ).before(
+                                        '<tr class="group"><td colspan="' + columns.length + '">'+group+'</td></tr>'
+                                    );
+                 
+                                    last = group;
+                                }
+                            });
+                        }
+                    }         
+                },
+                "bDestroy": true
+            });
+
+            // $("tr td:last-child:contains('LF')").parent().css("background-color", "red");
+            // $("tr td:last-child:contains('RT')").parent().css("background-color", "green");
+         
+            // Order by the grouping
+            // $('#dataTable tbody').on( 'click', 'tr.group', function () {
+            //     var currentOrder = table.order()[0];
+            //     if ( currentOrder[0] === groupColumn && currentOrder[1] === 'asc' ) {
+            //         table.order( [ groupColumn, 'desc' ] ).draw();
+            //     }
+            //     else {
+            //         table.order( [ groupColumn, 'asc' ] ).draw();
+            //     }
+            // } );
+        } );
+        $("tr td:last-child:contains('LF')").parent().css("background-color", "#ffd8f1");
+        $("tr td:last-child:contains('RT')").parent().css("background-color", "#d8f1ff");
+    </script>
+{% endblock %}
+{% block footer %}
+{% endblock %}

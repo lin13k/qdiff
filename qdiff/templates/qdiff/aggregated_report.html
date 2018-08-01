@@ -1,0 +1,166 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+        <style type="text/css">
+        body {
+        font: 300 36px "Helvetica Neue";
+        /*height: 640px;*/
+        /*margin: 80px 160px 80px 360px;*/
+        overflow: hidden;
+        position: relative;
+        /*width: 960px;*/
+        }
+        a:link, a:visited {
+        color: #777;
+        text-decoration: none;
+        }
+        a:hover {
+        color: #666;
+        }
+        blockquote {
+        margin: 0;
+        }
+        blockquote:before {
+        content: "“";
+        position: absolute;
+        left: -.4em;
+        }
+        blockquote:after {
+        content: "”";
+        position: absolute;
+        }
+        body > ul {
+        margin: 0;
+        padding: 0;
+        }
+        h1 {
+        font-size: 64px;
+        }
+        h1, h2, h3 {
+        font-weight: inherit;
+        margin: 0;
+        }
+        h2, h3 {
+        /*text-align: right;*/
+        font-size: inherit;
+        position: absolute;
+        bottom: 1;
+        right: 1;
+        }
+        h2 {
+        font-size: 24px;
+        /*position: absolute;*/
+        }
+        h3 {
+        bottom: -20px;
+        font-size: 18px;
+        }
+        .invert {
+        background: #1f1f1f;
+        color: #dcdccc;
+        }
+        .invert h2, .invert h3 {
+        color: #7f9f7f;
+        }
+        .string, .regexp {
+        color: #f39;
+        }
+        .keyword {
+        color: #00c;
+        }
+        .comment {
+        color: #777;
+        font-style: oblique;
+        }
+        .number {
+        color: #369;
+        }
+        .class, .special {
+        color: #1181B8;
+        }
+        body > svg {
+        position: absolute;
+        top: -80px;
+        left: -160px;
+        }
+        </style>
+        <style type="text/css">
+        svg {
+        font-size: 24px;
+        }
+        rect.background {
+        fill: none;
+        pointer-events: all;
+        }
+        .axis {
+        shape-rendering: crispEdges;
+        }
+        .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        stroke-width: .5px;
+        }
+        #parentDiv {
+           margin:0 auto;
+           overflow:scroll;
+           max-height:95vh;
+        }
+        a.button {
+            font: 24px Helvetica Neue;
+            text-decoration: none;
+            background-color: #EEEEEE;
+            color: #333333;
+            padding: 6px 2px 6px 2px;
+            border-top: 1px solid #CCCCCC;
+            border-right: 1px solid #333333;
+            border-bottom: 1px solid #333333;
+            position: absolute;
+            border-left: 1px solid #CCCCCC;
+            bottom: 0;
+            right: 1;
+        }
+        </style>
+    </head>
+    <body style="width: 100%">
+        <h2>
+        Task {{ task.id }} Aggregated Statics Data 
+        </h2>
+        <a class="button" href="{% url 'AggregatedReportGenerator_download' taskId=task.id %}">CSV Download</a>
+        <div id="parentDiv" width="100%">
+            <div id="categoryHierarchy"></div>
+        </div>
+        <script src="{% static 'qdiff/vendor/jquery/jquery.min.js' %}"></script>
+        <script src="{% static 'qdiff/vendor/d3/d3.js' %}"></script>
+        <script src="{% static 'qdiff/vendor/d3/d3.layout.js' %}"></script>
+        <script src="{% static 'qdiff/js/aggregated_report.js' %}"></script>
+        <script type="text/javascript">
+            var m = [30, 240, 0, 560], // top right bottom left
+                w = $(window).width() - m[1] - m[3], // width
+                h = 2600 - m[0] - m[2], // height
+                x = d3.scale.linear().range([0, w]),
+                y = 25, // bar height
+                z = d3.scale.ordinal().range(["steelblue", "#aaa"]); // bar color
+            var hierarchy = d3.layout.partition().value(function(d) {
+                return d.size;
+            });
+            var xAxis = d3.svg.axis().scale(x).orient("top").tickFormat(d3.format("d"));
+            var svg = d3.select("#categoryHierarchy")
+                        .append("svg:svg")
+                        // .attr("viewBox", "0,0,100,200")
+                        .attr("width", w + m[1] + m[3])
+                        .attr("height", h + m[0] + m[2])
+                        .append("svg:g")
+                        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+            svg.append("svg:rect").attr("class", "background").attr("width", w).attr("height", h).on("click", up);
+            svg.append("svg:g").attr("class", "x axis");
+            svg.append("svg:g").attr("class", "y axis").append("svg:line").attr("y1", "100%");
+            d3.json("{% url 'AggregatedReportGenerator_api' taskId=task.id %}", function(root) {
+                hierarchy.nodes(root);
+                x.domain([0, root.value]).nice();
+                down(root, 0);
+            });
+        </script>
+    </body>
+</html>

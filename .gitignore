@@ -63,3 +63,10 @@ env.bak/
 venv.bak/
 p3venv/
 p2env/
+data/
+tmp/
+gen_reports/
+
+# Celery
+results.sqlite
+data/

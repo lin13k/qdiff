@@ -1,22 +1,34 @@
 from csv import writer
+from qdiff.abstracts import AbstractDatabaseAccessUnit
 
 
-class DBWriter:
-    def __init__(self, connection, tableName):
-        self.connection = connection
-        # TODO purify the tableName
+class DatabaseWriter(AbstractDatabaseAccessUnit):
+    '''
+    Database writer, which can write date into the given table name
+    '''
+
+    def __init__(self, configDict, tableName):
+        '''
+        Positional arguments:
+        configDict --  the database configuration dictionary
+            ref https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+        tableName -- the table name the writer instance targets
+        '''
+        super(DatabaseWriter, self).__init__(configDict)
+
         self.tableName = tableName
-        # TODO should get header from outside
 
     def getColumns(self):
+        '''return the column names as a list'''
         columns = []
-        with self.connection.cursor() as cursor:
+        with self.getCursor() as cursor:
             cursor.execute("SELECT * FROM %s LIMIT 1;" % (self.tableName))
             for columnDesc in cursor.description:
                 columns.append(columnDesc[0])
         return columns
 
     def getInsertStatement(self):
+        '''return insert statement as string for the given table'''
         if not hasattr(self, 'columns'):
             self.columns = self.getColumns()
         statement = 'INSERT INTO %s ' % self.tableName
@@ -25,13 +37,22 @@ class DBWriter:
         return statement
 
     def writeAll(self, rows):
+        '''
+        write rows into database
+
+        Positional arguements
+        rows -- two dimentional list
+        '''
         if not hasattr(self, 'insert_statement'):
             self.insert_statement = self.getInsertStatement()
-        with self.connection.cursor() as cursor:
+        with self.getCursor() as cursor:
             cursor.executemany(self.insert_statement, rows)
 
 
-class CSVWriter:
+class CsvWriter:
+    '''
+    CSV writer wrapper
+    '''
 
     def __init__(self, *args, **kwargs):
         headers = kwargs.pop('headers', None)
@@ -47,6 +68,9 @@ class CSVWriter:
 
 
 class ConsoleWriter:
+    '''
+    Console writer wrapper, mainly for testing
+    '''
 
     def writeAll(self, rows):
         self.rows = rows

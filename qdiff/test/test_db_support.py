@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.db import connection, connections
 from random import randint
 from logging import Logger
@@ -6,28 +6,36 @@ from logging import Logger
 logger = Logger('test')
 
 
-class DbSupportTestCase(TestCase):
+class DbSupportTestCase(TransactionTestCase):
 
     def setUp(self):
 
         with connection.cursor() as cursor:
             # create table
-            cursor.execute('''CREATE TABLE temp (
-                    col1 VARCHAR(10),
-                    col2 VARCHAR(10)
-                );
-            ''')
+            try:
+                cursor.execute('''CREATE TABLE temp (
+                        col1 VARCHAR(10),
+                        col2 VARCHAR(10)
+                    );
+                ''')
 
-            # insert data
-            query = '''INSERT INTO temp (col1, col2)
-                VALUES (%s, %s)
-            '''
-            cursor.executemany(query, [
-                (
-                    str(randint(0, 1)),
-                    str(randint(0, 10))
-                )
-                for i in range(10)])
+                # insert data
+                query = '''INSERT INTO temp (col1, col2)
+                    VALUES (%s, %s)
+                '''
+                cursor.executemany(query, [
+                    (
+                        str(randint(0, 1)),
+                        str(randint(0, 10))
+                    )
+                    for i in range(10)])
+
+            except Exception as e:
+                pass
+
+    def tearDown(self):
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE temp;')
 
     '''
     test if django can fetch the fields information of the table
@@ -77,3 +85,4 @@ class DbSupportTestCase(TestCase):
                 for i in range(10)])
             # read
             cursor.execute("SELECT * from temp LIMIT 1;")
+            self.assertEqual(len(cursor.fetchall()), 1)

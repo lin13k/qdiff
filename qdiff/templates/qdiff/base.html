@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>qDiff</title>
+  <!-- Bootstrap core CSS-->
+  <link href="{% static 'qdiff/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="{% static 'qdiff/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+  <!-- Page level plugin CSS-->
+  <link href="{% static 'qdiff/vendor/datatables/dataTables.bootstrap4.css' %}" rel="stylesheet">
+  <!-- Custom styles for this template-->
+  <link href="{% static 'qdiff/css/sb-admin.css' %}" rel="stylesheet">
+  <script src="{% static 'qdiff/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'qdiff/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <!-- Core plugin JavaScript-->
+  <script src="{% static 'qdiff/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+  <!-- Page level plugin JavaScript-->
+  <script src="{% static 'qdiff/vendor/chart.js/Chart.min.js' %}"></script>
+  <script src="{% static 'qdiff/vendor/datatables/jquery.dataTables.js' %}"></script>
+  <script src="{% static 'qdiff/vendor/datatables/dataTables.bootstrap4.js' %}"></script>
+  <!-- Custom scripts for all pages-->
+  <script src="{% static 'qdiff/js/sb-admin.min.js' %}"></script>
+  <!-- Custom scripts for this page-->
+  <script src="{% static 'qdiff/js/sb-admin-datatables.min.js' %}"></script>
+  <!-- <script src="{% static 'qdiff/js/sb-admin-charts.min.js' %}"></script> -->
+  <script src="https://unpkg.com/ag-grid/dist/ag-grid.min.noStyle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid/dist/styles/ag-grid.css">
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid/dist/styles/ag-theme-balham.css">
+</head>
+
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+  <!-- Navigation-->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+    <a class="navbar-brand" href="index.html">qDiff</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+        {% block sidebar %}
+        {% endblock %}
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+            <a class="nav-link" href="{% url 'task_create' %}">
+                <i class="fa fa-fw fa-plus-circle"></i>
+                <span class="nav-link-text">Create Task</span>
+            </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+            <a class="nav-link" href="{% url 'task_list' %}">
+                <i class="fa fa-fw fa-th-list"></i>
+                <span class="nav-link-text">Task List</span>
+            </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+            <a class="nav-link" href="{% url 'create_config_file' %}">
+                <i class="fa fa-fw fa-th-list"></i>
+                <span class="nav-link-text">Generate DB Config</span>
+            </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav sidenav-toggler">
+        <li class="nav-item">
+          <a class="nav-link text-center" id="sidenavToggler">
+            <i class="fa fa-fw fa-angle-left"></i>
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        {% block topbar %}
+        {% endblock %}
+      </ul>
+    </div>
+  </nav>
+  <div class="content-wrapper">
+    <div class="container-fluid">
+      <!-- Breadcrumbs-->
+      <ol class="breadcrumb">
+        {% block breadcrumbs %}
+        {% endblock %}
+      </ol>
+      {% block content %}
+      {% endblock %}
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+      <div class="container">
+        <!-- <div class="text-center">
+          <small>qDiff by Je-Ming Lin 2018</small>
+        </div> -->
+        {% block footer %}
+        {% endblock %}
+      </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <!-- Bootstrap core JavaScript-->
+    
+  </div>
+</body>
+
+</html>
