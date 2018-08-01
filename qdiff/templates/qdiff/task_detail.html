@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 {% if conflictResults|length > 0 %}
-                    <iframe width="30%" height="450px" src="{% url 'static_pie_report' task_id=task.id %}"></iframe>
+                    <iframe width="30%" height="450px" src="{% url 'static_pie_report' taskId=task.id %}"></iframe>
                 {% endif %}
             </div>
         </div>
@@ -149,13 +149,13 @@
                 <div class="card-header">
                     <i class="fa fa-table"></i>Aggregated Report
                     <div style="float: right;">
-                        <a href="{% url report.report_generator task_id=task.id %}" target="_blank">
+                        <a href="{% url report.report_generator taskId=task.id %}" target="_blank">
                             <i class="fa fa-object-group"></i>Open In Tab
                         </a>
                     </div>
                 </div>
                 <div class="card-body">
-                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator task_id=task.id %}"></iframe>
+                    <iframe width="100%" height="300px" scrolling="yes" src="{% url report.report_generator taskId=task.id %}"></iframe>
                 </div>
             </div>
         {% endfor %}

@@ -13,6 +13,10 @@ from collections import defaultdict
 
 
 class ReportGenerator:
+    '''
+    base class for report generators
+    it provides the factory design pattern
+    '''
 
     def factory(className, *args, **kwargs):
         if className == "AggregatedReportGenerator":
@@ -21,39 +25,62 @@ class ReportGenerator:
     factory = staticmethod(factory)
 
     def __init__(self, reportModel):
+        '''
+        init the generator with the reportModel
+        including following items
+        1. parameters loading
+        2. conflict records loading
+        3. columns list loading
+        '''
         self._reportModel = reportModel
         self.parameters = json.loads(self._reportModel.parameters)
 
         # get data
         taskModel = self._reportModel.task
         tableName1, tableName2 = getConflictRecordTableNames(taskModel)
-        self.conflictRecords = []
+        self.conflictRecords1 = []
+        self.conflictRecords2 = []
         crr1 = ConflictRecordReader(tableName1)
         result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
         result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
                    for item in crr2.getConflictRecords()]
-        self.conflictRecords.extend(result1)
-        self.conflictRecords.extend(result2)
+        self.conflictRecords1.extend(result1)
+        self.conflictRecords2.extend(result2)
         self.conflictRecordColumns = crr1.getColumns()
 
     def generate(self):
+        '''
+        invoke the _process function and save the result into file
+        '''
         reportObj = self._process(
-            self.getConflictRecords(),
+            self.conflictRecords1,
+            self.conflictRecords2,
             self.getConflictRecordColumn())
         return self._saveReportFileWithObject(reportObj)
 
-    def _process(self, data, columns):
-        raise NotImplementedError('Should implement this generate function')
+    def _process(self, data1, data2, columns):
+        '''
+        main logic for the report generator
+        Positional arguements
+        data1 -- conflict records from left source
+        data2 -- conflict records from right source
+        columns -- column name list
+
+        this function should return dictionary like object
+        '''
+        raise NotImplementedError('Should implement this _process function')
 
     def getFileName(self):
+        '''return the filename of the report'''
         return settings.REPORT_FILENAME_FORMAT.format(
             task_id=self._reportModel.task.id,
             report_type=self.__class__.__name__,
         )
 
     def _saveReportFileWithObject(self, obj):
+        '''save the report object and return the file path'''
         filePath = os.path.join(settings.REPORT_FOLDER, self.getFileName())
         if not os.path.exists(os.path.dirname(filePath)):
             try:
@@ -68,6 +95,7 @@ class ReportGenerator:
         return filePath
 
     def _saveReportFileWithExistFile(self, filePath):
+        '''update the model path with given file path'''
         self._reportModel.file.name = filePath
         self._reportModel.save()
 
@@ -75,14 +103,30 @@ class ReportGenerator:
         return self.parameters.get(key, None)
 
     def getConflictRecords(self):
-        return self.conflictRecords
+        return self.conflictRecords1 + self.conflictRecords2
 
     def getConflictRecordColumn(self):
         return self.conflictRecordColumns
 
 
 class AggregatedReportGenerator(ReportGenerator):
-    def _process(self, data, columns):
+    '''
+    This groups the difference from two souce
+        with the parameter 'grouping_fields'
+
+    In normal case, each group should contain only two records, one
+    from left source, another one from right source. Then the
+    generator will check over the two records and put the difference
+    into each field's difference list.
+
+    If a group contains only one record,
+        the single record is considered as unpaired one
+    If a group contains more than one record from the same source,
+        these records are considered as duplicateds
+
+    '''
+
+    def _process(self, data1, data2, columns):
 
         # get grouping index, the index of the grouping fields
         grouping_fields = self.getParameter('grouping_fields')
@@ -100,22 +144,27 @@ class AggregatedReportGenerator(ReportGenerator):
                 'grouping_fields is invalid: %s' % grouping_fields)
 
         # map the rows into dict with the grouping index
+        data = data1 + data2
         dic = defaultdict(list)
         for row in data:
             key = tuple(row[i] for i in grouping_index)
             dic[key].append(row)
 
-        # count the difference by group
         leftUnpairedRecords = []
         leftUnpairedCount = 0
         rightUnpairedRecords = []
         rightUnpairedCount = 0
+
+        # counts of differences in every column
         columnCounts = [0 for i in columns]
+        # differences in every column
         columnRecords = [[] for i in columns]
         leftDuplicatedCount = 0
         leftDuplicatedRecords = []
         rightDuplicatedCount = 0
         rightDuplicatedRecords = []
+
+        # count the difference by group
         for key, value in dic.items():
             # non-paired record
             if len(value) < 2:
@@ -132,17 +181,17 @@ class AggregatedReportGenerator(ReportGenerator):
             # records more than one pair
             token = ConflictRecord.POSITION_IN_TASK_LEFT
             leftRecords = [i for i in value if i[-1] == token]
-            if len(leftRecords) > 1:
-                leftDuplicatedCount += 1
-                leftDuplicatedRecords.append(
-                    tuple(leftRecords[0][i] for i in grouping_index))
             token = ConflictRecord.POSITION_IN_TASK_RIGHT
             rightRecords = [i for i in value if i[-1] == token]
-            if len(rightRecords) > 1:
-                rightDuplicatedCount += 1
-                rightDuplicatedRecords.append(
-                    tuple(leftRecords[0][i] for i in grouping_index))
             if len(leftRecords) > 1 or len(rightRecords) > 1:
+                if len(leftRecords) > 1:
+                    leftDuplicatedCount += 1
+                    leftDuplicatedRecords.append(
+                        tuple(leftRecords[0][i] for i in grouping_index))
+                if len(rightRecords) > 1:
+                    rightDuplicatedCount += 1
+                    rightDuplicatedRecords.append(
+                        tuple(rightRecords[0][i] for i in grouping_index))
                 continue
 
             # normal case, two records in the group

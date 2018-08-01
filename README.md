@@ -9,7 +9,8 @@ A tool for finding the difference between multiple data sources which should hav
 1. Resolve the differences for user basing on input rules.
 
 ---
-## Install
+## setup
+### Install
 1. install mysql
     ```shell
     sudo yum install mysql-server
@@ -36,7 +37,7 @@ A tool for finding the difference between multiple data sources which should hav
     ```
 
 
-## Setup database - mysql
+### Setup database - mysql
 1. start mysql server
     ```shell
     sudo service mysqld start
@@ -57,36 +58,192 @@ A tool for finding the difference between multiple data sources which should hav
     python3 manage.py migrate
     ```
 
-## install rabbitmq as broker for celery
-## start rabbitmq
-    run the command
-
+### install rabbitmq as broker for celery
+1. install Erlang Version 20.1
+    ```
+    cd /opt
+    sudo wget https://github.com/rabbitmq/erlang-rpm/releases/download/v20.1.7/erlang-20.1.7-1.el6.x86_64.rpm
+    sudo rpm -ivh erlang-20.1.7-1.el6.x86_64.rpm
+    ```
+1. install Socat
+    ```
+    sudo yum install socat
+    ```
+1. RabbitMQ v3.7.0
+    ```
+    sudo wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.0/rabbitmq-server-3.7.0-1.el6.noarch.rpm
+    sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
+    ```
+1. start rabbitmq, run the command
     ```
     rabbitmq-server
     ```
-
-## start celery worker
-    use daemon or inline cli
-    check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
-
+1. or you can start rabbitmq as service
     ```
-    celery -A qdiff worker -l info
+    sudo service rabbitmq-server start
     ```
 
-    after add new task, you have to restart the worker to register new task
 
+### start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+```
+celery -A qdiff worker -l info --detach
+```
 
-
-## Sanity test
+### Sanity test
 1. run command
     ```shell
-    python3 manage.py test --settings=setting.settings_test
+    sudo python3 manage.py test --settings=setting.settings_test
     ```
 1. Cheers if all the test cases are successful
 
-
-
 ---
+## Deploy with Nginx, UWSGI in EC2
+### pull the code into the folder /opt/datadiff/
+1. make directory /opt/
+    ```shell
+    sudo mkdir /opt
+    ```
+1. clone the code with git
+    ```shell
+    cd /opt
+    git clone git@github.com:analyticsMD/datadiff.git
+    ``` 
+
+### install uwsgi
+1. run command
+    ```shell
+    sudo python3 -m pip install uwsgi
+    ```
+
+### install nginx
+1. run command
+    ```shell
+    sudo yum install nginx
+    ```
+
+### create qdiff.conf file for nginx
+1. run command
+    ```shell
+    sudo vim /etc/nginx/nginx.conf
+    ```
+1. edit context for your requirement, this is a simple sample
+    ```
+    user ec2-user ec2-user;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log;
+    pid /var/run/nginx.pid;
+    include /usr/share/nginx/modules/*.conf;
+
+    events {
+        worker_connections 1024;
+    }
+    http {
+        server_names_hash_bucket_size 128;
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile            on;
+        tcp_nopush          on;
+        tcp_nodelay         on;
+        keepalive_timeout   65;
+        types_hash_max_size 2048;
+        include             /etc/nginx/mime.types;
+        default_type        application/octet-stream;
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enable/*;
+        index   index.html index.htm;
+    }
+    ```
+
+### create qdiff_nginx.conf for nginx
+1. make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
+    ```shell
+    mkdir /etc/nginx/sites-enable/
+    mkdir /etc/nginx/sites-available/
+    ```
+1. create qdiff_nginx.conf in /etc/nginx/sites-available/
+    ```shell
+    sudo vim /etc/nginx/sites-available/qdiff_nginx.conf
+    ```
+1. edit content as follow
+    ```
+    # the upstream component nginx needs to connect to
+    upstream django {
+        server unix:///opt/datadiff/qdiff.sock; # for a file socket
+        # server 127.0.0.1:8001; # for a web port socket
+    }
+
+    # configuration of the server
+    server {
+        # the port your site will be served on
+        listen      8000;
+        # the domain name it will serve for
+        server_name ec2-54-183-250-158.us-west-1.compute.amazonaws.com; # substitute your machine's IP address or FQDN
+        charset     utf-8;
+
+        # max upload size
+        client_max_body_size 1000M;   # adjust to taste
+
+        # Django media
+        location /media  {
+            alias /opt/datadiff/media;  # your Django project's media files - amend as required
+        }
+        location /static {
+            alias /opt/datadiff/static; # your Django project's static files - amend as required
+        }
+
+        # Finally, send all non-media requests to the Django server.
+        location / {
+            uwsgi_pass  django;
+            include     /opt/datadiff/uwsgi_params; # the uwsgi_params file you installed
+        }
+    }
+
+    ```
+
+### make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable
+1. check the read write permissions
+    ```shell
+    ls -l /var/lib/nginx/tmp/
+    ```
+    it should return
+    ```shell
+    drwxr-xr-x 2 ec2-user ec2-user 4096 Jul 31 19:36 client_body
+    drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 fastcgi
+    drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 proxy
+    drwx------ 2 ec2-user ec2-user 4096 Jul 24 02:06 scgi
+    drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
+
+    ```
+
+### start the qdiff
+1. start the nginx service
+    ```shell
+    sudo service nginx start
+    ```
+
+1. start uwsgi worker
+    ```shell
+    cd /opt/datadiff
+    uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log
+    ```
+
+### start and test your machine
+1. access URL host:port/tasks to check if it works or not
+
+for example: http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks
+
+1. if not working, check following files for debug
+    ```shell
+    /var/log/nginx/error.log    #nginx reverse server log
+    /opt/datadiff/uwsgi.log     #uwsgi server log
+    /opt/datadiff/dev.log       #qdiff log
+    ```
+---
+
 ## System architecture
 ### Architecture
 
