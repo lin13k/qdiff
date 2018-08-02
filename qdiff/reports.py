@@ -12,7 +12,7 @@ import errno
 from collections import defaultdict
 
 
-class ReportGenerator:
+class ReportGenerator(object):
     '''
     base class for report generators
     it provides the factory design pattern
@@ -41,10 +41,10 @@ class ReportGenerator:
         self.conflictRecords1 = []
         self.conflictRecords2 = []
         crr1 = ConflictRecordReader(tableName1)
-        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+        result1 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_LEFT,))
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
-        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+        result2 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_RIGHT,))
                    for item in crr2.getConflictRecords()]
         self.conflictRecords1.extend(result1)
         self.conflictRecords2.extend(result2)

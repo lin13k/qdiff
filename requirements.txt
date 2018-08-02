@@ -8,3 +8,5 @@ coverage
 codecov
 djangorestframework
 cryptography
+pathlib
+mock

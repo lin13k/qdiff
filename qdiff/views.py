@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from hashlib import sha256
-from io import StringIO
 from qdiff.models import Task, ConflictRecord, Report
 from qdiff.readers import DatabaseReader
 from qdiff.tasks import compareCommand
@@ -23,6 +22,11 @@ from wsgiref.util import FileWrapper
 import json
 import os
 import csv
+import sys
+if (3,) < sys.version_info:
+    from io import StringIO
+else:
+    from io import BytesIO as StringIO
 
 
 def task_list_view(request):
@@ -47,10 +51,10 @@ def task_detail_view(request, pk):
     columns = []
     if task.status == Task.STATUS_OF_TASK_COMPLETED:
         crr1 = ConflictRecordReader(tableName1)
-        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+        result1 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_LEFT,))
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
-        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+        result2 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_RIGHT,))
                    for item in crr2.getConflictRecords()]
         conflictResults = result1 + result2
         columns = crr1.getColumns()
@@ -245,8 +249,7 @@ class Database_Config_APIView(APIView):
               ] = 'attachment; filename="' + filename + '_databaseConfig.txt"'
             return r
         except Exception as e:
-            print(e)
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
 
 class Agregated_Report_APIView(APIView):

@@ -64,7 +64,7 @@ def getMaskedSourceFromString(readSource):
     return maskedSource
 
 
-class ConflictRecordReader:
+class ConflictRecordReader(object):
     def __init__(self, tableName):
         defaultConfigs = settings.DATABASES['default'].copy()
         self.dr = DatabaseReader(

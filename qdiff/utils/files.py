@@ -10,7 +10,7 @@ def saveUploadedFile(f):
     return saved file path
     """
     time = now()
-    prefix = time.strftime("%Y-%m-%d--%H:%M:%S:%f")
+    prefix = time.strftime("%Y-%m-%d--%H-%M-%S-%f")
     fileName = prefix + '-' + (f.name if hasattr(f, 'name') else '')
     fullPath = os.path.join(settings.FILE_UPLOAD_FOLDER, fileName)
     with open(fullPath, 'wb+') as destination:

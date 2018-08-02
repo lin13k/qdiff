@@ -49,7 +49,7 @@ class DatabaseWriter(AbstractDatabaseAccessUnit):
             cursor.executemany(self.insert_statement, rows)
 
 
-class CsvWriter:
+class CsvWriter(object):
     '''
     CSV writer wrapper
     '''
@@ -67,7 +67,7 @@ class CsvWriter:
             self.writer.writerow(row)
 
 
-class ConsoleWriter:
+class ConsoleWriter(object):
     '''
     Console writer wrapper, mainly for testing
     '''

@@ -1,9 +1,12 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from qdiff.models import Task
-from io import StringIO
 from rest_framework.status import HTTP_200_OK
-import json
+import sys
+if (3,) < sys.version_info:
+    from io import StringIO
+else:
+    from io import BytesIO as StringIO
 
 
 class TaskViewTestCase(TestCase):

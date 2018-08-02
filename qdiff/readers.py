@@ -6,7 +6,7 @@ from django.conf import settings
 import re
 
 
-class DataReader:
+class DataReader(object):
     '''base class for readers'''
 
     def getRow(self):

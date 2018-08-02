@@ -5,6 +5,7 @@ from qdiff.readers import DatabaseReader
 from qdiff.writers import DatabaseWriter
 from qdiff.models import Task
 from tableschema import Schema
+import sys
 
 
 class TestWriter:
@@ -312,11 +313,22 @@ class FieldComparatorTestCase(TransactionTestCase):
         self.assertTrue(not comparator.isSame())
         self.assertEqual(model.result, 'Fields are inconsistent!')
         # self.assertEqual(model.result, 'Fields are inconsistent!')
-        self.assertEqual(
-            model.result_detail,
-            "+ {'name': 'igfield2', 'type': 'string', 'format': 'default'}"
-            "<@#$>- {'name': 'igfield', 'type': 'string', 'format': 'default'}"
-        )
+        if sys.version_info > (3,):
+            self.assertEqual(
+                model.result_detail,
+                "+ {'name': 'igfield2', 'type': 'string', 'format': 'default'}"
+                "<@#$>"
+                "- {'name': 'igfield', 'type': 'string', 'format': 'default'}"
+            )
+        else:
+            self.assertEqual(
+                model.result_detail,
+                "- {u'type': u'string', u'name': 'igfield',"
+                " u'format': u'default'}"
+                "<@#$>"
+                "+ {u'type': u'string', u'name': 'igfield2',"
+                " u'format': u'default'}"
+            )
 
     def testDataType3(self):
         DbConfig = {}
@@ -353,7 +365,7 @@ class FieldComparatorTestCase(TransactionTestCase):
         query_sql1 = 'SELECT * FROM r1;'
         r1 = DatabaseReader(DbConfig, query_sql1)
         r2 = TestReader([[
-            'col1', 'igfield2', 'col2', ], [
+            u'col1', u'igfield2', u'col2', ], [
             '1', 'ignore&', '1', ], [
             '2', 'ignore&', '2', ], [
             '3', 'ignore&', '3', ], [

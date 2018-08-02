@@ -14,7 +14,7 @@ import os
 logging.basicConfig(filename='managers.log', level=logging.DEBUG)
 
 
-class TaskManager:
+class TaskManager(object):
     """
     This class will manage the whole process of a comparison task
     It handles following jobs:
