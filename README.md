@@ -9,7 +9,7 @@ A tool for finding the difference between multiple data sources which should hav
 1. Resolve the differences for user basing on input rules.
 
 ---
-## setup
+## setup on EC2
 ### Install
 1. install mysql
     ```shell
