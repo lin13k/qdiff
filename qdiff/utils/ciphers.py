@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 from django.conf import settings
 
 
-class FernetCipher:
+class FernetCipher(object):
     def __init__(self, cipher=None):
         if cipher:
             self.cipher = Fernet(cipher)

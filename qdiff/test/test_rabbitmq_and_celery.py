@@ -1,9 +1,13 @@
 from django.test import TestCase
-from unittest.mock import patch
 import pytest
 from qdiff.models import Task
 from qdiff.tasks import compareCommand, test
 from django.conf import settings
+import sys
+if sys.version_info > (3,):
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 
 class CompareCommandTestCase(TestCase):

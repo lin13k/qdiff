@@ -4,6 +4,7 @@ from random import randint
 from django.db import connection
 from csv import reader
 import os
+import sys
 
 
 class DatabaseWriterTestCase(TransactionTestCase):
@@ -77,25 +78,49 @@ class CsvWriterTestCase(TestCase):
         pass
 
     def testWriteWithoutHeaders(self):
-        with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
-            w = CsvWriter(csvfile, delimiter=',', quotechar='\\')
-            w.writeAll([['row1', 'data1'], ['row2', 'data2']])
-        with open('test_csvwriter.txt', newline='') as csvfile:
-            w = reader(csvfile, delimiter=',', quotechar='\\')
-            r = '\n'.join([str(x) for x in list(w)])
-            os.remove('test_csvwriter.txt')
-            self.assertEquals(r, "['row1', 'data1']\n['row2', 'data2']")
+        if sys.version_info > (3,):
+            with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
+                w = CsvWriter(csvfile, delimiter=',', quotechar='\\')
+                w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+            with open('test_csvwriter.txt', newline='') as csvfile:
+                w = reader(csvfile, delimiter=',', quotechar='\\')
+                r = '\n'.join([str(x) for x in list(w)])
+                os.remove('test_csvwriter.txt')
+                self.assertEquals(r, "['row1', 'data1']\n['row2', 'data2']")
+        else:
+            with open('test_csvwriter.txt', 'w+') as csvfile:
+                w = CsvWriter(csvfile, delimiter=',', quotechar='\\')
+                w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+            with open('test_csvwriter.txt') as csvfile:
+                w = reader(csvfile, delimiter=',', quotechar='\\')
+                r = '\n'.join([str(x) for x in list(w)])
+                os.remove('test_csvwriter.txt')
+                self.assertEquals(r, "['row1', 'data1']\n['row2', 'data2']")
 
     def testWriteWithHeaders(self):
-        with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
-            w = CsvWriter(
-                csvfile, delimiter=',',
-                quotechar='\\', headers=['h1', 'h2'])
-            w.writeAll([['row1', 'data1'], ['row2', 'data2']])
-        with open('test_csvwriter.txt', newline='') as csvfile:
-            w = reader(csvfile, delimiter=',', quotechar='\\')
-            r = '\n'.join([str(x) for x in list(w)])
-            os.remove('test_csvwriter.txt')
-            self.assertEquals(
-                r,
-                "['h1', 'h2']\n['row1', 'data1']\n['row2', 'data2']")
+        if sys.version_info > (3,):
+            with open('test_csvwriter.txt', 'w+', newline='') as csvfile:
+                w = CsvWriter(
+                    csvfile, delimiter=',',
+                    quotechar='\\', headers=['h1', 'h2'])
+                w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+            with open('test_csvwriter.txt', newline='') as csvfile:
+                w = reader(csvfile, delimiter=',', quotechar='\\')
+                r = '\n'.join([str(x) for x in list(w)])
+                os.remove('test_csvwriter.txt')
+                self.assertEquals(
+                    r,
+                    "['h1', 'h2']\n['row1', 'data1']\n['row2', 'data2']")
+        else:
+            with open('test_csvwriter.txt', 'w+') as csvfile:
+                w = CsvWriter(
+                    csvfile, delimiter=',',
+                    quotechar='\\', headers=['h1', 'h2'])
+                w.writeAll([['row1', 'data1'], ['row2', 'data2']])
+            with open('test_csvwriter.txt') as csvfile:
+                w = reader(csvfile, delimiter=',', quotechar='\\')
+                r = '\n'.join([str(x) for x in list(w)])
+                os.remove('test_csvwriter.txt')
+                self.assertEquals(
+                    r,
+                    "['h1', 'h2']\n['row1', 'data1']\n['row2', 'data2']")

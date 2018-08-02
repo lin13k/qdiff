@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from hashlib import sha256
-from io import StringIO
 from qdiff.models import Task, ConflictRecord, Report
 from qdiff.readers import DatabaseReader
 from qdiff.tasks import compareCommand
@@ -23,6 +22,11 @@ from wsgiref.util import FileWrapper
 import json
 import os
 import csv
+import sys
+if (3,) < sys.version_info:
+    from io import StringIO
+else:
+    from io import BytesIO as StringIO
 
 
 def task_list_view(request):
@@ -79,7 +83,6 @@ def task_create_view(request):
     if request.method == 'GET':
         return render(request, 'qdiff/task_create.html', context)
     # save the csv if file uploaded
-    print('checkA')
     rds1 = rds2 = path1 = path2 = None
     file1 = request.FILES.get('file1', None)
     if file1:
@@ -96,7 +99,6 @@ def task_create_view(request):
     if dbfile2:
         rds2 = settings.SOURCE_TYPE_DATABASE_PREFIX + decodedContent(dbfile2)
 
-    print('checkB')
     # validate the input
     ignore1 = request.POST.get('ignoreList1', None)
     ignore2 = request.POST.get('ignoreList2', None)
@@ -108,7 +110,6 @@ def task_create_view(request):
     wds1 = request.POST.get('wds1', None)
     wds2 = request.POST.get('wds2', None)
 
-    print('checkC')
     v = Validator(
         summary, rds1, rds2,
         sql1, sql2, ignore1, ignore2,
@@ -124,7 +125,6 @@ def task_create_view(request):
         # passing original value back
         return render(request, 'qdiff/task_create.html', context)
 
-    print('checkD')
     # create model
     model = Task.objects.create(
         summary=summary,
@@ -135,10 +135,8 @@ def task_create_view(request):
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
-    print('checkE')
     # create report model
     if grouping_fields and len(grouping_fields) > 0:
-        print('checkE-1')
         Report.objects.create(
             report_generator='AggregatedReportGenerator',
             parameters='{"grouping_fields":"%s"}' % grouping_fields,
@@ -146,7 +144,6 @@ def task_create_view(request):
 
     # invoke async compare_command with model id
     compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
-    print('checkF')
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
 
 
@@ -252,8 +249,7 @@ class Database_Config_APIView(APIView):
               ] = 'attachment; filename="' + filename + '_databaseConfig.txt"'
             return r
         except Exception as e:
-            print(e)
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
 
 class Agregated_Report_APIView(APIView):

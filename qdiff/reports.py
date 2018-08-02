@@ -12,7 +12,7 @@ import errno
 from collections import defaultdict
 
 
-class ReportGenerator:
+class ReportGenerator(object):
     '''
     base class for report generators
     it provides the factory design pattern

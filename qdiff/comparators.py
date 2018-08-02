@@ -3,7 +3,7 @@ from django.conf import settings
 import re
 
 
-class FieldComparator:
+class FieldComparator(object):
     def __init__(self, dataReader1, dataReader2,
                  ignoredFields1=[], ignoredFields2=[], taskModel=None):
         self._dataReader1 = dataReader1
@@ -45,7 +45,7 @@ class FieldComparator:
         return True
 
 
-class ValueComparator:
+class ValueComparator(object):
     """Comparator is used to compare the given data and find the differences"""
 
     def __init__(self, dataReader1, dataReader2,
