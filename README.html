@@ -821,7 +821,7 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 <a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h3>
 <ol>
 <li>run command
-<div class="highlight highlight-source-shell"><pre>sudo python3 manage.py <span class="pl-c1">test</span> --settings=setting.settings_test</pre></div>
+<div class="highlight highlight-source-shell"><pre>sudo python3 manage.py <span class="pl-c1">test</span></pre></div>
 </li>
 <li>Cheers if all the test cases are successful</li>
 </ol>
@@ -967,11 +967,12 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 <h3>
 <a id="user-content-start-and-test-your-machine" class="anchor" href="#start-and-test-your-machine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start and test your machine</h3>
 <ol>
-<li>access URL host:port/tasks to check if it works or not</li>
-</ol>
+<li>
+<p>access URL host:port/tasks to check if it works or not</p>
 <p>for example: <a href="http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks" rel="nofollow">http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks</a></p>
-<ol>
-<li>if not working, check following files for debug
+</li>
+<li>
+<p>if not working, check following files for debug</p>
 <div class="highlight highlight-source-shell"><pre>/var/log/nginx/error.log    <span class="pl-c"><span class="pl-c">#</span>nginx reverse server log</span>
 /opt/datadiff/uwsgi.log     <span class="pl-c"><span class="pl-c">#</span>uwsgi server log</span>
 /opt/datadiff/dev.log       <span class="pl-c"><span class="pl-c">#</span>qdiff log</span></pre></div>

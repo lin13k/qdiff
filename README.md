@@ -92,7 +92,7 @@ celery -A qdiff worker -l info --detach
 ### Sanity test
 1. run command
     ```shell
-    sudo python3 manage.py test --settings=setting.settings_test
+    sudo python3 manage.py test
     ```
 1. Cheers if all the test cases are successful
 
@@ -234,7 +234,7 @@ celery -A qdiff worker -l info --detach
 ### start and test your machine
 1. access URL host:port/tasks to check if it works or not
 
-for example: http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks
+    for example: http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks
 
 1. if not working, check following files for debug
     ```shell
