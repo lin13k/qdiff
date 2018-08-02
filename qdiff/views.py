@@ -47,10 +47,10 @@ def task_detail_view(request, pk):
     columns = []
     if task.status == Task.STATUS_OF_TASK_COMPLETED:
         crr1 = ConflictRecordReader(tableName1)
-        result1 = [(*item, ConflictRecord.POSITION_IN_TASK_LEFT)
+        result1 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_LEFT,))
                    for item in crr1.getConflictRecords()]
         crr2 = ConflictRecordReader(tableName2)
-        result2 = [(*item, ConflictRecord.POSITION_IN_TASK_RIGHT)
+        result2 = [tuple(item + (ConflictRecord.POSITION_IN_TASK_RIGHT,))
                    for item in crr2.getConflictRecords()]
         conflictResults = result1 + result2
         columns = crr1.getColumns()
@@ -79,6 +79,7 @@ def task_create_view(request):
     if request.method == 'GET':
         return render(request, 'qdiff/task_create.html', context)
     # save the csv if file uploaded
+    print('checkA')
     rds1 = rds2 = path1 = path2 = None
     file1 = request.FILES.get('file1', None)
     if file1:
@@ -95,6 +96,7 @@ def task_create_view(request):
     if dbfile2:
         rds2 = settings.SOURCE_TYPE_DATABASE_PREFIX + decodedContent(dbfile2)
 
+    print('checkB')
     # validate the input
     ignore1 = request.POST.get('ignoreList1', None)
     ignore2 = request.POST.get('ignoreList2', None)
@@ -106,6 +108,7 @@ def task_create_view(request):
     wds1 = request.POST.get('wds1', None)
     wds2 = request.POST.get('wds2', None)
 
+    print('checkC')
     v = Validator(
         summary, rds1, rds2,
         sql1, sql2, ignore1, ignore2,
@@ -121,6 +124,7 @@ def task_create_view(request):
         # passing original value back
         return render(request, 'qdiff/task_create.html', context)
 
+    print('checkD')
     # create model
     model = Task.objects.create(
         summary=summary,
@@ -131,8 +135,10 @@ def task_create_view(request):
         right_query_sql=sql2,
         right_ignore_fields=ignore2,
     )
+    print('checkE')
     # create report model
     if grouping_fields and len(grouping_fields) > 0:
+        print('checkE-1')
         Report.objects.create(
             report_generator='AggregatedReportGenerator',
             parameters='{"grouping_fields":"%s"}' % grouping_fields,
@@ -140,6 +146,7 @@ def task_create_view(request):
 
     # invoke async compare_command with model id
     compareCommand.delay(model.id, rds1, rds2, wds1, wds2)
+    print('checkF')
     return redirect(reverse('task_detail', kwargs={'pk': model.id}))
 
 

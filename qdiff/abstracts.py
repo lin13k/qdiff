@@ -1,7 +1,7 @@
 from django.db import connections
 
 
-class AbstractDatabaseAccessUnit:
+class AbstractDatabaseAccessUnit(object):
     '''
     This abstract class is used by database reader and writer
     '''

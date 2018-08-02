@@ -3,13 +3,12 @@ import re
 import json
 
 
-class Validator:
+class Validator(object):
     """docstring for Validator"""
 
     def __init__(self, summary, rds1, rds2,
                  sql1=None, sql2=None, ignore1=None, ignore2=None,
                  wds1=None, wds2=None):
-        super(Validator, self).__init__()
         self.summary = summary
         self.rds1 = rds1
         self.rds2 = rds2
