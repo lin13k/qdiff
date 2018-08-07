@@ -2,6 +2,18 @@
 ## Overview
 A tool for finding the difference between multiple data sources which should have the same value.
 
+
+
+<details><summary> Heavily tested versions
+</summary>
+
+|Django     | Python 2  | Python 3  |
+| --------- | ----------| --------- |
+| 1.11.15   |     V     |           |
+| 2.0.5     |           |     V     |
+
+</details>
+
 ---
 ## Goals
 1. Reduce the efforts required to check data validation from different source.
@@ -9,8 +21,15 @@ A tool for finding the difference between multiple data sources which should hav
 1. Resolve the differences for user basing on input rules.
 
 ---
-## setup
+## Setup on EC2
+<details><summary> detail guides
+</summary>
+
 ### Install
+<details><summary> detail guides
+</summary>
+
+
 1. install mysql
     ```shell
     sudo yum install mysql-server
@@ -35,9 +54,13 @@ A tool for finding the difference between multiple data sources which should hav
     ```shell
     python3 -m pip install -r datadiff/requirements.txt --user
     ```
+</details>
 
 
 ### Setup database - mysql
+<details><summary> detail guides
+</summary>
+
 1. start mysql server
     ```shell
     sudo service mysqld start
@@ -57,8 +80,12 @@ A tool for finding the difference between multiple data sources which should hav
     python3 manage.py makemigrations
     python3 manage.py migrate
     ```
+</details>
 
 ### install rabbitmq as broker for celery
+<details><summary> detail guides
+</summary>
+
 1. install Erlang Version 20.1
     ```
     cd /opt
@@ -82,23 +109,40 @@ A tool for finding the difference between multiple data sources which should hav
     ```
     sudo service rabbitmq-server start
     ```
+</details>
 
 
-### start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+### start celery worker, use daemon or inline cli. 
+<details><summary> detail guides
+</summary>
+
 ```
 celery -A qdiff worker -l info --detach
 ```
+You can also check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+</details>
 
 ### Sanity test
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo python3 manage.py test
     ```
 1. Cheers if all the test cases are successful
+</details>
+</details>
 
 ---
 ## Deploy with Nginx, UWSGI in EC2
+<details><summary> detail guides
+</summary>
+
 ### pull the code into the folder /opt/datadiff/
+<details><summary> detail guides
+</summary>
+
 1. make directory /opt/
     ```shell
     sudo mkdir /opt
@@ -108,20 +152,32 @@ celery -A qdiff worker -l info --detach
     cd /opt
     git clone git@github.com:analyticsMD/datadiff.git
     ``` 
+</details>
 
 ### install uwsgi
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo python3 -m pip install uwsgi
     ```
+</details>
 
 ### install nginx
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo yum install nginx
     ```
+</details>
 
 ### create qdiff.conf file for nginx
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo vim /etc/nginx/nginx.conf
@@ -157,8 +213,12 @@ celery -A qdiff worker -l info --detach
         index   index.html index.htm;
     }
     ```
+</details>
 
 ### create qdiff_nginx.conf for nginx
+<details><summary> detail guides
+</summary>
+
 1. make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
     ```shell
     mkdir /etc/nginx/sites-enable/
@@ -203,8 +263,12 @@ celery -A qdiff worker -l info --detach
     }
 
     ```
+</details>
 
 ### make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable
+<details><summary> detail guides
+</summary>
+
 1. check the read write permissions
     ```shell
     ls -l /var/lib/nginx/tmp/
@@ -218,8 +282,12 @@ celery -A qdiff worker -l info --detach
     drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 
     ```
+</details>
 
 ### start the qdiff
+<details><summary> detail guides
+</summary>
+
 1. start the nginx service
     ```shell
     sudo service nginx start
@@ -230,8 +298,12 @@ celery -A qdiff worker -l info --detach
     cd /opt/datadiff
     uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log
     ```
+</details>
 
 ### start and test your machine
+<details><summary> detail guides
+</summary>
+
 1. access URL host:port/tasks to check if it works or not
 
     for example: http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks
@@ -242,6 +314,10 @@ celery -A qdiff worker -l info --detach
     /opt/datadiff/uwsgi.log     #uwsgi server log
     /opt/datadiff/dev.log       #qdiff log
     ```
+</details>
+
+</details>
+
 ---
 
 ## System architecture
@@ -251,11 +327,9 @@ celery -A qdiff worker -l info --detach
     For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
 
 <img src="./diagrams/sa.png">
-<a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i">link</a>
 
 ### Data flow
 <img src="./diagrams/df.png">
-<a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF">link</a>
 
 
 ### Components
@@ -363,33 +437,10 @@ celery -A qdiff worker -l info --detach
 
 ---
 
-## Milestone
-### Development
-| phase | timeline | items
----|---|---
-1 | Week 2 | Data reader, file reader, comparator
-2 | Week 4 | Report viewer
-3 | Week 6 | Rule parser, conflict resolver
-
-### SIT
-| phase | timeline | items
----|---|---
-1 | Week 3 | Data reader, file reader, comparator
-2 | Week 5 | Report viewer
-3 | Week 7 | Rule parser, conflict resolver
-
-### CAT/UAT
-| phase | timeline | items
----|---|---
-1 | Week 4 | Data reader, file reader, comparator
-2 | Week 6 | Report viewer
-3 | Week 8 | Rule parser, conflict resolver
-
----
-
 ## ERD
 ### entities	
 <img src="./diagrams/erd.png">
+
 1. Task
 
     * Information of datasource

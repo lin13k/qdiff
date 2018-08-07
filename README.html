@@ -733,6 +733,30 @@ pre {
 <h2>
 <a id="user-content-overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h2>
 <p>A tool for finding the difference between multiple data sources which should have the same value.</p>
+<details><summary> Heavily tested versions
+</summary>
+<table>
+<thead>
+<tr>
+<th>Django</th>
+<th>Python 2</th>
+<th>Python 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.11.15</td>
+<td>V</td>
+<td></td>
+</tr>
+<tr>
+<td>2.0.5</td>
+<td></td>
+<td>V</td>
+</tr>
+</tbody>
+</table>
+</details>
 <hr>
 <h2>
 <a id="user-content-goals" class="anchor" href="#goals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Goals</h2>
@@ -743,9 +767,13 @@ pre {
 </ol>
 <hr>
 <h2>
-<a id="user-content-setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>setup</h2>
+<a id="user-content-setup-on-ec2" class="anchor" href="#setup-on-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup on EC2</h2>
+<details><summary> detail guides
+</summary>
 <h3>
 <a id="user-content-install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>install mysql
 <div class="highlight highlight-source-shell"><pre>sudo yum install mysql-server</pre></div>
@@ -766,8 +794,11 @@ pre {
 <div class="highlight highlight-source-shell"><pre>python3 -m pip install -r datadiff/requirements.txt --user</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-setup-database---mysql" class="anchor" href="#setup-database---mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup database - mysql</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>start mysql server
 <div class="highlight highlight-source-shell"><pre>sudo service mysqld start</pre></div>
@@ -785,8 +816,11 @@ mysql<span class="pl-k">&gt;</span> create database qdiff_test<span class="pl-k"
 python3 manage.py migrate</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-rabbitmq-as-broker-for-celery" class="anchor" href="#install-rabbitmq-as-broker-for-celery" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install rabbitmq as broker for celery</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>install Erlang Version 20.1
 <pre><code>cd /opt
@@ -812,24 +846,36 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
-<a id="user-content-start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli. check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a>
-</h3>
+<a id="user-content-start-celery-worker-use-daemon-or-inline-cli" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli.</h3>
+<details><summary> detail guides
+</summary>
 <pre><code>celery -A qdiff worker -l info --detach
 </code></pre>
+<p>You can also check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a></p>
+</details>
 <h3>
 <a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo python3 manage.py <span class="pl-c1">test</span></pre></div>
 </li>
 <li>Cheers if all the test cases are successful</li>
 </ol>
+</details>
+</details>
 <hr>
 <h2>
 <a id="user-content-deploy-with-nginx-uwsgi-in-ec2" class="anchor" href="#deploy-with-nginx-uwsgi-in-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Deploy with Nginx, UWSGI in EC2</h2>
+<details><summary> detail guides
+</summary>
 <h3>
 <a id="user-content-pull-the-code-into-the-folder-optdatadiff" class="anchor" href="#pull-the-code-into-the-folder-optdatadiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pull the code into the folder /opt/datadiff/</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>make directory /opt/
 <div class="highlight highlight-source-shell"><pre>sudo mkdir /opt</pre></div>
@@ -839,22 +885,31 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 git clone git@github.com:analyticsMD/datadiff.git</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-uwsgi" class="anchor" href="#install-uwsgi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install uwsgi</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo python3 -m pip install uwsgi</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-nginx" class="anchor" href="#install-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo yum install nginx</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-create-qdiffconf-file-for-nginx" class="anchor" href="#create-qdiffconf-file-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff.conf file for nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo vim /etc/nginx/nginx.conf</pre></div>
@@ -891,8 +946,11 @@ http {
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-create-qdiff_nginxconf-for-nginx" class="anchor" href="#create-qdiff_nginxconf-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff_nginx.conf for nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
 <div class="highlight highlight-source-shell"><pre>mkdir /etc/nginx/sites-enable/
@@ -937,8 +995,11 @@ server {
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" class="anchor" href="#make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>check the read write permissions
 <div class="highlight highlight-source-shell"><pre>ls -l /var/lib/nginx/tmp/</pre></div>
@@ -951,8 +1012,11 @@ drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 </pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-start-the-qdiff" class="anchor" href="#start-the-qdiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start the qdiff</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>
 <p>start the nginx service</p>
@@ -964,8 +1028,11 @@ drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-start-and-test-your-machine" class="anchor" href="#start-and-test-your-machine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start and test your machine</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>
 <p>access URL host:port/tasks to check if it works or not</p>
@@ -978,6 +1045,8 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 /opt/datadiff/dev.log       <span class="pl-c"><span class="pl-c">#</span>qdiff log</span></pre></div>
 </li>
 </ol>
+</details>
+</details>
 <hr>
 <h2>
 <a id="user-content-system-architecture" class="anchor" href="#system-architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>System architecture</h2>
