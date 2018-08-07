@@ -322,11 +322,12 @@ You can also check http://docs.celeryproject.org/en/latest/userguide/daemonizing
 
 ## System architecture
 ### Architecture
-
-    For database, the user should config access in qDiff database.
-    For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
+<details><summary> details
+</summary>
+    When input databases as datasources, users need to generate a database access token first. The database access token is an encrypted JSON file which contains the database setting for Django.
 
 <img src="./diagrams/sa.png">
+</details>
 
 ### Data flow
 <img src="./diagrams/df.png">

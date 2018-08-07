@@ -1052,15 +1052,14 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 <a id="user-content-system-architecture" class="anchor" href="#system-architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>System architecture</h2>
 <h3>
 <a id="user-content-architecture" class="anchor" href="#architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Architecture</h3>
-<pre><code>For database, the user should config access in qDiff database.
-For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
-</code></pre>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" style="max-width:100%;"></a></p>
-<a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i" rel="nofollow">link</a>
+<details><summary> details
+</summary>
+    When input databases as datasources, users need to generate a database access token first. The database access token is an encrypted JSON file which contains the database setting for Django.
+<a href="" target="_blank"><img style="max-width:100%;"></a>
+</details>
 <h3>
 <a id="user-content-data-flow" class="anchor" href="#data-flow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data flow</h3>
 <p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" style="max-width:100%;"></a></p>
-<a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF" rel="nofollow">link</a>
 <h3>
 <a id="user-content-components" class="anchor" href="#components" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Components</h3>
 <ol>
@@ -1191,112 +1190,30 @@ Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
 </ol>
 <hr>
 <h2>
-<a id="user-content-milestone" class="anchor" href="#milestone" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Milestone</h2>
-<h3>
-<a id="user-content-development" class="anchor" href="#development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Development</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 2</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 4</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 6</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
-<h3>
-<a id="user-content-sit" class="anchor" href="#sit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SIT</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 3</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 5</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 7</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
-<h3>
-<a id="user-content-catuat" class="anchor" href="#catuat" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>CAT/UAT</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 4</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 6</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 8</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<h2>
 <a id="user-content-erd" class="anchor" href="#erd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ERD</h2>
 <h3>
 <a id="user-content-entities" class="anchor" href="#entities" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>entities</h3>
 <p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" style="max-width:100%;"></a></p>
-1. Task
-<pre><code>* Information of datasource
-* Uploaded file path
-* Database information (encryption required, use what as secret key, what as salt) 
-* Datetime, Recording the start time and end time for performance evaluation
-* Owner 
-</code></pre>
 <ol>
-<li>Conflict record
+<li>
+<p>Task</p>
+<ul>
+<li>Information of datasource</li>
+<li>Uploaded file path</li>
+<li>Database information (encryption required, use what as secret key, what as salt)</li>
+<li>Datetime, Recording the start time and end time for performance evaluation</li>
+<li>Owner</li>
+</ul>
+</li>
+<li>
+<p>Conflict record</p>
 <ul>
 <li>Raw data</li>
 <li>What source it belongs to</li>
 </ul>
 </li>
-<li>Rule set
+<li>
+<p>Rule set</p>
 <ul>
 <li>Name</li>
 <li>Description</li>
