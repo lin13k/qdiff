@@ -29,6 +29,229 @@ A tool for finding the difference between multiple data sources which should hav
 </details>
 
 ---
+## Setup locally
+<details><summary> install on python2 Venv
+</summary>
+
+### One-time setup on Mac
+in these steps, the bold and italic sentences are the commands for terminal
+
+1. install brew
+    ```
+    sudo xcodebuild -license
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    ```
+1. install mysql via brew
+    ```
+    brew install mysql
+    ```
+
+1. start mysql
+    ```
+    brew services start mysql
+    ```
+
+1. install rabbitmq 
+    ```
+    brew install rabbitmq
+    ```
+
+1. start rabbitmq
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. pull the source code
+    ```
+    cd ~
+    git clone https://github.com/analyticsMD/datadiff.git
+    ```
+
+1. create virtual environment p2env for qdiff
+    ```
+    cd datadiff
+    python -m venv p2env
+    ```
+
+1. activate the virtual environment 
+    ```
+    source p2env/bin/activate
+    ```
+
+1. install dependency for qdiff
+    ```
+    pip install -r requirements.txt
+    ```
+
+1. create database 
+    ```
+    mysql -uroot -p
+    CREATE DATABASE qdiff;
+    exit;
+    ```
+
+1. init tables in the database
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. do a test for sanity check
+    ```
+    python manage.py test
+    ```
+
+1. run the server for demo!!
+    ```
+    python manage.py runserver
+    ```
+
+1. check URL http://127.0.0.1:8000/
+
+### Consecutive runs
+After you restart your device, you only need to do the following to launch Qdiff
+
+1. start rabbitmq server
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. activate virtual environment
+    ```
+    cd ~/datadiff
+    source p2env/bin/activate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. run the django server
+    ```
+    python manage.py runserver
+    ```
+</details>
+
+<details><summary> install on python3 Venv
+</summary>
+
+### One-time setup on Mac
+in these steps, the bold and italic sentences are the commands for terminal
+
+1. install brew
+    ```
+    sudo xcodebuild -license
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    ```
+1. install mysql via brew
+    ```
+    brew install mysql
+    ```
+
+1. start mysql
+    ```
+    brew services start mysql
+    ```
+
+1. install rabbitmq 
+    ```
+    brew install rabbitmq
+    ```
+
+1. start rabbitmq
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. install python36
+    ```
+    brew install python
+    ```
+
+1. pull the source code
+    ```
+    cd ~
+    git clone https://github.com/analyticsMD/datadiff.git
+    ```
+
+1. create virtual environment p3env for qdiff
+    ```
+    cd datadiff
+    python3 -m venv p3env
+    ```
+
+1. activate the virtual environment 
+    ```
+    source p3env/bin/activate
+    ```
+
+1. install dependency for qdiff
+    ```
+    pip install -r requirements.txt
+    ```
+
+1. create database 
+    ```
+    mysql -uroot -p
+    CREATE DATABASE qdiff;
+    exit;
+    ```
+
+1. init tables in the database
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. do a test for sanity check
+    ```
+    python manage.py test
+    ```
+
+1. run the server for demo!!
+    ```
+    python manage.py runserver
+    ```
+
+1. check URL http://127.0.0.1:8000/
+
+### Consecutive runs
+After you restart your device, you only need to do the following to launch Qdiff
+
+1. start rabbitmq server
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. activate virtual environment
+    ```
+    cd ~/datadiff
+    source p3env/bin/activate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. run the django server
+    ```
+    python manage.py runserver
+    ```
+</details>
+
+---
 ## Setup on EC2
 <details><summary> detail guides
 </summary>
@@ -297,6 +520,8 @@ Please make sure you already finish [this section](#setup-on-ec2)
 ### start the qdiff
 <details><summary> detail guides
 </summary>
+
+1. make sure the rabbit mq already start
 
 1. start the nginx service
     ```shell

@@ -777,6 +777,240 @@ pre {
 </details>
 <hr>
 <h2>
+<a id="user-content-setup-locally" class="anchor" href="#setup-locally" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup locally</h2>
+<details><summary> install on python2 Venv
+</summary>
+<h3>
+<a id="user-content-one-time-setup-on-mac" class="anchor" href="#one-time-setup-on-mac" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>One-time setup on Mac</h3>
+<p>in these steps, the bold and italic sentences are the commands for terminal</p>
+<ol>
+<li>
+<p>install brew</p>
+<pre><code>sudo xcodebuild -license
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+</code></pre>
+</li>
+<li>
+<p>install mysql via brew</p>
+<pre><code>brew install mysql
+</code></pre>
+</li>
+<li>
+<p>start mysql</p>
+<pre><code>brew services start mysql
+</code></pre>
+</li>
+<li>
+<p>install rabbitmq </p>
+<pre><code>brew install rabbitmq
+</code></pre>
+</li>
+<li>
+<p>start rabbitmq</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>pull the source code</p>
+<pre><code>cd ~
+git clone https://github.com/analyticsMD/datadiff.git
+</code></pre>
+</li>
+<li>
+<p>create virtual environment p2env for qdiff</p>
+<pre><code>cd datadiff
+python -m venv p2env
+</code></pre>
+</li>
+<li>
+<p>activate the virtual environment </p>
+<pre><code>source p2env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>install dependency for qdiff</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+</li>
+<li>
+<p>create database </p>
+<pre><code>mysql -uroot -p
+CREATE DATABASE qdiff;
+exit;
+</code></pre>
+</li>
+<li>
+<p>init tables in the database</p>
+<pre><code>python manage.py makemigrations
+python manage.py migrate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>do a test for sanity check</p>
+<pre><code>python manage.py test
+</code></pre>
+</li>
+<li>
+<p>run the server for demo!!</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+<li>
+<p>check URL <a href="http://127.0.0.1:8000/" rel="nofollow">http://127.0.0.1:8000/</a></p>
+</li>
+</ol>
+<h3>
+<a id="user-content-consecutive-runs" class="anchor" href="#consecutive-runs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Consecutive runs</h3>
+<p>After you restart your device, you only need to do the following to launch Qdiff</p>
+<ol>
+<li>
+<p>start rabbitmq server</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>activate virtual environment</p>
+<pre><code>cd ~/datadiff
+source p2env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>run the django server</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+</ol>
+</details>
+<details><summary> install on python3 Venv
+</summary>
+<h3>
+<a id="user-content-one-time-setup-on-mac-1" class="anchor" href="#one-time-setup-on-mac-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>One-time setup on Mac</h3>
+<p>in these steps, the bold and italic sentences are the commands for terminal</p>
+<ol>
+<li>
+<p>install brew</p>
+<pre><code>sudo xcodebuild -license
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+</code></pre>
+</li>
+<li>
+<p>install mysql via brew</p>
+<pre><code>brew install mysql
+</code></pre>
+</li>
+<li>
+<p>start mysql</p>
+<pre><code>brew services start mysql
+</code></pre>
+</li>
+<li>
+<p>install rabbitmq </p>
+<pre><code>brew install rabbitmq
+</code></pre>
+</li>
+<li>
+<p>start rabbitmq</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>install python36</p>
+<pre><code>brew install python
+</code></pre>
+</li>
+<li>
+<p>pull the source code</p>
+<pre><code>cd ~
+git clone https://github.com/analyticsMD/datadiff.git
+</code></pre>
+</li>
+<li>
+<p>create virtual environment p3env for qdiff</p>
+<pre><code>cd datadiff
+python3 -m venv p3env
+</code></pre>
+</li>
+<li>
+<p>activate the virtual environment </p>
+<pre><code>source p3env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>install dependency for qdiff</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+</li>
+<li>
+<p>create database </p>
+<pre><code>mysql -uroot -p
+CREATE DATABASE qdiff;
+exit;
+</code></pre>
+</li>
+<li>
+<p>init tables in the database</p>
+<pre><code>python manage.py makemigrations
+python manage.py migrate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>do a test for sanity check</p>
+<pre><code>python manage.py test
+</code></pre>
+</li>
+<li>
+<p>run the server for demo!!</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+<li>
+<p>check URL <a href="http://127.0.0.1:8000/" rel="nofollow">http://127.0.0.1:8000/</a></p>
+</li>
+</ol>
+<h3>
+<a id="user-content-consecutive-runs-1" class="anchor" href="#consecutive-runs-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Consecutive runs</h3>
+<p>After you restart your device, you only need to do the following to launch Qdiff</p>
+<ol>
+<li>
+<p>start rabbitmq server</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>activate virtual environment</p>
+<pre><code>cd ~/datadiff
+source p3env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>run the django server</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+</ol>
+</details>
+<hr>
+<h2>
 <a id="user-content-setup-on-ec2" class="anchor" href="#setup-on-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup on EC2</h2>
 <details><summary> detail guides
 </summary>
@@ -1029,6 +1263,9 @@ drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 <details><summary> detail guides
 </summary>
 <ol>
+<li>
+<p>make sure the rabbit mq already start</p>
+</li>
 <li>
 <p>start the nginx service</p>
 <div class="highlight highlight-source-shell"><pre>sudo service nginx start</pre></div>
