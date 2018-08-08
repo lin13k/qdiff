@@ -144,6 +144,8 @@ You can also check http://docs.celeryproject.org/en/latest/userguide/daemonizing
 
 ---
 ## Deploy with Nginx, UWSGI in EC2
+Please make sure you already finish [this section](#Setup-on-EC2)
+
 <details><summary> detail guides
 </summary>
 
