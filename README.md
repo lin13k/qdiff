@@ -2,8 +2,6 @@
 ## Overview
 A tool for finding the difference between multiple data sources which should have the same value.
 
-
-
 <details><summary> Heavily tested versions
 </summary>
 
@@ -19,6 +17,16 @@ A tool for finding the difference between multiple data sources which should hav
 1. Reduce the efforts required to check data validation from different source.
 1. Report the differences to user.
 1. Resolve the differences for user basing on input rules.
+
+<details><summary>Scenarios
+</summary>
+
+* Comparing tables within same database
+* Comparing tables from different databases
+* Comparing tables with different range of data within same/different database
+* Comparing table and CSV file
+* Comparing unordered CSV file and database 
+</details>
 
 ---
 ## Setup on EC2
@@ -329,132 +337,141 @@ You can also check http://docs.celeryproject.org/en/latest/userguide/daemonizing
 <img src="./diagrams/sa.png">
 </details>
 
-### Data flow
-<img src="./diagrams/df.png">
-
-
 ### Components
-1. Data reader
-    * Using ORM framework to read the data
-    * Supporting multiple databases and file sources
-1. file reader
-    * Importing the file into the database, support  DSV(CSV, TSV) and excel
-1. Comparator
+<details><summary> details
+</summary>
+
+#### Data reader
+* Using Django DB cursor to read the data
+* Supporting multiple databases and file sources
+
+#### file reader
+* Support  CSV excel
+
+#### Comparators
+##### Field Comparators
+A wrapper for package [tableschema](https://github.com/frictionlessdata/tableschema-py)
+* It will query setting.settings.SCHEMA_INFER_LIMIT number records and infer the schema from them.
+* The setting.settings.SCHEMA_INFER_CONFIDENCE permits the minor occurance of abnomral, default is 1.00.
+* The setting.settings.SCHEMA_CSV_MISSING_VALUES and SCHEMA_DATABASE_MISSING_VALUES is used to configurate what should be consider as missing. 
+
+
+##### Value Comparators
+1. Variable definitions
+
+    data1, data2: the input data, can be queryset, list, dictionary
+
+    item1, item2: the elements from data1 and data2
     
-    1. Brief description
+    dict1, dict2: the list for saving unmatch records
 
-        data1, data2: the input data, can be queryset, list, dictionary
+1. steps
+    1. Sort the data1 and data2
+    1. Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
+        1. If the item1 is identical to item2, iterate next item pair
+        1. Else if the item1 in dict2, save the all elements in dict2 except item1 as conflicted results, iterate next item1
+        1. Else if the item2 in dict1, save the all elements in dict1 except item2 as conflicted results, iterate next item2
+        1. Else, the item1 is different from the item2, put item1 in dict1 and item2 in dict2, iterate next item pair
 
-        item1, item2: the elements from data1 and data2
-        
-        list1, list2: the list for saving unmatch records
+1. Complexity.
 
-    1. steps
-        1. Sort the data1 and data2
-        1. Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
-            1. If the item1 is identical to item2, iterate next item
-            1. If the item1 in list2, save the all elements in list2 except item1 as conflicted results
-            1. If the item2 in list1, save the all elements in list1 except item2 as conflicted results
-            1. If the item1 is different from the item2, put item1 in list1 and item2 in list2
+    given m,n = len(data1),len(data2)
 
-    1. Complexity.
+    Time complexity:
 
-        given m,n = len(data1),len(data2)
-    
-        Time complexity:
+        O(m+n)
 
-            Average Case: O(m+n)
+    Space complexity:
 
-            Amortized Worst Case: O(m*n)
+        O(m+n)
 
-        Space complexity:
+1. pseudo code in python
 
-            O(m+n)
-
-    1. pseudo code in python
-
-        ```python
-        qDiff(data1, data2):
-            iter1 = iter(sorted(data1))
-            iter2 = iter(sorted(data2))
-            temp_dict1 ={}
-            temp_dict2 ={}
-            item1 = None
-            item2 = None
-            try:
-                while True:
-                    item1 = next(iter1)
-                    item2 = next(iter2)
-                    h1 = hash(item1)
-                    h2 = hash(item2)
-                    if h1==h2:
-                        item1 = None
-                        item2 = None
-                        continue
-                    elif h1 in temp_dict2 or h2 in temp_dict1:
-                        if h1 in temp_dict2:
-                            temp_dict2.pop(h1)
-                            saveToConflictedResult(temp_dict2.values())
-                        if h2 in temp_dict1:
-                            temp_dict1.pop(h2) 
-                            saveToConflictedResult(temp_dict1.values())
-                    else:
-                        temp_dict1[h1]=item1
-                        temp_dict2[h2]=item2
+    ```python
+    qDiff(data1, data2):
+        iter1 = iter(sorted(data1))
+        iter2 = iter(sorted(data2))
+        temp_dict1 ={}
+        temp_dict2 ={}
+        item1 = None
+        item2 = None
+        try:
+            while True:
+                item1 = next(iter1)
+                item2 = next(iter2)
+                h1 = hash(item1)
+                h2 = hash(item2)
+                if h1==h2:
                     item1 = None
                     item2 = None
-            except StopIteration as e:
-                if not item1:
-                    saveToConflictedResult(list(iter2))
+                    continue
+                elif h1 in temp_dict2 or h2 in temp_dict1:
+                    if h1 in temp_dict2:
+                        temp_dict2.pop(h1)
+                        saveToConflictedResult(temp_dict2.values())
+                    if h2 in temp_dict1:
+                        temp_dict1.pop(h2) 
+                        saveToConflictedResult(temp_dict1.values())
                 else:
-                    saveToConflictedResult([item1] + list(iter1))
-        ```
+                    temp_dict1[h1]=item1
+                    temp_dict2[h2]=item2
+                item1 = None
+                item2 = None
+        except StopIteration as e:
+            if not item1:
+                saveToConflictedResult(list(iter2))
+            else:
+                saveToConflictedResult([item1] + list(iter1))
+    ```
 
+#### Report viewer
+* Providing the comparison result    
+* GUI for accepting rules for resolving ((Not implemented yet))
 
-1. Rule parser
-    * Parsing the input rules and save as rule set for reuse
-    * Rules:
+#### Rule parser (Not implemented yet)
+* Parsing the input rules and save as rule set for reuse
+* Rules:
 
         Where to write the resolved result
         Left join, right join, inner join, and outer join
         Condition based rule, (E.X. when field1 == 0 and field2 > 3)
 
+#### Conflict resolver (Not implemented yet)
+* Filtering the conflicted results basing on the input rules
 
-1. Report viewer
-    * Providing the comparison result    
-    * GUI for accepting rules for resolving (phase 3)
-
-1. Conflict resolver
-    * Filtering the conflicted results basing on the input rules
-
-
----
-## Scenarios
-1. Comparing tables within same database
-1. Comparing tables from different databases
-1. Comparing tables with different range of data within same/different database
-1. Comparing table and CSV file
-1. Comparing unordered CSV file and database 
+</details>
 
 ---
 
 ## ERD
-### entities	
+<details><summary> Entities
+</summary>
 <img src="./diagrams/erd.png">
 
 1. Task
 
-    * Information of datasource
+    * Information about the data source
     * Uploaded file path
-    * Database information (encryption required, use what as secret key, what as salt) 
+    * Database information (This will not contain password) 
     * Datetime, Recording the start time and end time for performance evaluation
-    * Owner 
+    * Owner (Not implemented yet)
 
 1. Conflict record
     * Raw data
     * What source it belongs to
-1. Rule set
+    * The name of raw table
+
+1. Raw Table
+    * Fields here are dynamics, this table schema is depending on the schema of given datasources
+
+1. Report
+    * Which generator will process the data
+    * Generated file path
+    * Parameters for the generator, in JSON format
+
+1. Rule set (Not implemented yet)
     * Name 
     * Description
     * Rule, formatted rules in json format
     
+</details>

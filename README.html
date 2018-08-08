@@ -765,6 +765,16 @@ pre {
 <li>Report the differences to user.</li>
 <li>Resolve the differences for user basing on input rules.</li>
 </ol>
+<details><summary>Scenarios
+</summary>
+<ul>
+<li>Comparing tables within same database</li>
+<li>Comparing tables from different databases</li>
+<li>Comparing tables with different range of data within same/different database</li>
+<li>Comparing table and CSV file</li>
+<li>Comparing unordered CSV file and database</li>
+</ul>
+</details>
 <hr>
 <h2>
 <a id="user-content-setup-on-ec2" class="anchor" href="#setup-on-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup on EC2</h2>
@@ -1055,35 +1065,41 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 <details><summary> details
 </summary>
     When input databases as datasources, users need to generate a database access token first. The database access token is an encrypted JSON file which contains the database setting for Django.
-<a href="" target="_blank"><img style="max-width:100%;"></a>
+<a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" style="max-width:100%;"></a>
 </details>
 <h3>
-<a id="user-content-data-flow" class="anchor" href="#data-flow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data flow</h3>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" style="max-width:100%;"></a></p>
-<h3>
 <a id="user-content-components" class="anchor" href="#components" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Components</h3>
-<ol>
-<li>
-<p>Data reader</p>
+<details><summary> details
+</summary>
+<h4>
+<a id="user-content-data-reader" class="anchor" href="#data-reader" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data reader</h4>
 <ul>
-<li>Using ORM framework to read the data</li>
+<li>Using Django DB cursor to read the data</li>
 <li>Supporting multiple databases and file sources</li>
 </ul>
-</li>
-<li>
-<p>file reader</p>
+<h4>
+<a id="user-content-file-reader" class="anchor" href="#file-reader" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>file reader</h4>
 <ul>
-<li>Importing the file into the database, support  DSV(CSV, TSV) and excel</li>
+<li>Support  CSV excel</li>
 </ul>
-</li>
-<li>
-<p>Comparator</p>
+<h4>
+<a id="user-content-comparators" class="anchor" href="#comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comparators</h4>
+<h5>
+<a id="user-content-field-comparators" class="anchor" href="#field-comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Field Comparators</h5>
+<p>A wrapper for package <a href="https://github.com/frictionlessdata/tableschema-py">tableschema</a></p>
+<ul>
+<li>It will query setting.settings.SCHEMA_INFER_LIMIT number records and infer the schema from them.</li>
+<li>The setting.settings.SCHEMA_INFER_CONFIDENCE permits the minor occurance of abnomral, default is 1.00.</li>
+<li>The setting.settings.SCHEMA_CSV_MISSING_VALUES and SCHEMA_DATABASE_MISSING_VALUES is used to configurate what should be consider as missing.</li>
+</ul>
+<h5>
+<a id="user-content-value-comparators" class="anchor" href="#value-comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Value Comparators</h5>
 <ol>
 <li>
-<p>Brief description</p>
+<p>Variable definitions</p>
 <p>data1, data2: the input data, can be queryset, list, dictionary</p>
 <p>item1, item2: the elements from data1 and data2</p>
-<p>list1, list2: the list for saving unmatch records</p>
+<p>dict1, dict2: the list for saving unmatch records</p>
 </li>
 <li>
 <p>steps</p>
@@ -1091,10 +1107,10 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 <li>Sort the data1 and data2</li>
 <li>Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
 <ol>
-<li>If the item1 is identical to item2, iterate next item</li>
-<li>If the item1 in list2, save the all elements in list2 except item1 as conflicted results</li>
-<li>If the item2 in list1, save the all elements in list1 except item2 as conflicted results</li>
-<li>If the item1 is different from the item2, put item1 in list1 and item2 in list2</li>
+<li>If the item1 is identical to item2, iterate next item pair</li>
+<li>Else if the item1 in dict2, save the all elements in dict2 except item1 as conflicted results, iterate next item1</li>
+<li>Else if the item2 in dict1, save the all elements in dict1 except item2 as conflicted results, iterate next item2</li>
+<li>Else, the item1 is different from the item2, put item1 in dict1 and item2 in dict2, iterate next item pair</li>
 </ol>
 </li>
 </ol>
@@ -1103,9 +1119,7 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 <p>Complexity.</p>
 <p>given m,n = len(data1),len(data2)</p>
 <p>Time complexity:</p>
-<pre><code> Average Case: O(m+n)
-
- Amortized Worst Case: O(m*n)
+<pre><code> O(m+n)
 </code></pre>
 <p>Space complexity:</p>
 <pre><code> O(m+n)
@@ -1149,60 +1163,47 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
             saveToConflictedResult([item1] <span class="pl-k">+</span> <span class="pl-c1">list</span>(iter1))</pre></div>
 </li>
 </ol>
-</li>
-<li>
-<p>Rule parser</p>
+<h4>
+<a id="user-content-report-viewer" class="anchor" href="#report-viewer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Report viewer</h4>
+<ul>
+<li>Providing the comparison result</li>
+<li>GUI for accepting rules for resolving ((Not implemented yet))</li>
+</ul>
+<h4>
+<a id="user-content-rule-parser-not-implemented-yet" class="anchor" href="#rule-parser-not-implemented-yet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Rule parser (Not implemented yet)</h4>
 <ul>
 <li>
 <p>Parsing the input rules and save as rule set for reuse</p>
 </li>
 <li>
 <p>Rules:</p>
-<p>Where to write the resolved result
-Left join, right join, inner join, and outer join
-Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
+<pre><code>  Where to write the resolved result
+  Left join, right join, inner join, and outer join
+  Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)
+</code></pre>
 </li>
 </ul>
-</li>
-<li>
-<p>Report viewer</p>
-<ul>
-<li>Providing the comparison result</li>
-<li>GUI for accepting rules for resolving (phase 3)</li>
-</ul>
-</li>
-<li>
-<p>Conflict resolver</p>
+<h4>
+<a id="user-content-conflict-resolver-not-implemented-yet" class="anchor" href="#conflict-resolver-not-implemented-yet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conflict resolver (Not implemented yet)</h4>
 <ul>
 <li>Filtering the conflicted results basing on the input rules</li>
 </ul>
-</li>
-</ol>
-<hr>
-<h2>
-<a id="user-content-scenarios" class="anchor" href="#scenarios" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Scenarios</h2>
-<ol>
-<li>Comparing tables within same database</li>
-<li>Comparing tables from different databases</li>
-<li>Comparing tables with different range of data within same/different database</li>
-<li>Comparing table and CSV file</li>
-<li>Comparing unordered CSV file and database</li>
-</ol>
+</details>
 <hr>
 <h2>
 <a id="user-content-erd" class="anchor" href="#erd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ERD</h2>
-<h3>
-<a id="user-content-entities" class="anchor" href="#entities" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>entities</h3>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" style="max-width:100%;"></a></p>
+<details><summary> Entities
+</summary>
+<a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" style="max-width:100%;"></a>
 <ol>
 <li>
 <p>Task</p>
 <ul>
-<li>Information of datasource</li>
+<li>Information about the data source</li>
 <li>Uploaded file path</li>
-<li>Database information (encryption required, use what as secret key, what as salt)</li>
+<li>Database information (This will not contain password)</li>
 <li>Datetime, Recording the start time and end time for performance evaluation</li>
-<li>Owner</li>
+<li>Owner (Not implemented yet)</li>
 </ul>
 </li>
 <li>
@@ -1210,10 +1211,25 @@ Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
 <ul>
 <li>Raw data</li>
 <li>What source it belongs to</li>
+<li>The name of raw table</li>
 </ul>
 </li>
 <li>
-<p>Rule set</p>
+<p>Raw Table</p>
+<ul>
+<li>Fields here are dynamics, this table schema is depending on the schema of given datasources</li>
+</ul>
+</li>
+<li>
+<p>Report</p>
+<ul>
+<li>Which generator will process the data</li>
+<li>Generated file path</li>
+<li>Parameters for the generator, in JSON format</li>
+</ul>
+</li>
+<li>
+<p>Rule set (Not implemented yet)</p>
 <ul>
 <li>Name</li>
 <li>Description</li>
@@ -1221,4 +1237,5 @@ Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
 </ul>
 </li>
 </ol>
+</details>
 </article></body></html>
