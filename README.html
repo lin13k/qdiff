@@ -733,6 +733,30 @@ pre {
 <h2>
 <a id="user-content-overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h2>
 <p>A tool for finding the difference between multiple data sources which should have the same value.</p>
+<details><summary> Heavily tested versions
+</summary>
+<table>
+<thead>
+<tr>
+<th>Django</th>
+<th>Python 2</th>
+<th>Python 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.11.15</td>
+<td>V</td>
+<td></td>
+</tr>
+<tr>
+<td>2.0.5</td>
+<td></td>
+<td>V</td>
+</tr>
+</tbody>
+</table>
+</details>
 <hr>
 <h2>
 <a id="user-content-goals" class="anchor" href="#goals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Goals</h2>
@@ -741,11 +765,259 @@ pre {
 <li>Report the differences to user.</li>
 <li>Resolve the differences for user basing on input rules.</li>
 </ol>
+<details><summary>Scenarios
+</summary>
+<ul>
+<li>Comparing tables within same database</li>
+<li>Comparing tables from different databases</li>
+<li>Comparing tables with different range of data within same/different database</li>
+<li>Comparing table and CSV file</li>
+<li>Comparing unordered CSV file and database</li>
+</ul>
+</details>
 <hr>
 <h2>
-<a id="user-content-setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>setup</h2>
+<a id="user-content-setup-locally" class="anchor" href="#setup-locally" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup locally</h2>
+<details><summary> install on python2 Venv
+</summary>
+<h3>
+<a id="user-content-one-time-setup-on-mac" class="anchor" href="#one-time-setup-on-mac" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>One-time setup on Mac</h3>
+<p>in these steps, the bold and italic sentences are the commands for terminal</p>
+<ol>
+<li>
+<p>install brew</p>
+<pre><code>sudo xcodebuild -license
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+</code></pre>
+</li>
+<li>
+<p>install mysql via brew</p>
+<pre><code>brew install mysql
+</code></pre>
+</li>
+<li>
+<p>start mysql</p>
+<pre><code>brew services start mysql
+</code></pre>
+</li>
+<li>
+<p>install rabbitmq </p>
+<pre><code>brew install rabbitmq
+</code></pre>
+</li>
+<li>
+<p>start rabbitmq</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>pull the source code</p>
+<pre><code>cd ~
+git clone https://github.com/analyticsMD/datadiff.git
+</code></pre>
+</li>
+<li>
+<p>create virtual environment p2env for qdiff</p>
+<pre><code>cd datadiff
+python -m venv p2env
+</code></pre>
+</li>
+<li>
+<p>activate the virtual environment </p>
+<pre><code>source p2env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>install dependency for qdiff</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+</li>
+<li>
+<p>create database </p>
+<pre><code>mysql -uroot -p
+CREATE DATABASE qdiff;
+exit;
+</code></pre>
+</li>
+<li>
+<p>init tables in the database</p>
+<pre><code>python manage.py makemigrations
+python manage.py migrate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>do a test for sanity check</p>
+<pre><code>python manage.py test
+</code></pre>
+</li>
+<li>
+<p>run the server for demo!!</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+<li>
+<p>check URL <a href="http://127.0.0.1:8000/" rel="nofollow">http://127.0.0.1:8000/</a></p>
+</li>
+</ol>
+<h3>
+<a id="user-content-consecutive-runs" class="anchor" href="#consecutive-runs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Consecutive runs</h3>
+<p>After you restart your device, you only need to do the following to launch Qdiff</p>
+<ol>
+<li>
+<p>start rabbitmq server</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>activate virtual environment</p>
+<pre><code>cd ~/datadiff
+source p2env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>run the django server</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+</ol>
+</details>
+<details><summary> install on python3 Venv
+</summary>
+<h3>
+<a id="user-content-one-time-setup-on-mac-1" class="anchor" href="#one-time-setup-on-mac-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>One-time setup on Mac</h3>
+<p>in these steps, the bold and italic sentences are the commands for terminal</p>
+<ol>
+<li>
+<p>install brew</p>
+<pre><code>sudo xcodebuild -license
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+</code></pre>
+</li>
+<li>
+<p>install mysql via brew</p>
+<pre><code>brew install mysql
+</code></pre>
+</li>
+<li>
+<p>start mysql</p>
+<pre><code>brew services start mysql
+</code></pre>
+</li>
+<li>
+<p>install rabbitmq </p>
+<pre><code>brew install rabbitmq
+</code></pre>
+</li>
+<li>
+<p>start rabbitmq</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>install python36</p>
+<pre><code>brew install python
+</code></pre>
+</li>
+<li>
+<p>pull the source code</p>
+<pre><code>cd ~
+git clone https://github.com/analyticsMD/datadiff.git
+</code></pre>
+</li>
+<li>
+<p>create virtual environment p3env for qdiff</p>
+<pre><code>cd datadiff
+python3 -m venv p3env
+</code></pre>
+</li>
+<li>
+<p>activate the virtual environment </p>
+<pre><code>source p3env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>install dependency for qdiff</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+</li>
+<li>
+<p>create database </p>
+<pre><code>mysql -uroot -p
+CREATE DATABASE qdiff;
+exit;
+</code></pre>
+</li>
+<li>
+<p>init tables in the database</p>
+<pre><code>python manage.py makemigrations
+python manage.py migrate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>do a test for sanity check</p>
+<pre><code>python manage.py test
+</code></pre>
+</li>
+<li>
+<p>run the server for demo!!</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+<li>
+<p>check URL <a href="http://127.0.0.1:8000/" rel="nofollow">http://127.0.0.1:8000/</a></p>
+</li>
+</ol>
+<h3>
+<a id="user-content-consecutive-runs-1" class="anchor" href="#consecutive-runs-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Consecutive runs</h3>
+<p>After you restart your device, you only need to do the following to launch Qdiff</p>
+<ol>
+<li>
+<p>start rabbitmq server</p>
+<pre><code>/usr/local/sbin/rabbitmq-server -detached
+</code></pre>
+</li>
+<li>
+<p>activate virtual environment</p>
+<pre><code>cd ~/datadiff
+source p3env/bin/activate
+</code></pre>
+</li>
+<li>
+<p>start Celery workers</p>
+<pre><code>celery -A qdiff worker -l info --detach
+</code></pre>
+</li>
+<li>
+<p>run the django server</p>
+<pre><code>python manage.py runserver
+</code></pre>
+</li>
+</ol>
+</details>
+<hr>
+<h2>
+<a id="user-content-setup-on-ec2" class="anchor" href="#setup-on-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup on EC2</h2>
+<details><summary> detail guides
+</summary>
 <h3>
 <a id="user-content-install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>install mysql
 <div class="highlight highlight-source-shell"><pre>sudo yum install mysql-server</pre></div>
@@ -766,8 +1038,11 @@ pre {
 <div class="highlight highlight-source-shell"><pre>python3 -m pip install -r datadiff/requirements.txt --user</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-setup-database---mysql" class="anchor" href="#setup-database---mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup database - mysql</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>start mysql server
 <div class="highlight highlight-source-shell"><pre>sudo service mysqld start</pre></div>
@@ -785,8 +1060,11 @@ mysql<span class="pl-k">&gt;</span> create database qdiff_test<span class="pl-k"
 python3 manage.py migrate</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-rabbitmq-as-broker-for-celery" class="anchor" href="#install-rabbitmq-as-broker-for-celery" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install rabbitmq as broker for celery</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>install Erlang Version 20.1
 <pre><code>cd /opt
@@ -812,24 +1090,37 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
-<a id="user-content-start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli-check-httpdocsceleryprojectorgenlatestuserguidedaemonizinghtml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli. check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a>
-</h3>
+<a id="user-content-start-celery-worker-use-daemon-or-inline-cli" class="anchor" href="#start-celery-worker-use-daemon-or-inline-cli" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start celery worker, use daemon or inline cli.</h3>
+<details><summary> detail guides
+</summary>
 <pre><code>celery -A qdiff worker -l info --detach
 </code></pre>
+<p>You can also check <a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html" rel="nofollow">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html</a></p>
+</details>
 <h3>
 <a id="user-content-sanity-test" class="anchor" href="#sanity-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sanity test</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo python3 manage.py <span class="pl-c1">test</span></pre></div>
 </li>
 <li>Cheers if all the test cases are successful</li>
 </ol>
+</details>
+</details>
 <hr>
 <h2>
 <a id="user-content-deploy-with-nginx-uwsgi-in-ec2" class="anchor" href="#deploy-with-nginx-uwsgi-in-ec2" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Deploy with Nginx, UWSGI in EC2</h2>
+<p>Please make sure you already finish <a href="#setup-on-ec2">this section</a></p>
+<details><summary> detail guides
+</summary>
 <h3>
 <a id="user-content-pull-the-code-into-the-folder-optdatadiff" class="anchor" href="#pull-the-code-into-the-folder-optdatadiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pull the code into the folder /opt/datadiff/</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>make directory /opt/
 <div class="highlight highlight-source-shell"><pre>sudo mkdir /opt</pre></div>
@@ -839,22 +1130,31 @@ sudo rpm -ivh rabbitmq-server-3.7.0-1.el6.noarch.rpm
 git clone git@github.com:analyticsMD/datadiff.git</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-uwsgi" class="anchor" href="#install-uwsgi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install uwsgi</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo python3 -m pip install uwsgi</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-install-nginx" class="anchor" href="#install-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>install nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo yum install nginx</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-create-qdiffconf-file-for-nginx" class="anchor" href="#create-qdiffconf-file-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff.conf file for nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>run command
 <div class="highlight highlight-source-shell"><pre>sudo vim /etc/nginx/nginx.conf</pre></div>
@@ -891,8 +1191,11 @@ http {
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-create-qdiff_nginxconf-for-nginx" class="anchor" href="#create-qdiff_nginxconf-for-nginx" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>create qdiff_nginx.conf for nginx</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
 <div class="highlight highlight-source-shell"><pre>mkdir /etc/nginx/sites-enable/
@@ -937,8 +1240,11 @@ server {
 </code></pre>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" class="anchor" href="#make-sure-the-permissions-of-the-folder-varlibnginxtmpclient_body-is-readable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>check the read write permissions
 <div class="highlight highlight-source-shell"><pre>ls -l /var/lib/nginx/tmp/</pre></div>
@@ -951,9 +1257,15 @@ drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 </pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-start-the-qdiff" class="anchor" href="#start-the-qdiff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start the qdiff</h3>
+<details><summary> detail guides
+</summary>
 <ol>
+<li>
+<p>make sure the rabbit mq already start</p>
+</li>
 <li>
 <p>start the nginx service</p>
 <div class="highlight highlight-source-shell"><pre>sudo service nginx start</pre></div>
@@ -964,8 +1276,11 @@ drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log</pre></div>
 </li>
 </ol>
+</details>
 <h3>
 <a id="user-content-start-and-test-your-machine" class="anchor" href="#start-and-test-your-machine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>start and test your machine</h3>
+<details><summary> detail guides
+</summary>
 <ol>
 <li>
 <p>access URL host:port/tasks to check if it works or not</p>
@@ -978,44 +1293,51 @@ uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize u
 /opt/datadiff/dev.log       <span class="pl-c"><span class="pl-c">#</span>qdiff log</span></pre></div>
 </li>
 </ol>
+</details>
+</details>
 <hr>
 <h2>
 <a id="user-content-system-architecture" class="anchor" href="#system-architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>System architecture</h2>
 <h3>
 <a id="user-content-architecture" class="anchor" href="#architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Architecture</h3>
-<pre><code>For database, the user should config access in qDiff database.
-For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
-</code></pre>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" style="max-width:100%;"></a></p>
-<a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i" rel="nofollow">link</a>
-<h3>
-<a id="user-content-data-flow" class="anchor" href="#data-flow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data flow</h3>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/df.png" style="max-width:100%;"></a></p>
-<a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF" rel="nofollow">link</a>
+<details><summary> details
+</summary>
+    When input databases as datasources, users need to generate a database access token first. The database access token is an encrypted JSON file which contains the database setting for Django.
+<a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/sa.png" style="max-width:100%;"></a>
+</details>
 <h3>
 <a id="user-content-components" class="anchor" href="#components" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Components</h3>
-<ol>
-<li>
-<p>Data reader</p>
+<details><summary> details
+</summary>
+<h4>
+<a id="user-content-data-reader" class="anchor" href="#data-reader" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data reader</h4>
 <ul>
-<li>Using ORM framework to read the data</li>
+<li>Using Django DB cursor to read the data</li>
 <li>Supporting multiple databases and file sources</li>
 </ul>
-</li>
-<li>
-<p>file reader</p>
+<h4>
+<a id="user-content-file-reader" class="anchor" href="#file-reader" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>file reader</h4>
 <ul>
-<li>Importing the file into the database, support  DSV(CSV, TSV) and excel</li>
+<li>Support  CSV excel</li>
 </ul>
-</li>
-<li>
-<p>Comparator</p>
+<h4>
+<a id="user-content-comparators" class="anchor" href="#comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comparators</h4>
+<h5>
+<a id="user-content-field-comparators" class="anchor" href="#field-comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Field Comparators</h5>
+<p>A wrapper for package <a href="https://github.com/frictionlessdata/tableschema-py">tableschema</a></p>
+<ul>
+<li>It will query setting.settings.SCHEMA_INFER_LIMIT number records and infer the schema from them.</li>
+<li>The setting.settings.SCHEMA_INFER_CONFIDENCE permits the minor occurance of abnomral, default is 1.00.</li>
+<li>The setting.settings.SCHEMA_CSV_MISSING_VALUES and SCHEMA_DATABASE_MISSING_VALUES is used to configurate what should be consider as missing.</li>
+</ul>
+<h5>
+<a id="user-content-value-comparators" class="anchor" href="#value-comparators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Value Comparators</h5>
 <ol>
 <li>
-<p>Brief description</p>
+<p>Variable definitions</p>
 <p>data1, data2: the input data, can be queryset, list, dictionary</p>
 <p>item1, item2: the elements from data1 and data2</p>
-<p>list1, list2: the list for saving unmatch records</p>
+<p>dict1, dict2: the list for saving unmatch records</p>
 </li>
 <li>
 <p>steps</p>
@@ -1023,10 +1345,10 @@ For API, the user should input an description for the API, including endpoint, m
 <li>Sort the data1 and data2</li>
 <li>Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
 <ol>
-<li>If the item1 is identical to item2, iterate next item</li>
-<li>If the item1 in list2, save the all elements in list2 except item1 as conflicted results</li>
-<li>If the item2 in list1, save the all elements in list1 except item2 as conflicted results</li>
-<li>If the item1 is different from the item2, put item1 in list1 and item2 in list2</li>
+<li>If the item1 is identical to item2, iterate next item pair</li>
+<li>Else if the item1 in dict2, save the all elements in dict2 except item1 as conflicted results, iterate next item1</li>
+<li>Else if the item2 in dict1, save the all elements in dict1 except item2 as conflicted results, iterate next item2</li>
+<li>Else, the item1 is different from the item2, put item1 in dict1 and item2 in dict2, iterate next item pair</li>
 </ol>
 </li>
 </ol>
@@ -1035,9 +1357,7 @@ For API, the user should input an description for the API, including endpoint, m
 <p>Complexity.</p>
 <p>given m,n = len(data1),len(data2)</p>
 <p>Time complexity:</p>
-<pre><code> Average Case: O(m+n)
-
- Amortized Worst Case: O(m*n)
+<pre><code> O(m+n)
 </code></pre>
 <p>Space complexity:</p>
 <pre><code> O(m+n)
@@ -1081,153 +1401,73 @@ For API, the user should input an description for the API, including endpoint, m
             saveToConflictedResult([item1] <span class="pl-k">+</span> <span class="pl-c1">list</span>(iter1))</pre></div>
 </li>
 </ol>
-</li>
-<li>
-<p>Rule parser</p>
+<h4>
+<a id="user-content-report-viewer" class="anchor" href="#report-viewer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Report viewer</h4>
+<ul>
+<li>Providing the comparison result</li>
+<li>GUI for accepting rules for resolving ((Not implemented yet))</li>
+</ul>
+<h4>
+<a id="user-content-rule-parser-not-implemented-yet" class="anchor" href="#rule-parser-not-implemented-yet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Rule parser (Not implemented yet)</h4>
 <ul>
 <li>
 <p>Parsing the input rules and save as rule set for reuse</p>
 </li>
 <li>
 <p>Rules:</p>
-<p>Where to write the resolved result
-Left join, right join, inner join, and outer join
-Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
+<pre><code>  Where to write the resolved result
+  Left join, right join, inner join, and outer join
+  Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)
+</code></pre>
 </li>
 </ul>
-</li>
-<li>
-<p>Report viewer</p>
-<ul>
-<li>Providing the comparison result</li>
-<li>GUI for accepting rules for resolving (phase 3)</li>
-</ul>
-</li>
-<li>
-<p>Conflict resolver</p>
+<h4>
+<a id="user-content-conflict-resolver-not-implemented-yet" class="anchor" href="#conflict-resolver-not-implemented-yet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conflict resolver (Not implemented yet)</h4>
 <ul>
 <li>Filtering the conflicted results basing on the input rules</li>
 </ul>
-</li>
-</ol>
-<hr>
-<h2>
-<a id="user-content-scenarios" class="anchor" href="#scenarios" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Scenarios</h2>
-<ol>
-<li>Comparing tables within same database</li>
-<li>Comparing tables from different databases</li>
-<li>Comparing tables with different range of data within same/different database</li>
-<li>Comparing table and CSV file</li>
-<li>Comparing unordered CSV file and database</li>
-</ol>
-<hr>
-<h2>
-<a id="user-content-milestone" class="anchor" href="#milestone" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Milestone</h2>
-<h3>
-<a id="user-content-development" class="anchor" href="#development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Development</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 2</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 4</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 6</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
-<h3>
-<a id="user-content-sit" class="anchor" href="#sit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SIT</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 3</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 5</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 7</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
-<h3>
-<a id="user-content-catuat" class="anchor" href="#catuat" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>CAT/UAT</h3>
-<table>
-<thead>
-<tr>
-<th>phase</th>
-<th>timeline</th>
-<th>items</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Week 4</td>
-<td>Data reader, file reader, comparator</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Week 6</td>
-<td>Report viewer</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Week 8</td>
-<td>Rule parser, conflict resolver</td>
-</tr>
-</tbody>
-</table>
+</details>
 <hr>
 <h2>
 <a id="user-content-erd" class="anchor" href="#erd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ERD</h2>
-<h3>
-<a id="user-content-entities" class="anchor" href="#entities" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>entities</h3>
-<p><a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" style="max-width:100%;"></a></p>
-1. Task
-<pre><code>* Information of datasource
-* Uploaded file path
-* Database information (encryption required, use what as secret key, what as salt) 
-* Datetime, Recording the start time and end time for performance evaluation
-* Owner 
-</code></pre>
+<details><summary> Entities
+</summary>
+<a href="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" target="_blank"><img src="/Users/je-minglin/Documents/GitHub/datadiff/diagrams/erd.png" style="max-width:100%;"></a>
 <ol>
-<li>Conflict record
+<li>
+<p>Task</p>
+<ul>
+<li>Information about the data source</li>
+<li>Uploaded file path</li>
+<li>Database information (This will not contain password)</li>
+<li>Datetime, Recording the start time and end time for performance evaluation</li>
+<li>Owner (Not implemented yet)</li>
+</ul>
+</li>
+<li>
+<p>Conflict record</p>
 <ul>
 <li>Raw data</li>
 <li>What source it belongs to</li>
+<li>The name of raw table</li>
 </ul>
 </li>
-<li>Rule set
+<li>
+<p>Raw Table</p>
+<ul>
+<li>Fields here are dynamics, this table schema is depending on the schema of given datasources</li>
+</ul>
+</li>
+<li>
+<p>Report</p>
+<ul>
+<li>Which generator will process the data</li>
+<li>Generated file path</li>
+<li>Parameters for the generator, in JSON format</li>
+</ul>
+</li>
+<li>
+<p>Rule set (Not implemented yet)</p>
 <ul>
 <li>Name</li>
 <li>Description</li>
@@ -1235,4 +1475,5 @@ Condition based rule, (E.X. when field1 == 0 and field2 &gt; 3)</p>
 </ul>
 </li>
 </ol>
+</details>
 </article></body></html>

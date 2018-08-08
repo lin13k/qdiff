@@ -2,15 +2,265 @@
 ## Overview
 A tool for finding the difference between multiple data sources which should have the same value.
 
+<details><summary> Heavily tested versions
+</summary>
+
+|Django     | Python 2  | Python 3  |
+| --------- | ----------| --------- |
+| 1.11.15   |     V     |           |
+| 2.0.5     |           |     V     |
+
+</details>
+
 ---
 ## Goals
 1. Reduce the efforts required to check data validation from different source.
 1. Report the differences to user.
 1. Resolve the differences for user basing on input rules.
 
+<details><summary>Scenarios
+</summary>
+
+* Comparing tables within same database
+* Comparing tables from different databases
+* Comparing tables with different range of data within same/different database
+* Comparing table and CSV file
+* Comparing unordered CSV file and database 
+</details>
+
 ---
-## setup on EC2
+## Setup locally
+<details><summary> install on python2 Venv
+</summary>
+
+### One-time setup on Mac
+in these steps, the bold and italic sentences are the commands for terminal
+
+1. install brew
+    ```
+    sudo xcodebuild -license
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    ```
+1. install mysql via brew
+    ```
+    brew install mysql
+    ```
+
+1. start mysql
+    ```
+    brew services start mysql
+    ```
+
+1. install rabbitmq 
+    ```
+    brew install rabbitmq
+    ```
+
+1. start rabbitmq
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. pull the source code
+    ```
+    cd ~
+    git clone https://github.com/analyticsMD/datadiff.git
+    ```
+
+1. create virtual environment p2env for qdiff
+    ```
+    cd datadiff
+    python -m venv p2env
+    ```
+
+1. activate the virtual environment 
+    ```
+    source p2env/bin/activate
+    ```
+
+1. install dependency for qdiff
+    ```
+    pip install -r requirements.txt
+    ```
+
+1. create database 
+    ```
+    mysql -uroot -p
+    CREATE DATABASE qdiff;
+    exit;
+    ```
+
+1. init tables in the database
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. do a test for sanity check
+    ```
+    python manage.py test
+    ```
+
+1. run the server for demo!!
+    ```
+    python manage.py runserver
+    ```
+
+1. check URL http://127.0.0.1:8000/
+
+### Consecutive runs
+After you restart your device, you only need to do the following to launch Qdiff
+
+1. start rabbitmq server
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. activate virtual environment
+    ```
+    cd ~/datadiff
+    source p2env/bin/activate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. run the django server
+    ```
+    python manage.py runserver
+    ```
+</details>
+
+<details><summary> install on python3 Venv
+</summary>
+
+### One-time setup on Mac
+in these steps, the bold and italic sentences are the commands for terminal
+
+1. install brew
+    ```
+    sudo xcodebuild -license
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    ```
+1. install mysql via brew
+    ```
+    brew install mysql
+    ```
+
+1. start mysql
+    ```
+    brew services start mysql
+    ```
+
+1. install rabbitmq 
+    ```
+    brew install rabbitmq
+    ```
+
+1. start rabbitmq
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. install python36
+    ```
+    brew install python
+    ```
+
+1. pull the source code
+    ```
+    cd ~
+    git clone https://github.com/analyticsMD/datadiff.git
+    ```
+
+1. create virtual environment p3env for qdiff
+    ```
+    cd datadiff
+    python3 -m venv p3env
+    ```
+
+1. activate the virtual environment 
+    ```
+    source p3env/bin/activate
+    ```
+
+1. install dependency for qdiff
+    ```
+    pip install -r requirements.txt
+    ```
+
+1. create database 
+    ```
+    mysql -uroot -p
+    CREATE DATABASE qdiff;
+    exit;
+    ```
+
+1. init tables in the database
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. do a test for sanity check
+    ```
+    python manage.py test
+    ```
+
+1. run the server for demo!!
+    ```
+    python manage.py runserver
+    ```
+
+1. check URL http://127.0.0.1:8000/
+
+### Consecutive runs
+After you restart your device, you only need to do the following to launch Qdiff
+
+1. start rabbitmq server
+    ```
+    /usr/local/sbin/rabbitmq-server -detached
+    ```
+
+1. activate virtual environment
+    ```
+    cd ~/datadiff
+    source p3env/bin/activate
+    ```
+
+1. start Celery workers
+    ```
+    celery -A qdiff worker -l info --detach
+    ```
+
+1. run the django server
+    ```
+    python manage.py runserver
+    ```
+</details>
+
+---
+## Setup on EC2
+<details><summary> detail guides
+</summary>
+
 ### Install
+<details><summary> detail guides
+</summary>
+
+
 1. install mysql
     ```shell
     sudo yum install mysql-server
@@ -35,9 +285,13 @@ A tool for finding the difference between multiple data sources which should hav
     ```shell
     python3 -m pip install -r datadiff/requirements.txt --user
     ```
+</details>
 
 
 ### Setup database - mysql
+<details><summary> detail guides
+</summary>
+
 1. start mysql server
     ```shell
     sudo service mysqld start
@@ -57,8 +311,12 @@ A tool for finding the difference between multiple data sources which should hav
     python3 manage.py makemigrations
     python3 manage.py migrate
     ```
+</details>
 
 ### install rabbitmq as broker for celery
+<details><summary> detail guides
+</summary>
+
 1. install Erlang Version 20.1
     ```
     cd /opt
@@ -82,23 +340,42 @@ A tool for finding the difference between multiple data sources which should hav
     ```
     sudo service rabbitmq-server start
     ```
+</details>
 
 
-### start celery worker, use daemon or inline cli. check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+### start celery worker, use daemon or inline cli. 
+<details><summary> detail guides
+</summary>
+
 ```
 celery -A qdiff worker -l info --detach
 ```
+You can also check http://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+</details>
 
 ### Sanity test
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo python3 manage.py test
     ```
 1. Cheers if all the test cases are successful
+</details>
+</details>
 
 ---
 ## Deploy with Nginx, UWSGI in EC2
+Please make sure you already finish [this section](#setup-on-ec2)
+
+<details><summary> detail guides
+</summary>
+
 ### pull the code into the folder /opt/datadiff/
+<details><summary> detail guides
+</summary>
+
 1. make directory /opt/
     ```shell
     sudo mkdir /opt
@@ -108,20 +385,32 @@ celery -A qdiff worker -l info --detach
     cd /opt
     git clone git@github.com:analyticsMD/datadiff.git
     ``` 
+</details>
 
 ### install uwsgi
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo python3 -m pip install uwsgi
     ```
+</details>
 
 ### install nginx
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo yum install nginx
     ```
+</details>
 
 ### create qdiff.conf file for nginx
+<details><summary> detail guides
+</summary>
+
 1. run command
     ```shell
     sudo vim /etc/nginx/nginx.conf
@@ -157,8 +446,12 @@ celery -A qdiff worker -l info --detach
         index   index.html index.htm;
     }
     ```
+</details>
 
 ### create qdiff_nginx.conf for nginx
+<details><summary> detail guides
+</summary>
+
 1. make two directories, /etc/nginx/sites-enable/ and /etc/nginx/sites-available/
     ```shell
     mkdir /etc/nginx/sites-enable/
@@ -203,8 +496,12 @@ celery -A qdiff worker -l info --detach
     }
 
     ```
+</details>
 
 ### make sure the permissions of the folder /var/lib/nginx/tmp/client_body/ is readable
+<details><summary> detail guides
+</summary>
+
 1. check the read write permissions
     ```shell
     ls -l /var/lib/nginx/tmp/
@@ -218,8 +515,14 @@ celery -A qdiff worker -l info --detach
     drwx------ 7 ec2-user ec2-user 4096 Jul 31 19:36 uwsgi
 
     ```
+</details>
 
 ### start the qdiff
+<details><summary> detail guides
+</summary>
+
+1. make sure the rabbit mq already start
+
 1. start the nginx service
     ```shell
     sudo service nginx start
@@ -230,8 +533,12 @@ celery -A qdiff worker -l info --detach
     cd /opt/datadiff
     uwsgi --socket qdiff.sock --module setting.wsgi --chmod-socket=664 --daemonize uwsgi.log
     ```
+</details>
 
 ### start and test your machine
+<details><summary> detail guides
+</summary>
+
 1. access URL host:port/tasks to check if it works or not
 
     for example: http://ec2-xx-xx-xx-xx.us-west-1.compute.amazonaws.com/tasks
@@ -242,167 +549,156 @@ celery -A qdiff worker -l info --detach
     /opt/datadiff/uwsgi.log     #uwsgi server log
     /opt/datadiff/dev.log       #qdiff log
     ```
+</details>
+
+</details>
+
 ---
 
 ## System architecture
 ### Architecture
-
-    For database, the user should config access in qDiff database.
-    For API, the user should input an description for the API, including endpoint, method, parameters, and authentication information.
+<details><summary> details
+</summary>
+    When input databases as datasources, users need to generate a database access token first. The database access token is an encrypted JSON file which contains the database setting for Django.
 
 <img src="./diagrams/sa.png">
-<a href="https://drive.google.com/open?id=1GzHV_wweiGHNRarZlgLIKfL8TgOqlY5i">link</a>
-
-### Data flow
-<img src="./diagrams/df.png">
-<a href="https://drive.google.com/open?id=1rTqiyL6w3TEEVXfZsxA1inN8pERg8vrF">link</a>
-
+</details>
 
 ### Components
-1. Data reader
-    * Using ORM framework to read the data
-    * Supporting multiple databases and file sources
-1. file reader
-    * Importing the file into the database, support  DSV(CSV, TSV) and excel
-1. Comparator
+<details><summary> details
+</summary>
+
+#### Data reader
+* Using Django DB cursor to read the data
+* Supporting multiple databases and file sources
+
+#### file reader
+* Support  CSV excel
+
+#### Comparators
+##### Field Comparators
+A wrapper for package [tableschema](https://github.com/frictionlessdata/tableschema-py)
+* It will query setting.settings.SCHEMA_INFER_LIMIT number records and infer the schema from them.
+* The setting.settings.SCHEMA_INFER_CONFIDENCE permits the minor occurance of abnomral, default is 1.00.
+* The setting.settings.SCHEMA_CSV_MISSING_VALUES and SCHEMA_DATABASE_MISSING_VALUES is used to configurate what should be consider as missing. 
+
+
+##### Value Comparators
+1. Variable definitions
+
+    data1, data2: the input data, can be queryset, list, dictionary
+
+    item1, item2: the elements from data1 and data2
     
-    1. Brief description
+    dict1, dict2: the list for saving unmatch records
 
-        data1, data2: the input data, can be queryset, list, dictionary
+1. steps
+    1. Sort the data1 and data2
+    1. Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
+        1. If the item1 is identical to item2, iterate next item pair
+        1. Else if the item1 in dict2, save the all elements in dict2 except item1 as conflicted results, iterate next item1
+        1. Else if the item2 in dict1, save the all elements in dict1 except item2 as conflicted results, iterate next item2
+        1. Else, the item1 is different from the item2, put item1 in dict1 and item2 in dict2, iterate next item pair
 
-        item1, item2: the elements from data1 and data2
-        
-        list1, list2: the list for saving unmatch records
+1. Complexity.
 
-    1. steps
-        1. Sort the data1 and data2
-        1. Iterate over data1 and data2 at same time, item1 comes from data1 and item2 comes from data2
-            1. If the item1 is identical to item2, iterate next item
-            1. If the item1 in list2, save the all elements in list2 except item1 as conflicted results
-            1. If the item2 in list1, save the all elements in list1 except item2 as conflicted results
-            1. If the item1 is different from the item2, put item1 in list1 and item2 in list2
+    given m,n = len(data1),len(data2)
 
-    1. Complexity.
+    Time complexity:
 
-        given m,n = len(data1),len(data2)
-    
-        Time complexity:
+        O(m+n)
 
-            Average Case: O(m+n)
+    Space complexity:
 
-            Amortized Worst Case: O(m*n)
+        O(m+n)
 
-        Space complexity:
+1. pseudo code in python
 
-            O(m+n)
-
-    1. pseudo code in python
-
-        ```python
-        qDiff(data1, data2):
-            iter1 = iter(sorted(data1))
-            iter2 = iter(sorted(data2))
-            temp_dict1 ={}
-            temp_dict2 ={}
-            item1 = None
-            item2 = None
-            try:
-                while True:
-                    item1 = next(iter1)
-                    item2 = next(iter2)
-                    h1 = hash(item1)
-                    h2 = hash(item2)
-                    if h1==h2:
-                        item1 = None
-                        item2 = None
-                        continue
-                    elif h1 in temp_dict2 or h2 in temp_dict1:
-                        if h1 in temp_dict2:
-                            temp_dict2.pop(h1)
-                            saveToConflictedResult(temp_dict2.values())
-                        if h2 in temp_dict1:
-                            temp_dict1.pop(h2) 
-                            saveToConflictedResult(temp_dict1.values())
-                    else:
-                        temp_dict1[h1]=item1
-                        temp_dict2[h2]=item2
+    ```python
+    qDiff(data1, data2):
+        iter1 = iter(sorted(data1))
+        iter2 = iter(sorted(data2))
+        temp_dict1 ={}
+        temp_dict2 ={}
+        item1 = None
+        item2 = None
+        try:
+            while True:
+                item1 = next(iter1)
+                item2 = next(iter2)
+                h1 = hash(item1)
+                h2 = hash(item2)
+                if h1==h2:
                     item1 = None
                     item2 = None
-            except StopIteration as e:
-                if not item1:
-                    saveToConflictedResult(list(iter2))
+                    continue
+                elif h1 in temp_dict2 or h2 in temp_dict1:
+                    if h1 in temp_dict2:
+                        temp_dict2.pop(h1)
+                        saveToConflictedResult(temp_dict2.values())
+                    if h2 in temp_dict1:
+                        temp_dict1.pop(h2) 
+                        saveToConflictedResult(temp_dict1.values())
                 else:
-                    saveToConflictedResult([item1] + list(iter1))
-        ```
+                    temp_dict1[h1]=item1
+                    temp_dict2[h2]=item2
+                item1 = None
+                item2 = None
+        except StopIteration as e:
+            if not item1:
+                saveToConflictedResult(list(iter2))
+            else:
+                saveToConflictedResult([item1] + list(iter1))
+    ```
 
+#### Report viewer
+* Providing the comparison result    
+* GUI for accepting rules for resolving ((Not implemented yet))
 
-1. Rule parser
-    * Parsing the input rules and save as rule set for reuse
-    * Rules:
+#### Rule parser (Not implemented yet)
+* Parsing the input rules and save as rule set for reuse
+* Rules:
 
         Where to write the resolved result
         Left join, right join, inner join, and outer join
         Condition based rule, (E.X. when field1 == 0 and field2 > 3)
 
+#### Conflict resolver (Not implemented yet)
+* Filtering the conflicted results basing on the input rules
 
-1. Report viewer
-    * Providing the comparison result    
-    * GUI for accepting rules for resolving (phase 3)
-
-1. Conflict resolver
-    * Filtering the conflicted results basing on the input rules
-
-
----
-## Scenarios
-1. Comparing tables within same database
-1. Comparing tables from different databases
-1. Comparing tables with different range of data within same/different database
-1. Comparing table and CSV file
-1. Comparing unordered CSV file and database 
-
----
-
-## Milestone
-### Development
-| phase | timeline | items
----|---|---
-1 | Week 2 | Data reader, file reader, comparator
-2 | Week 4 | Report viewer
-3 | Week 6 | Rule parser, conflict resolver
-
-### SIT
-| phase | timeline | items
----|---|---
-1 | Week 3 | Data reader, file reader, comparator
-2 | Week 5 | Report viewer
-3 | Week 7 | Rule parser, conflict resolver
-
-### CAT/UAT
-| phase | timeline | items
----|---|---
-1 | Week 4 | Data reader, file reader, comparator
-2 | Week 6 | Report viewer
-3 | Week 8 | Rule parser, conflict resolver
+</details>
 
 ---
 
 ## ERD
-### entities	
+<details><summary> Entities
+</summary>
 <img src="./diagrams/erd.png">
+
 1. Task
 
-    * Information of datasource
+    * Information about the data source
     * Uploaded file path
-    * Database information (encryption required, use what as secret key, what as salt) 
+    * Database information (This will not contain password) 
     * Datetime, Recording the start time and end time for performance evaluation
-    * Owner 
+    * Owner (Not implemented yet)
 
 1. Conflict record
     * Raw data
     * What source it belongs to
-1. Rule set
+    * The name of raw table
+
+1. Raw Table
+    * Fields here are dynamics, this table schema is depending on the schema of given datasources
+
+1. Report
+    * Which generator will process the data
+    * Generated file path
+    * Parameters for the generator, in JSON format
+
+1. Rule set (Not implemented yet)
     * Name 
     * Description
     * Rule, formatted rules in json format
     
+</details>
