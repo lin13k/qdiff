@@ -1,4 +1,4 @@
-# qDiff
+# qDiff - sponsored by Qventus
 ## Overview
 A tool for finding the difference between multiple data sources which should have the same value.
 
